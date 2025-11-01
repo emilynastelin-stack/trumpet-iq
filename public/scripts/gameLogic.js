@@ -1,7 +1,7 @@
 // gameLogic.js
 import { levels } from '/data/levels.js';
 import { getFingering } from '/utils/getFingerings.js';
-import { firebaseReady } from '/scripts/firebase.js';
+import { firebaseReady } from '/utils/firebase.js';
 
 /**
  * Initialize the game with dynamic fingerings.
@@ -205,7 +205,7 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
         firebaseReady.then(({ db, auth, collection, addDoc }) => {
           const user = auth.currentUser;
           const userId = user ? user.uid : 'anonymous';
-          addDoc(collection(db, 'scores'), {
+          const scoreData = {
             userId: userId,
             mode: mode,
             level: difficulty,
@@ -216,10 +216,12 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             key: key,
             timestamp: new Date(),
             completed: true
-          }).then(() => {
-            console.log('Score saved to Firebase');
+          };
+          console.log('💾 Saving score to Firebase:', scoreData);
+          addDoc(collection(db, 'scores'), scoreData).then(() => {
+            console.log('✅ Score saved successfully');
           }).catch((error) => {
-            console.error('Error saving score:', error);
+            console.error('❌ Error saving score:', error);
           });
         });
         const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount }, bubbles: true, composed: true });
@@ -538,10 +540,48 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
 
   document.addEventListener('transposition:change', onTranspositionChange);
 
+  // Listen for external game:end events (e.g., from speed mode timer)
+  // to save the score if it hasn't been saved yet
+  const onExternalGameEnd = (e) => {
+    if (ended) return; // Already ended and saved
+    if (e && e.detail && e.detail.reason === 'timeout' && mode === 'speed') {
+      ended = true;
+      // Save speed mode score to Firebase
+      firebaseReady.then(({ db, auth, collection, addDoc }) => {
+        const user = auth.currentUser;
+        const userId = user ? user.uid : 'anonymous';
+        const scoreData = {
+          userId: userId,
+          mode: 'speed',
+          level: difficulty,
+          score: correctCount,
+          total: noteCount,
+          percentage: noteCount > 0 ? Math.round((correctCount / noteCount) * 100) : 0,
+          instrument: instrument,
+          key: key,
+          timestamp: new Date(),
+          completed: true,
+          endReason: 'timeout'
+        };
+        console.log('💾 Saving speed mode score to Firebase:', scoreData);
+        addDoc(collection(db, 'scores'), scoreData).then(() => {
+          console.log('✅ Speed mode score saved successfully');
+        }).catch((error) => {
+          console.error('❌ Error saving speed mode score:', error);
+        });
+      });
+    }
+  };
+  
+  window.addEventListener('game:end', onExternalGameEnd);
+  document.addEventListener('game:end', onExternalGameEnd);
+
   return {
     destroy() {
       gpButtons.forEach(b => b.removeEventListener('click', onClick));
       document.removeEventListener('transposition:change', onTranspositionChange);
+      window.removeEventListener('game:end', onExternalGameEnd);
+      document.removeEventListener('game:end', onExternalGameEnd);
       if (pendingWrongTimer) { clearTimeout(pendingWrongTimer); pendingWrongTimer = null; }
       if (speedTimer) { clearTimeout(speedTimer); speedTimer = null; }
     }

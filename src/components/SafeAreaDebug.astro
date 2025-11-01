@@ -1,0 +1,197 @@
+---
+// SafeAreaDebug.astro - Visual debug overlay for iOS safe areas
+---
+
+<div id="safe-area-debug" class="safe-area-debug">
+  <div class="debug-top">
+    <span class="debug-label">Safe Area Top (Notch/Status Bar)</span>
+  </div>
+  <div class="debug-bottom">
+    <span class="debug-label">Safe Area Bottom (Home Indicator)</span>
+  </div>
+  <div class="debug-left"></div>
+  <div class="debug-right"></div>
+  
+  <button id="toggle-debug" class="toggle-debug-btn">
+    Hide Debug
+  </button>
+</div>
+
+<style>
+  .safe-area-debug {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999999;
+  }
+
+  /* Top notch/status bar area */
+  .debug-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 44px);
+    background: rgba(255, 0, 0, 0.3);
+    border-bottom: 2px dashed rgba(255, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .debug-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    background: rgba(255, 0, 0, 0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  /* Bottom home indicator area */
+  .debug-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-bottom, 34px);
+    background: rgba(255, 165, 0, 0.3);
+    border-top: 2px dashed rgba(255, 165, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .debug-bottom .debug-label {
+    background: rgba(255, 165, 0, 0.8);
+  }
+
+  /* Left safe area */
+  .debug-left {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: env(safe-area-inset-left, 0px);
+    background: rgba(0, 255, 0, 0.2);
+    border-right: 2px dashed rgba(0, 255, 0, 0.8);
+  }
+
+  /* Right safe area */
+  .debug-right {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: env(safe-area-inset-right, 0px);
+    background: rgba(0, 255, 0, 0.2);
+    border-left: 2px dashed rgba(0, 255, 0, 0.8);
+  }
+
+  /* Toggle button */
+  .toggle-debug-btn {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 44px) + 10px);
+    right: 10px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 1000000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .toggle-debug-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+
+  .toggle-debug-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Hidden state */
+  .safe-area-debug.hidden .debug-top,
+  .safe-area-debug.hidden .debug-bottom,
+  .safe-area-debug.hidden .debug-left,
+  .safe-area-debug.hidden .debug-right {
+    display: none;
+  }
+
+  /* Info display */
+  .debug-top::after {
+    content: attr(data-height);
+    position: absolute;
+    top: 2px;
+    left: 10px;
+    font-size: 10px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  .debug-bottom::after {
+    content: attr(data-height);
+    position: absolute;
+    bottom: 2px;
+    left: 10px;
+    font-size: 10px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+</style>
+
+<script>
+  // Toggle debug overlay
+  const toggleBtn = document.getElementById('toggle-debug');
+  const debugOverlay = document.getElementById('safe-area-debug');
+  
+  if (toggleBtn && debugOverlay) {
+    let isHidden = false;
+    
+    toggleBtn.addEventListener('click', () => {
+      isHidden = !isHidden;
+      debugOverlay.classList.toggle('hidden', isHidden);
+      toggleBtn.textContent = isHidden ? 'Show Debug' : 'Hide Debug';
+    });
+  }
+
+  // Display actual pixel values
+  function updateDebugInfo() {
+    const debugTop = document.querySelector('.debug-top') as HTMLElement;
+    const debugBottom = document.querySelector('.debug-bottom') as HTMLElement;
+    
+    if (debugTop) {
+      const topHeight = debugTop.offsetHeight;
+      debugTop.setAttribute('data-height', `${topHeight}px`);
+    }
+    
+    if (debugBottom) {
+      const bottomHeight = debugBottom.offsetHeight;
+      debugBottom.setAttribute('data-height', `${bottomHeight}px`);
+    }
+  }
+
+  // Update on load and resize
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(updateDebugInfo, 100);
+    });
+  } else {
+    setTimeout(updateDebugInfo, 100);
+  }
+
+  window.addEventListener('resize', updateDebugInfo);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(updateDebugInfo, 200);
+  });
+</script>

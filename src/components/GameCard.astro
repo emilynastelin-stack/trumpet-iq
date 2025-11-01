@@ -13,7 +13,7 @@ const imageFile = image || (Array.isArray(notes) && notes[index] && notes[index]
 const resolvedAlt = altText || (imageFile ? imageFile.replace(/\.png$/i, '') : 'Fingering note');
 ---
 
-<div id="game-container" style="position: relative; width: 100%; max-width: 320px; margin: 0 auto; aspect-ratio: 1.02 / 1; z-index: 500; pointer-events: auto;">
+<div id="game-container" style="position: relative; width: 100%; max-width: 280px; margin: 0 auto; aspect-ratio: 1.02 / 1; z-index: 500; pointer-events: auto;">
   <!-- main image / game card -->
   <img
     src={imageFile ? `/notes/${imageFile}` : ''}
@@ -23,7 +23,7 @@ const resolvedAlt = altText || (imageFile ? imageFile.replace(/\.png$/i, '') : '
     tabindex="0"
     role="img"
     aria-label={resolvedAlt}
-    style="width: 100%; height: 100%; position: relative; z-index: 10; border-radius: 1rem; display: block; margin: 0 auto; object-fit: cover;"
+    style="width: 100%; height: 100%; position: relative; z-index: 10; border-radius: 0.875rem; display: block; margin: 0 auto; object-fit: cover;"
   />
 
   {mode === 'marathon' && (

@@ -21,12 +21,27 @@ const randomizeId = `randomize-${id}`;
 ---
 
 <div class={`transposition-controls ${compact ? 'compact' : ''}`} data-control-id={id}>
-  {showHeader && (
-    <div class="header">
-      <h2>Transposition</h2>
-      <p>Select instrument and concert key</p>
-    </div>
-  )}
+  <!-- Locked Message (shown in Beginner Mode) -->
+  <div class="locked-message-transposition">
+    <div class="lock-icon-large">🔒</div>
+    <h4 class="lock-title">Transposition Locked</h4>
+    <p class="lock-description">
+      Transposition is only available in <strong>Advanced Mode</strong>.
+    </p>
+    <p class="lock-instruction">
+      To unlock, go to <strong>Settings</strong> on the home page and turn off <strong>Beginner Mode</strong>.
+    </p>
+    <a href="/" class="lock-home-btn">Go to Home Page</a>
+  </div>
+
+  <!-- Transposition Controls (shown in Advanced Mode) -->
+  <div class="controls-content">
+    {showHeader && (
+      <div class="header">
+        <h2>Transposition</h2>
+        <p>Select instrument and concert key</p>
+      </div>
+    )}
 
   <!-- Instrument Picker -->
   <div class="control-group">
@@ -86,6 +101,7 @@ const randomizeId = `randomize-${id}`;
       </button>
     </div>
   )}
+  </div>
 </div>
 
 <script define:vars={{ id, showRandomize }}>
@@ -344,9 +360,39 @@ const randomizeId = `randomize-${id}`;
     // Listen for state sync from other controls
     window.addEventListener('transposition:sync', syncFromState);
 
+    // Check transposition enabled state and show/hide locked message
+    const controlsContainer = document.querySelector(`[data-control-id="${controlId}"]`);
+    const lockedMessage = controlsContainer?.querySelector('.locked-message-transposition');
+    const controlsContent = controlsContainer?.querySelector('.controls-content');
+    
+    function updateLockedState() {
+      const isEnabled = localStorage.getItem('transposition-enabled') === 'true';
+      
+      if (lockedMessage && controlsContent) {
+        if (isEnabled) {
+          // Advanced Mode - show controls
+          lockedMessage.style.display = 'none';
+          controlsContent.style.display = 'block';
+        } else {
+          // Beginner Mode - show locked message
+          lockedMessage.style.display = 'flex';
+          controlsContent.style.display = 'none';
+        }
+      }
+    }
+    
+    // Check initial state
+    updateLockedState();
+    
+    // Listen for transposition enabled/disabled events
+    window.addEventListener('transposition:enabled', (e) => {
+      updateLockedState();
+    });
+
     // Initial state sync
     setTimeout(() => {
       console.log('TranspositionControls initializing for:', controlId);
+      updateLockedState();
       if (window.TranspositionState) {
         updateState();
       } else {
@@ -359,6 +405,84 @@ const randomizeId = `randomize-${id}`;
 <style>
   .transposition-controls {
     width: 100%;
+    position: relative;
+  }
+
+  /* Locked Message */
+  .locked-message-transposition {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 32px 24px;
+  }
+
+  .lock-icon-large {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+
+  .lock-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+  }
+
+  .lock-description {
+    font-size: 0.9rem;
+    color: #475569;
+    margin: 0 0 6px 0;
+    line-height: 1.5;
+  }
+
+  .lock-description strong {
+    color: #1e293b;
+    font-weight: 700;
+  }
+
+  .lock-instruction {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0 0 18px 0;
+    line-height: 1.5;
+  }
+
+  .lock-instruction strong {
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .lock-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    border: 1.5px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  .lock-home-btn:hover {
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .lock-home-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Controls Content */
+  .controls-content {
+    display: block;
   }
 
   .header {
@@ -379,7 +503,7 @@ const randomizeId = `randomize-${id}`;
   }
 
   .control-group {
-    margin-bottom: 28px;
+    margin-bottom: 18px;
   }
 
   .control-group:last-child {
@@ -389,8 +513,8 @@ const randomizeId = `randomize-${id}`;
   .label {
     display: block;
     text-align: center;
-    margin-bottom: 12px;
-    font-size: 0.75rem;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: #64748b;
@@ -400,11 +524,11 @@ const randomizeId = `randomize-${id}`;
   /* Instrument Select */
   .instrument-select {
     width: 100%;
-    padding: 14px 18px;
-    font-size: 1rem;
+    padding: 10px 14px;
+    font-size: 0.95rem;
     font-weight: 600;
     border: 2px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 10px;
     background: #ffffff;
     color: #1e293b;
     cursor: pointer;
@@ -437,10 +561,10 @@ const randomizeId = `randomize-${id}`;
   .wheel-container {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 160px;
     background: #ffffff;
     border: 2px solid #e2e8f0;
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     box-shadow: 
       0 1px 3px rgba(0, 0, 0, 0.05),
@@ -465,16 +589,16 @@ const randomizeId = `randomize-${id}`;
   }
 
   .wheel-padding {
-    height: 75px;
+    height: 55px;
     flex-shrink: 0;
   }
 
   .wheel-item {
-    height: 50px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #cbd5e1;
     scroll-snap-align: center;
@@ -489,7 +613,7 @@ const randomizeId = `randomize-${id}`;
 
   .wheel-item.active {
     color: #12908e;
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
   }
 
@@ -500,7 +624,7 @@ const randomizeId = `randomize-${id}`;
     left: 50%;
     transform: translate(-50%, -50%);
     width: calc(100% - 48px);
-    height: 50px;
+    height: 40px;
     border-top: 2px solid rgba(18, 144, 142, 0.2);
     border-bottom: 2px solid rgba(18, 144, 142, 0.2);
     pointer-events: none;
@@ -517,7 +641,7 @@ const randomizeId = `randomize-${id}`;
     position: absolute;
     left: 0;
     right: 0;
-    height: 75px;
+    height: 55px;
     pointer-events: none;
     z-index: 2;
   }
@@ -542,19 +666,19 @@ const randomizeId = `randomize-${id}`;
   .button-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: 6px;
+    padding: 10px 12px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 

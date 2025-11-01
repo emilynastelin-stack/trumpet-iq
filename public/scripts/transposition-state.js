@@ -5,7 +5,7 @@ class TranspositionState {
   constructor() {
     // Default state
     this.instrument = 'Bb';
-    this.key = 'C';
+    this.key = 'Bb';
     this.enabled = false;
     this.source = null;
   }
@@ -157,7 +157,7 @@ class TranspositionState {
       if (saved) {
         const state = JSON.parse(saved);
         this.instrument = state.instrument || 'Bb';
-        this.key = state.key || 'C';
+        this.key = state.key || 'Bb';
         this.enabled = state.enabled || false;
         
         // Notify without triggering infinite loops
@@ -175,7 +175,7 @@ class TranspositionState {
   reset() {
     this.update({
       instrument: 'Bb',
-      key: 'C',
+      key: 'Bb',
       enabled: false,
       source: 'reset'
     });

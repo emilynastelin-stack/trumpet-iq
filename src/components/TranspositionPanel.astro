@@ -13,14 +13,14 @@ import TranspositionControls from './TranspositionControls.astro';
     
     <div class="panel-body">
       <TranspositionControls 
-        id="overlay" 
+        id="panel" 
         showHeader={false}
         showRandomize={true}
         compact={false}
       />
       
       <div class="state-display">
-        Playing in <strong id="overlay-state-key">C</strong> on <strong id="overlay-state-instrument">Bb Trumpet</strong>
+        Playing in <strong id="panel-state-key">C</strong> on <strong id="panel-state-instrument">Bb Trumpet</strong>
       </div>
     </div>
   </div>
@@ -70,9 +70,10 @@ import TranspositionControls from './TranspositionControls.astro';
     const overlay = document.getElementById('transposition-overlay');
     const toggleBtn = document.getElementById('transposition-toggle');
     const backdrop = overlay?.querySelector('.overlay-backdrop');
+    let panelLocked = false; // Prevent auto-opening after mode change
 
     function openPanel() {
-      if (overlay) {
+      if (overlay && !panelLocked) {
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
       }
@@ -86,6 +87,12 @@ import TranspositionControls from './TranspositionControls.astro';
     }
 
     function togglePanel() {
+      // Ignore if panel is locked (mode just changed)
+      if (panelLocked) {
+        console.log('Panel locked, ignoring toggle');
+        return;
+      }
+      
       if (overlay?.classList.contains('active')) {
         closePanel();
       } else {
@@ -93,15 +100,65 @@ import TranspositionControls from './TranspositionControls.astro';
       }
     }
 
-    // Footer toggle button
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', togglePanel);
+    // Attach click handler to transposition button with retries
+    let buttonAttached = false;
+    function attachButtonHandler() {
+      if (buttonAttached) return;
+      
+      const btn = document.getElementById('transposition-toggle');
+      if (btn) {
+        console.log('✅ Attached click handler to transposition button');
+        btn.addEventListener('click', togglePanel);
+        buttonAttached = true;
+      } else {
+        console.log('⚠️ Transposition button not found, will retry...');
+      }
     }
+
+    // Try immediately
+    attachButtonHandler();
+    
+    // Try after 100ms
+    setTimeout(attachButtonHandler, 100);
+    
+    // Try after 300ms
+    setTimeout(attachButtonHandler, 300);
+    
+    // Try after 500ms
+    setTimeout(attachButtonHandler, 500);
+    
+    // Also observe DOM for button appearance
+    const observer = new MutationObserver(() => {
+      if (!buttonAttached) {
+        attachButtonHandler();
+      }
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    // Stop observing after 2 seconds
+    setTimeout(() => observer.disconnect(), 2000);
 
     // Listen for custom events to open panel
     window.addEventListener('transposition:open', openPanel);
     window.addEventListener('transposition:close', closePanel);
     window.addEventListener('transposition:toggle', togglePanel);
+
+    // Lock panel when mode changes, unlock after delay
+    window.addEventListener('transposition:enabled', (e) => {
+      console.log('Mode changed, locking panel for 500ms');
+      panelLocked = true;
+      closePanel(); // Close panel if it's open
+      
+      // Unlock after 500ms
+      setTimeout(() => {
+        panelLocked = false;
+        console.log('Panel unlocked');
+      }, 500);
+    });
 
     // Click backdrop to close
     if (backdrop) {
@@ -173,7 +230,7 @@ import TranspositionControls from './TranspositionControls.astro';
   .panel-header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     padding: 24px 24px 16px;
     border-bottom: 2px solid #e2e8f0;
     position: sticky;
@@ -256,6 +313,8 @@ import TranspositionControls from './TranspositionControls.astro';
   .transposition-panel::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.3);
   }
+
+
 
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {

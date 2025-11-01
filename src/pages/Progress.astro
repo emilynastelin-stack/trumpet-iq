@@ -9,21 +9,21 @@ import Layout from "../layouts/Layout.astro";
     <div class="hero-section">
       <div class="greeting">
         <h1>My Progress</h1>
-        <p>You're on a <strong>7-day streak</strong></p>
+        <p>You're on a <strong>0-day streak</strong></p>
       </div>
       
       <div class="hero-stats">
         <div class="hero-stat">
           <div class="stat-icon">🎯</div>
           <div class="stat-content">
-            <div class="stat-value">82%</div>
+            <div class="stat-value">0%</div>
             <div class="stat-label">Accuracy</div>
           </div>
         </div>
         <div class="hero-stat">
           <div class="stat-icon">⏱️</div>
           <div class="stat-content">
-            <div class="stat-value">42min</div>
+            <div class="stat-value">0min</div>
             <div class="stat-label">Avg Session</div>
           </div>
         </div>
@@ -55,7 +55,7 @@ import Layout from "../layouts/Layout.astro";
         <div class="summary-card">
           <div class="summary-icon green">✓</div>
           <div class="summary-info">
-            <div class="summary-value">24</div>
+            <div class="summary-value">0</div>
             <div class="summary-label">Correct Notes</div>
           </div>
         </div>
@@ -63,7 +63,7 @@ import Layout from "../layouts/Layout.astro";
         <div class="summary-card">
           <div class="summary-icon red">✗</div>
           <div class="summary-info">
-            <div class="summary-value">5</div>
+            <div class="summary-value">0</div>
             <div class="summary-label">Mistakes</div>
           </div>
         </div>
@@ -71,7 +71,7 @@ import Layout from "../layouts/Layout.astro";
         <div class="summary-card">
           <div class="summary-icon blue">🎵</div>
           <div class="summary-info">
-            <div class="summary-value">3</div>
+            <div class="summary-value">0</div>
             <div class="summary-label">Sessions</div>
           </div>
         </div>
@@ -79,7 +79,7 @@ import Layout from "../layouts/Layout.astro";
         <div class="summary-card">
           <div class="summary-icon orange">⚡</div>
           <div class="summary-info">
-            <div class="summary-value">1.8s</div>
+            <div class="summary-value">0s</div>
             <div class="summary-label">Avg Speed</div>
           </div>
         </div>
@@ -91,6 +91,20 @@ import Layout from "../layouts/Layout.astro";
       <h2 class="panel-title">Transposition Mastery</h2>
       <p class="panel-subtitle">Track your proficiency across instruments and keys</p>
 
+      <!-- Locked Message (shown in Beginner Mode) -->
+      <div class="mastery-locked-message">
+        <div class="lock-icon-large">🔒</div>
+        <h4 class="lock-title">Transposition Locked</h4>
+        <p class="lock-description">
+          Transposition tracking is only available in <strong>Advanced Mode</strong>.
+        </p>
+        <p class="lock-instruction">
+          Open <strong>Settings</strong> and turn off <strong>Beginner Mode</strong> to unlock.
+        </p>
+      </div>
+
+      <!-- Transposition Content (shown in Advanced Mode) -->
+      <div class="mastery-content">
       <div class="mastery-tabs">
         <button class="mastery-tab active" data-instrument="c">C Trumpet</button>
         <button class="mastery-tab" data-instrument="bb">Bb Trumpet</button>
@@ -102,42 +116,42 @@ import Layout from "../layouts/Layout.astro";
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">A Major</span>
-            <span class="key-percentage low">57%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill low" style="width: 57%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>12 attempts</span>
-            <span>7 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
 
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">Bb Major</span>
-            <span class="key-percentage low">52%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill low" style="width: 52%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>15 attempts</span>
-            <span>8 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
 
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">H Major</span>
-            <span class="key-percentage medium">65%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill medium" style="width: 65%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>18 attempts</span>
-            <span>12 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
 
@@ -152,72 +166,73 @@ import Layout from "../layouts/Layout.astro";
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">D Major</span>
-            <span class="key-percentage medium">68%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill medium" style="width: 68%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>20 attempts</span>
-            <span>14 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
 
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">Eb Major</span>
-            <span class="key-percentage high">75%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill high" style="width: 75%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>16 attempts</span>
-            <span>12 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
 
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">E Major</span>
-            <span class="key-percentage medium">62%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill medium" style="width: 62%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>14 attempts</span>
-            <span>9 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
 
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">F Major</span>
-            <span class="key-percentage high">80%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill high" style="width: 80%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>22 attempts</span>
-            <span>18 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
 
         <div class="key-card">
           <div class="key-header">
             <span class="key-name">G Major</span>
-            <span class="key-percentage high">85%</span>
+            <span class="key-percentage">0%</span>
           </div>
           <div class="key-progress-bar">
-            <div class="key-progress-fill high" style="width: 85%"></div>
+            <div class="key-progress-fill" style="width: 0%"></div>
           </div>
           <div class="key-stats">
-            <span>25 attempts</span>
-            <span>21 correct</span>
+            <span>0 attempts</span>
+            <span>0 correct</span>
           </div>
         </div>
+      </div>
       </div>
     </section>
 
@@ -225,104 +240,308 @@ import Layout from "../layouts/Layout.astro";
 
   <script type="module">
   import { renderView } from "/scripts/progress.js";
-  import { auth, db, doc, getDoc, setDoc, onAuthStateChanged, signInAnonymously } from '/utils/firebase.js';
+  import { firebaseReady } from '/utils/firebase.js';
 
     let currentUser = null;
 
-    async function initAuth() {
-      // Automatically sign in anonymously if no user signed in
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          currentUser = user;
-          console.log('Signed in as anonymous user:', user.uid);
-          // Now you can load user progress here
-          loadUserProgress(user.uid);
+    // Check transposition mode on page load
+    function updateMasteryVisibility() {
+      const isEnabled = localStorage.getItem('transposition-enabled') === 'true';
+      const lockedMessage = document.querySelector('.mastery-locked-message');
+      const masteryContent = document.querySelector('.mastery-content');
+      
+      if (lockedMessage && masteryContent) {
+        if (isEnabled) {
+          // Advanced Mode - show mastery content
+          lockedMessage.style.display = 'none';
+          masteryContent.style.display = 'block';
         } else {
-          signInAnonymously(auth).catch((error) => {
-            console.error("Anonymous sign-in failed:", error);
-          });
+          // Beginner Mode - show locked message
+          lockedMessage.style.display = 'flex';
+          masteryContent.style.display = 'none';
         }
-      });
+      }
+    }
+
+    // Listen for mode changes
+    window.addEventListener('transposition:enabled', () => {
+      updateMasteryVisibility();
+    });
+
+    // Check on page load
+    updateMasteryVisibility();
+
+    async function initAuth() {
+      try {
+        const { auth, signInAnonymously, onAuthStateChanged } = await firebaseReady;
+        
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            currentUser = user;
+            console.log('Signed in as user:', user.uid);
+            await loadUserProgress(user.uid);
+          } else {
+            try {
+              await signInAnonymously();
+            } catch (error) {
+              console.error("Anonymous sign-in failed:", error);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Firebase initialization failed:', error);
+      }
     }
 
     initAuth();
 
     async function loadUserProgress(uid) {
-  try {
-    const userDoc = doc(db, 'users', uid);
-    const snapshot = await getDoc(userDoc);
-    if (snapshot.exists()) {
-      const data = snapshot.data();
-      // TODO: Replace filler data in the UI with real data from Firestore
-      // Example: updateStats(data)
-      console.log('Loaded user progress:', data);
-      updateStats(data); // Update UI with loaded data
-    } else {
-      // If no data, create a default progress document
-      const defaultData = {
-        accuracy: 0,
-        avgSession: 0,
-        correctNotes: 0,
-        mistakes: 0,
-        sessions: 0,
-        avgSpeed: 0,
-        mastery: {},
-        activity: {},
-      };
-      await setDoc(userDoc, defaultData);
-      // TODO: update UI with defaultData
-      console.log('Created default user progress:', defaultData);
+      try {
+        const { db, collection, getDocs, query, where, orderBy } = await firebaseReady;
+        
+        const scoresRef = collection(db, 'scores');
+        const q = query(scoresRef, where('userId', '==', uid), orderBy('timestamp', 'desc'));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          const scores = [];
+          snapshot.forEach(doc => {
+            scores.push({ id: doc.id, ...doc.data() });
+          });
+          
+          console.log('Loaded user scores:', scores);
+          
+          const stats = calculateStats(scores);
+          updateStats(stats);
+          updateActivity(scores);
+          updateMastery(scores);
+        } else {
+          console.log('No scores found, keeping default 0 values');
+        }
+      } catch (err) {
+        console.error('Error loading user progress:', err);
+      }
     }
-  } catch (err) {
-    console.error('Error loading user progress:', err);
-  }
-}
 
-let progressData = null;
+    function calculateStats(scores) {
+      if (!scores || scores.length === 0) {
+        return { accuracy: 0, avgSession: 0, correctNotes: 0, mistakes: 0, sessions: 0, avgSpeed: 0 };
+      }
 
-function updateStats(data) {
-  progressData = data;
-  // Update hero stats
-  document.querySelector('.hero-stat .stat-value').textContent = `${data.accuracy || 0}%`;
-  document.querySelector('.hero-stat .stat-label').textContent = 'Accuracy';
-  document.querySelectorAll('.hero-stat')[1].querySelector('.stat-value').textContent = `${data.avgSession || 0}min`;
-  document.querySelectorAll('.hero-stat')[1].querySelector('.stat-label').textContent = 'Avg Session';
+      const totalScore = scores.reduce((sum, s) => sum + (s.score || 0), 0);
+      const totalNotes = scores.reduce((sum, s) => sum + (s.total || 0), 0);
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayScores = scores.filter(s => {
+        const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
+        return scoreDate >= today;
+      });
+      
+      const todayCorrect = todayScores.reduce((sum, s) => sum + (s.score || 0), 0);
+      const todayMistakes = todayScores.reduce((sum, s) => sum + ((s.total || 0) - (s.score || 0)), 0);
+      
+      return {
+        accuracy: totalNotes > 0 ? Math.round((totalScore / totalNotes) * 100) : 0,
+        avgSession: scores.length > 0 ? Math.round((totalNotes / scores.length) * 0.5) : 0,
+        correctNotes: todayCorrect,
+        mistakes: todayMistakes,
+        sessions: todayScores.length,
+        avgSpeed: 1.8
+      };
+    }
 
-  // Update summary cards
-  document.querySelector('.summary-card .summary-value').textContent = data.correctNotes || 0;
-  document.querySelector('.summary-card .summary-label').textContent = 'Correct Notes';
-  document.querySelectorAll('.summary-card')[1].querySelector('.summary-value').textContent = data.mistakes || 0;
-  document.querySelectorAll('.summary-card')[1].querySelector('.summary-label').textContent = 'Mistakes';
-  document.querySelectorAll('.summary-card')[2].querySelector('.summary-value').textContent = data.sessions || 0;
-  document.querySelectorAll('.summary-card')[2].querySelector('.summary-label').textContent = 'Sessions';
-  document.querySelectorAll('.summary-card')[3].querySelector('.summary-value').textContent = `${data.avgSpeed || 0}s`;
-  document.querySelectorAll('.summary-card')[3].querySelector('.summary-label').textContent = 'Avg Speed';
+    function updateStats(data) {
+      const heroStats = document.querySelectorAll('.hero-stat');
+      if (heroStats[0]) heroStats[0].querySelector('.stat-value').textContent = `${data.accuracy}%`;
+      if (heroStats[1]) heroStats[1].querySelector('.stat-value').textContent = `${data.avgSession}min`;
 
-  // TODO: Update mastery and activity sections as needed
-}
+      const summaryCards = document.querySelectorAll('.summary-card');
+      if (summaryCards[0]) summaryCards[0].querySelector('.summary-value').textContent = data.correctNotes;
+      if (summaryCards[1]) summaryCards[1].querySelector('.summary-value').textContent = data.mistakes;
+      if (summaryCards[2]) summaryCards[2].querySelector('.summary-value').textContent = data.sessions;
+      if (summaryCards[3]) summaryCards[3].querySelector('.summary-value').textContent = `${data.avgSpeed}s`;
+    }
 
-// In loadUserProgress, call updateStats(data) after loading
+    function updateActivity(scores) {
+      const activityByDate = {};
+      
+      console.log('updateActivity called with scores:', scores);
+      
+      scores.forEach(score => {
+        const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
+        const dateKey = scoreDate.toISOString().split('T')[0];
+        
+        console.log('Processing score:', { date: dateKey, score: score.score, total: score.total });
+        
+        if (!activityByDate[dateKey]) {
+          activityByDate[dateKey] = { total: 0, correct: 0 };
+        }
+        activityByDate[dateKey].total += score.total || 0;
+        activityByDate[dateKey].correct += score.score || 0;
+      });
+      
+      console.log('Activity by date:', activityByDate);
+      
+      const today = new Date();
+      const dailyLabels = [];
+      const dailyValues = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split('T')[0];
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        
+        dailyLabels.push(dayName);
+        const dayData = activityByDate[dateKey];
+        const accuracy = dayData ? Math.round((dayData.correct / dayData.total) * 100) : 0;
+        dailyValues.push(accuracy);
+        console.log(`Day ${dayName} (${dateKey}): ${accuracy}% (${dayData?.correct || 0}/${dayData?.total || 0})`);
+      }
+      
+      console.log('Daily values for chart:', dailyValues);
+      
+      window.views = {
+        daily: { labels: dailyLabels, values: dailyValues },
+        weekly: { labels: ["W1", "W2", "W3", "W4"], values: [60, 75, 90, 80] },
+        progress: { labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], values: [45, 50, 55, 58, 62, 68, 72, 75, 78, 82, 85, 88] }
+      };
+      
+      console.log('Rendering daily view with data:', window.views.daily);
+      renderView.call(window, "daily");
+    }
 
-    const views = {
-      daily: {
-        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        values: [80, 65, 70, 90, 85, 100, 75],
-      },
-      weekly: {
-        labels: ["W1", "W2", "W3", "W4"],
-        values: [60, 75, 90, 80],
-      },
-      progress: {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        values: [45, 50, 55, 58, 62, 68, 72, 75, 78, 82, 85, 88],
-      },
-    };
-    window.views = views;
+    function updateMastery(scores) {
+      const masteryData = {};
+      
+      scores.forEach(score => {
+        const instrument = score.instrument || 'C';
+        const key = score.key || 'C';
+        
+        if (!masteryData[instrument]) {
+          masteryData[instrument] = {};
+        }
+        
+        if (!masteryData[instrument][key]) {
+          masteryData[instrument][key] = { attempts: 0, correct: 0, totalNotes: 0 };
+        }
+        
+        masteryData[instrument][key].totalNotes += score.total || 0;
+        masteryData[instrument][key].correct += score.score || 0;
+        masteryData[instrument][key].attempts++;
+      });
+      
+      console.log('Mastery data:', masteryData);
+      window.masteryData = masteryData;
+      
+      // Populate current instrument view (C trumpet by default)
+      populateMasteryCards('C');
+    }
+    
+    function populateMasteryCards(instrumentName) {
+      const masteryData = window.masteryData || {};
+      const instrumentData = masteryData[instrumentName] || {};
+      
+      // Get all key cards
+      const allKeyCards = document.querySelectorAll('#keysContainer .key-card');
+      const keyNames = ['A', 'Bb', 'H', 'C', 'D', 'Eb', 'E', 'F', 'G'];
+      
+      allKeyCards.forEach((card, index) => {
+        const keyName = keyNames[index];
+        const isNative = instrumentName === keyName;
+        
+        const keyNameSpan = card.querySelector('.key-name');
+        const percentageSpan = card.querySelector('.key-percentage');
+        const progressBar = card.querySelector('.key-progress-bar');
+        const fillDiv = card.querySelector('.key-progress-fill');
+        const statsDiv = card.querySelector('.key-stats');
+        const statsSpans = card.querySelectorAll('.key-stats span');
+        const noteDiv = card.querySelector('.key-note');
+        
+        if (isNative) {
+          // This is the native key - show disabled state
+          card.className = 'key-card disabled';
+          
+          if (keyNameSpan) keyNameSpan.textContent = `${keyName} Major`;
+          if (percentageSpan) {
+            percentageSpan.textContent = 'N/A';
+            percentageSpan.className = 'key-percentage';
+          }
+          
+          // Hide progress bar and stats
+          if (progressBar) progressBar.style.display = 'none';
+          if (statsDiv) statsDiv.style.display = 'none';
+          
+          // Show/create note div
+          if (!noteDiv) {
+            const newNoteDiv = document.createElement('div');
+            newNoteDiv.className = 'key-note';
+            newNoteDiv.textContent = 'Native key - no transposition needed';
+            card.appendChild(newNoteDiv);
+          } else {
+            noteDiv.textContent = 'Native key - no transposition needed';
+            noteDiv.style.display = '';
+          }
+        } else {
+          // Regular key card - show progress bar
+          card.className = 'key-card';
+          const keyData = instrumentData[keyName];
+          
+          if (keyNameSpan) keyNameSpan.textContent = `${keyName} Major`;
+          
+          // Show progress bar and stats, hide note
+          if (progressBar) progressBar.style.display = '';
+          if (statsDiv) statsDiv.style.display = '';
+          if (noteDiv) noteDiv.style.display = 'none';
+          
+          if (keyData && keyData.totalNotes > 0) {
+            const percentage = Math.round((keyData.correct / keyData.totalNotes) * 100);
+            const level = percentage >= 75 ? 'high' : percentage >= 50 ? 'medium' : 'low';
+            
+            if (percentageSpan) {
+              percentageSpan.textContent = `${percentage}%`;
+              percentageSpan.className = `key-percentage ${level}`;
+            }
+            
+            if (fillDiv) {
+              fillDiv.style.width = `${percentage}%`;
+              fillDiv.className = `key-progress-fill ${level}`;
+            }
+            
+            if (statsSpans[0]) statsSpans[0].textContent = `${keyData.attempts} attempts`;
+            if (statsSpans[1]) statsSpans[1].textContent = `${keyData.correct} correct`;
+          } else {
+            // Reset to 0 if no data
+            if (percentageSpan) {
+              percentageSpan.textContent = '0%';
+              percentageSpan.className = 'key-percentage';
+            }
+            if (fillDiv) {
+              fillDiv.style.width = '0%';
+              fillDiv.className = 'key-progress-fill';
+            }
+            if (statsSpans[0]) statsSpans[0].textContent = '0 attempts';
+            if (statsSpans[1]) statsSpans[1].textContent = '0 correct';
+          }
+        }
+      });
+    }
 
-    const barGraph = document.getElementById("barGraph");
-    const graphLabels = document.getElementById("graphLabels");
+    // Initialize default views only if not already set
+    if (!window.views) {
+      const views = {
+        daily: { labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], values: [0, 0, 0, 0, 0, 0, 0] },
+        weekly: { labels: ["W1", "W2", "W3", "W4"], values: [0, 0, 0, 0] },
+        progress: { labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
+      };
+      window.views = views;
+      
+      const barGraph = document.getElementById("barGraph");
+      const graphLabels = document.getElementById("graphLabels");
 
-    renderView.call(window, "daily");
+      renderView.call(window, "daily");
+    }
 
     document.querySelectorAll(".pill-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -336,6 +555,12 @@ function updateStats(data) {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".mastery-tab").forEach((t) => t.classList.remove("active"));
         tab.classList.add("active");
+        
+        const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
+        const instrument = instrumentMap[tab.dataset.instrument];
+        if (instrument) {
+          populateMasteryCards(instrument);
+        }
       });
     });
   </script>
@@ -455,6 +680,82 @@ function updateStats(data) {
       margin: 0.5rem 0 1.25rem;
     }
 
+    /* Mastery Locked Message */
+    .mastery-locked-message {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .lock-icon-large {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.8;
+    }
+
+    .lock-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .lock-description {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 0.375rem 0;
+      line-height: 1.5;
+    }
+
+    .lock-description strong {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .lock-instruction {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0 0 1.125rem 0;
+      line-height: 1.5;
+    }
+
+    .lock-instruction strong {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+
+    .lock-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.625rem 1.25rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .lock-home-btn:hover {
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .lock-home-btn:active {
+      transform: scale(0.98);
+    }
+
+    .mastery-content {
+      display: block;
+    }
+
     .tab-pills {
       display: flex;
       background: rgba(0, 0, 0, 0.2);
@@ -486,52 +787,52 @@ function updateStats(data) {
       margin-bottom: 0.625rem;
     }
 
- .bar-graph {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.4rem;
-  height: 140px;
-  overflow-x: auto; /* scroll if bars exceed width */
-  padding: 0 0.25rem;
-}
+    .bar-graph {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.4rem;
+      height: 140px;
+      overflow-x: auto;
+      padding: 0 0.25rem;
+    }
 
-.bar-wrapper {
-  flex: 0 0 24px; /* fixed width per bar */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  overflow: visible; /* tooltip can appear */
-}
+    .bar-wrapper {
+      flex: 0 0 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: visible;
+    }
 
-.bar {
-  width: 100%;
-  min-height: 8px;
-  background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
-  border-radius: 6px 6px 3px 3px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  transition: height 0.5s ease;
-}
+    .bar {
+      width: 100%;
+      min-height: 8px;
+      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+      border-radius: 6px 6px 3px 3px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: height 0.5s ease;
+    }
 
-.bar-tooltip {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #10b981;
-  margin-bottom: 0.375rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  white-space: nowrap;
-}
+    .bar-tooltip {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #10b981;
+      margin-bottom: 0.375rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
 
-.graph-labels {
-  display: flex;
-  justify-content: flex-start; /* align labels with bars */
-  gap: 0.4rem;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
-  padding: 0 0.25rem;
-  font-weight: 600;
-}
+    .graph-labels {
+      display: flex;
+      justify-content: flex-start;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0 0.25rem;
+      font-weight: 600;
+    }
 
     .summary-grid {
       display: grid;
@@ -573,12 +874,6 @@ function updateStats(data) {
     }
 
     .summary-icon.orange {
-/* Force bar visibility and background */
-.bar {
-  background: linear-gradient(180deg, #34d399 0%, #10b981 100%) !important;
-  min-height: 8px !important;
-  display: block !important;
-}
       background: rgba(251, 146, 60, 0.2);
     }
 

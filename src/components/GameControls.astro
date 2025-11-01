@@ -39,13 +39,13 @@ const { mode } = Astro.props;
     const pauseBtn = document.getElementById('pause-btn');
     const restartBtn = document.getElementById('restart-btn');
     
-    // Position controls below gamepad
+    // Position controls below gamepad - LOCKED at 10px below
     function updateGamePadBottom() {
       const gamepad = document.getElementById('gamepad');
       const controlsWrap = document.querySelector('.game-controls-wrap');
       if (gamepad && controlsWrap) {
         const rect = gamepad.getBoundingClientRect();
-        const controlsTop = rect.bottom + 10;
+        const controlsTop = rect.bottom + 10; // Always 10px below
         (controlsWrap as HTMLElement).style.top = controlsTop + 'px';
       }
     }
@@ -54,11 +54,30 @@ const { mode } = Astro.props;
     window.addEventListener('DOMContentLoaded', updateGamePadBottom);
     window.addEventListener('resize', updateGamePadBottom);
     window.addEventListener('scroll', updateGamePadBottom);
+    window.addEventListener('orientationchange', updateGamePadBottom);
+    
+    // Use ResizeObserver to track gamepad size changes
+    const gamepad = document.getElementById('gamepad');
+    if (gamepad) {
+      const resizeObserver = new ResizeObserver(updateGamePadBottom);
+      resizeObserver.observe(gamepad);
+      
+      // Also observe mutations
+      const mutationObserver = new MutationObserver(updateGamePadBottom);
+      mutationObserver.observe(gamepad, { 
+        attributes: true, 
+        childList: true, 
+        subtree: true 
+      });
+    }
     
     // Update after delays for dynamic content
     setTimeout(updateGamePadBottom, 100);
     setTimeout(updateGamePadBottom, 500);
     setTimeout(updateGamePadBottom, 1000);
+    
+    // Continuous update for smooth tracking
+    setInterval(updateGamePadBottom, 100);
     
     // Pause button functionality
     if (pauseBtn) {
@@ -122,12 +141,12 @@ const { mode } = Astro.props;
   
   .game-controls {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%);
     backdrop-filter: blur(12px);
-    padding: 12px 20px;
-    border-radius: 20px;
+    padding: 10px 16px;
+    border-radius: 18px;
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.2),
@@ -137,14 +156,14 @@ const { mode } = Astro.props;
   }
   
   .control-btn {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
     border: 2px solid rgba(16, 185, 129, 0.4);
-    border-radius: 14px;
+    border-radius: 12px;
     color: #fff;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -189,13 +208,18 @@ const { mode } = Astro.props;
   /* Responsive */
   @media (max-width: 480px) {
     .game-controls {
-      gap: 12px;
-      padding: 10px 16px;
+      gap: 10px;
+      padding: 8px 14px;
     }
     
     .control-btn {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .control-btn svg {
+      width: 18px;
+      height: 18px;
     }
   }
   

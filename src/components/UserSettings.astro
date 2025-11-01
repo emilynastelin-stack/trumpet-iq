@@ -1,0 +1,706 @@
+<!-- UserSettings.astro -->
+<!-- User settings overlay panel -->
+---
+---
+
+<div id="usersettings-overlay" class="usersettings-overlay">
+  <div class="overlay-backdrop"></div>
+  <div class="usersettings-panel">
+    <div class="panel-header">
+      <h3 class="panel-title">Settings</h3>
+      <button class="close-btn" id="usersettings-close" type="button" aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="panel-body">
+      <div class="settings-section">
+        <h4 class="section-title">Player Mode</h4>
+        <p class="section-description">
+          Beginner Mode is designed for students learning to read/play. Advanced Mode unlocks transposition features for intermediate and professional players.
+        </p>
+        
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="beginner-mode-toggle" class="setting-label">Beginner Mode</label>
+            <p class="setting-hint">Keeps it simple for students</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="beginner-mode-toggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <p class="mode-note">
+          <strong>Advanced Mode</strong> shows transposition controls to practice playing in different keys.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transposition Warning Modal -->
+<div id="transposition-warning" class="warning-modal">
+  <div class="warning-backdrop"></div>
+  <div class="warning-content">
+    <div class="warning-icon">⚠️</div>
+    <h3 class="warning-title">Switch to Advanced Mode?</h3>
+    <p class="warning-text">
+      Advanced Mode unlocks transposition controls, allowing you to practice reading in different keys. 
+      This will <strong>change the fingerings</strong> displayed for each note based on your chosen transposition.
+    </p>
+    <p class="warning-subtext">
+      This feature is for intermediate/advanced players. Beginners should keep Beginner Mode enabled.
+    </p>
+    
+    <label class="warning-checkbox">
+      <input type="checkbox" id="dont-show-warning" />
+      <span>Don't show this warning again</span>
+    </label>
+    
+    <div class="warning-actions">
+      <button id="warning-cancel" class="warning-btn warning-btn-cancel">Stay in Beginner Mode</button>
+      <button id="warning-confirm" class="warning-btn warning-btn-confirm">Switch to Advanced Mode</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('usersettings-overlay');
+    const closeBtn = document.getElementById('usersettings-close');
+    const backdrop = overlay?.querySelector('.overlay-backdrop');
+
+    function openPanel() {
+      if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closePanel() {
+      if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function togglePanel() {
+      if (overlay?.classList.contains('active')) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    }
+
+    // Footer settings toggle button - use setTimeout to ensure button exists
+    setTimeout(() => {
+      const toggleBtn = document.getElementById('settings-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', togglePanel);
+      }
+    }, 100);
+
+    // Close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closePanel);
+    }
+
+    // Listen for custom events
+    window.addEventListener('usersettings:open', openPanel);
+    window.addEventListener('usersettings:close', closePanel);
+    window.addEventListener('usersettings:toggle', togglePanel);
+
+    // Click backdrop to close
+    if (backdrop) {
+      backdrop.addEventListener('click', closePanel);
+    }
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay?.classList.contains('active')) {
+        closePanel();
+      }
+    });
+
+    // Transposition toggle logic
+    const transpositionToggle = document.getElementById('beginner-mode-toggle') as HTMLInputElement;
+    const warningModal = document.getElementById('transposition-warning');
+    const warningBackdrop = warningModal?.querySelector('.warning-backdrop');
+    const warningCancel = document.getElementById('warning-cancel');
+    const warningConfirm = document.getElementById('warning-confirm');
+    const dontShowWarning = document.getElementById('dont-show-warning') as HTMLInputElement;
+
+    // Check if transposition is enabled in localStorage (default is disabled/beginner mode)
+    const isTranspositionEnabled = localStorage.getItem('transposition-enabled') === 'true';
+    const shouldShowWarning = localStorage.getItem('transposition-warning-dismissed') !== 'true';
+    
+    // Beginner Mode toggle is inverse of transposition enabled
+    if (transpositionToggle) {
+      transpositionToggle.checked = !isTranspositionEnabled; // Checked = Beginner Mode ON
+    }
+
+    // Apply initial state
+    updateTranspositionState(isTranspositionEnabled);
+
+    // Handle toggle change
+    if (transpositionToggle) {
+      transpositionToggle.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.checked) {
+          // Turning ON Beginner Mode = disable transposition
+          disableTransposition();
+        } else {
+          // Turning OFF Beginner Mode = enable transposition (Advanced Mode)
+          if (shouldShowWarning) {
+            // Show warning modal
+            warningModal?.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Check back temporarily until confirmed
+            target.checked = true;
+          } else {
+            // Already dismissed warning, enable directly
+            enableTransposition();
+          }
+        }
+      });
+    }
+
+    // Warning modal handlers
+    if (warningCancel) {
+      warningCancel.addEventListener('click', () => {
+        warningModal?.classList.remove('active');
+        document.body.style.overflow = '';
+        if (transpositionToggle) transpositionToggle.checked = true; // Stay in Beginner Mode
+      });
+    }
+
+    if (warningConfirm) {
+      warningConfirm.addEventListener('click', () => {
+        // Save preference if checkbox is checked
+        if (dontShowWarning?.checked) {
+          localStorage.setItem('transposition-warning-dismissed', 'true');
+        }
+        // Enable transposition (turn OFF beginner mode)
+        enableTransposition();
+        if (transpositionToggle) transpositionToggle.checked = false; // Uncheck Beginner Mode
+        // Close modal
+        warningModal?.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    }
+
+    if (warningBackdrop) {
+      warningBackdrop.addEventListener('click', () => {
+        warningModal?.classList.remove('active');
+        document.body.style.overflow = '';
+        if (transpositionToggle) transpositionToggle.checked = true; // Stay in Beginner Mode
+      });
+    }
+
+    function enableTransposition() {
+      localStorage.setItem('transposition-enabled', 'true');
+      updateTranspositionState(true);
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('transposition:enabled', { detail: { enabled: true } }));
+    }
+
+    function disableTransposition() {
+      localStorage.setItem('transposition-enabled', 'false');
+      updateTranspositionState(false);
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('transposition:enabled', { detail: { enabled: false } }));
+    }
+
+    function updateTranspositionState(enabled: boolean) {
+      // Update button visibility - TranspositionControls handles locked state internally
+      const transpositionToggleBtn = document.getElementById('transposition-toggle');
+      
+      if (enabled) {
+        // Advanced Mode - show transposition button
+        if (transpositionToggleBtn) {
+          transpositionToggleBtn.style.display = '';
+        }
+      } else {
+        // Beginner Mode - hide transposition button completely
+        if (transpositionToggleBtn) {
+          transpositionToggleBtn.style.display = 'none';
+        }
+      }
+    }
+  });
+</script>
+
+<style>
+  .usersettings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .usersettings-overlay.active {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .usersettings-overlay.active .overlay-backdrop {
+    opacity: 1;
+  }
+
+  .usersettings-panel {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 
+      0 -8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-bottom: none;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .usersettings-overlay.active .usersettings-panel {
+    transform: translateY(0);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 16px;
+    border-bottom: 2px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    z-index: 1;
+  }
+
+  .panel-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.02em;
+  }
+
+  .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(100, 116, 139, 0.1);
+    border: 1.5px solid rgba(100, 116, 139, 0.2);
+    border-radius: 12px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .close-btn:hover {
+    background: rgba(100, 116, 139, 0.15);
+    border-color: rgba(100, 116, 139, 0.3);
+    color: #475569;
+  }
+
+  .close-btn:active {
+    transform: scale(0.95);
+  }
+
+  .panel-body {
+    padding: 24px;
+  }
+
+  /* Placeholder */
+  .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+  }
+
+  .placeholder svg {
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  .placeholder h4 {
+    margin: 0 0 12px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .placeholder p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    max-width: 300px;
+  }
+
+  /* Mobile optimization */
+  @media (max-width: 640px) {
+    .usersettings-panel {
+      max-width: 100%;
+      max-height: 90vh;
+    }
+
+    .panel-header {
+      padding: 20px 20px 14px;
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .placeholder {
+      padding: 40px 20px;
+    }
+
+    .placeholder svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .placeholder h4 {
+      font-size: 1.125rem;
+    }
+
+    .placeholder p {
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Safe area for notched devices */
+  @supports (padding: max(0px)) {
+    .usersettings-panel {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* Scrollbar styling */
+  .usersettings-panel::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .usersettings-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .usersettings-panel::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+
+  .usersettings-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  /* Settings Section */
+  .settings-section {
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+  }
+
+  .section-description {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+  }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(241, 245, 249, 0.6);
+    border: 1.5px solid rgba(226, 232, 240, 0.8);
+    border-radius: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .setting-row:hover {
+    background: rgba(241, 245, 249, 0.9);
+    border-color: rgba(203, 213, 225, 1);
+  }
+
+  .setting-info {
+    flex: 1;
+  }
+
+  .setting-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+
+  .setting-hint {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .mode-note {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 12px 0 0 0;
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.05);
+    border-left: 3px solid #3b82f6;
+    border-radius: 6px;
+    line-height: 1.5;
+  }
+
+  .mode-note strong {
+    color: #1e40af;
+  }
+
+  /* Toggle Switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #cbd5e1;
+    border-radius: 28px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .toggle-slider:before {
+    content: "";
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.1),
+      0 0 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+  }
+
+  .toggle-switch input:focus + .toggle-slider {
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.1),
+      0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Warning Modal */
+  .warning-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+  }
+
+  .warning-modal.active {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .warning-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+  }
+
+  .warning-content {
+    position: relative;
+    max-width: 420px;
+    width: 100%;
+    background: white;
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(0, 0, 0, 0.05);
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .warning-modal.active .warning-content {
+    transform: scale(1);
+  }
+
+  .warning-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .warning-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    text-align: center;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+  }
+
+  .warning-text {
+    font-size: 1rem;
+    color: #475569;
+    text-align: center;
+    margin: 0 0 12px 0;
+    line-height: 1.6;
+  }
+
+  .warning-text strong {
+    color: #dc2626;
+    font-weight: 700;
+  }
+
+  .warning-subtext {
+    font-size: 0.875rem;
+    color: #64748b;
+    text-align: center;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+  }
+
+  .warning-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: #475569;
+    margin-bottom: 24px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .warning-checkbox input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+
+  .warning-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .warning-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .warning-btn-cancel {
+    background: rgba(100, 116, 139, 0.1);
+    color: #475569;
+    border: 1.5px solid rgba(100, 116, 139, 0.3);
+  }
+
+  .warning-btn-cancel:hover {
+    background: rgba(100, 116, 139, 0.15);
+    border-color: rgba(100, 116, 139, 0.4);
+  }
+
+  .warning-btn-confirm {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: 1.5px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .warning-btn-confirm:hover {
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .warning-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .usersettings-overlay,
+    .overlay-backdrop,
+    .usersettings-panel,
+    .close-btn,
+    .warning-modal,
+    .warning-content {
+      transition: none !important;
+    }
+  }
+</style>

@@ -59,6 +59,7 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
   let wrongStreak = 0;
   let noteCount = 0; // number of notes presented
   let correctCount = 0; // number of correct answers
+  let pointsEarned = 0; // points earned (100 per correct in speed/marathon, accuracy % in learning)
   let ended = false;
   // short tolerance window so slightly staggered multi-touch presses still count
   let pendingWrongTimer = null;
@@ -110,6 +111,7 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       detail: { 
         noteCount: displayNoteCount, 
         correctCount,
+        score: (mode === 'speed' || mode === 'marathon') ? pointsEarned : correctCount,
         lives: mode === 'marathon' ? lives : undefined 
       }, 
       bubbles: true, 
@@ -195,22 +197,29 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       showFeedback(true);
       wrongStreak = 0;
       // Only award a point if the current note hasn't already been marked wrong
-      if (!noteWasMarkedWrong) correctCount++;
+      if (!noteWasMarkedWrong) {
+        correctCount++;
+        // Award 100 points per correct answer in speed/marathon mode
+        if (mode === 'speed' || mode === 'marathon') {
+          pointsEarned += 100;
+        }
+      }
       // If this was the final learning note, end the game now so the
       // player's point for this note is included in the final score.
       if (mode === 'learning' && !ended && noteCount >= 20) {
         ended = true;
+        const accuracyPercent = Math.round((correctCount / noteCount) * 100);
         // Save progress to Dexie
         import('./db.js').then(({ saveProgress }) => {
           saveProgress({
             mode: mode || 'learning',
             level: difficulty || 'basic',
-            score: Math.round((correctCount / noteCount) * 100),
+            score: accuracyPercent,
             completed: true,
             lastPlayed: Date.now()
           });
         }).catch(e => console.error('Failed to save progress:', e));
-        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount }, bubbles: true, composed: true });
+        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent }, bubbles: true, composed: true });
         try { container.dispatchEvent(endEv); } catch (err) {}
         try { window.dispatchEvent(endEv); } catch (err) {}
       } else {
@@ -247,29 +256,34 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           showFeedback(true);
           wrongStreak = 0;
           // Only award a point if the current note hasn't already been marked wrong
-          if (!noteWasMarkedWrong) correctCount++;
+          if (!noteWasMarkedWrong) {
+            correctCount++;
+            // Award 100 points per correct answer in speed/marathon mode
+            if (mode === 'speed' || mode === 'marathon') {
+              pointsEarned += 100;
+            }
+          }
           if (mode === 'learning' && !ended && noteCount >= 20) {
             ended = true;
+            const accuracyPercent = Math.round((correctCount / noteCount) * 100);
             // Save progress to localStorage
             try {
               const progressKey = 'userProgress';
               const modeName = mode || 'learning';
               const levelName = difficulty || 'basic';
-              const score = correctCount;
-              const total = noteCount;
               let progress = {};
               try {
                 progress = JSON.parse(localStorage.getItem(progressKey) || '{}');
               } catch (e) { progress = {}; }
               if (!progress[modeName]) progress[modeName] = {};
               progress[modeName][levelName] = {
-                score: Math.round((score / total) * 100),
+                score: accuracyPercent,
                 completed: true,
                 lastPlayed: Date.now()
               };
               localStorage.setItem(progressKey, JSON.stringify(progress));
             } catch (e) { console.error('Failed to save progress:', e); }
-            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount }, bubbles: true, composed: true });
+            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent }, bubbles: true, composed: true });
             try { container.dispatchEvent(endEv); } catch (err) {}
             try { window.dispatchEvent(endEv); } catch (err) {}
           } else {
@@ -301,8 +315,15 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             // Check if game over
             if (lives <= 0) {
               ended = true;
+              const accuracyPercent = noteCount > 0 ? Math.round((correctCount / noteCount) * 100) : 0;
               const endEv = new CustomEvent('game:end', { 
-                detail: { score: correctCount, total: noteCount, reason: 'lives' }, 
+                detail: { 
+                  score: pointsEarned, 
+                  total: noteCount, 
+                  correctCount, 
+                  accuracy: accuracyPercent,
+                  reason: 'lives' 
+                }, 
                 bubbles: true, 
                 composed: true 
               });
@@ -324,7 +345,8 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           // final wrong attempt is included in the totals.
           if (mode === 'learning' && !ended && noteCount >= 20) {
             ended = true;
-            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount }, bubbles: true, composed: true });
+            const accuracyPercent = Math.round((correctCount / noteCount) * 100);
+            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent }, bubbles: true, composed: true });
             try { container.dispatchEvent(endEv); } catch (err) {}
             try { window.dispatchEvent(endEv); } catch (err) {}
             return; // stop further processing for this timer

@@ -28,18 +28,18 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
-    margin: 10px auto 0 auto;
+    gap: 0.5rem;
+    margin: 8px auto 0 auto;
     position: sticky;
-    top: calc(var(--progress-bar-bottom, 0px) + 10px);
+    top: calc(var(--progress-bar-bottom, 0px) + 8px);
     z-index: 5;
   }
 
   /* Buttons base - glassmorphic style */
   .gp-btn {
-    width: 95px;
-    height: 95px;
-    border-radius: 20px;
+    width: 88px;
+    height: 88px;
+    border-radius: 18px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid rgba(255, 255, 255, 0.4);
@@ -75,7 +75,7 @@
 
   /* Number styling */
   .btn-number {
-    font-size: 2.5rem;
+    font-size: 2.3rem;
     font-weight: 900;
     color: #ffffff;
     text-shadow: 
@@ -88,14 +88,13 @@
 
   /* Zero button larger */
   #gp-zero {
-    width: 100%;
-    max-width: calc(285px + 1.2rem);
-    height: 104px;
-    border-radius: 28px;
+    width: calc((88px * 3) + (0.5rem * 2));
+    height: 96px;
+    border-radius: 24px;
   }
 
   #gp-zero .btn-number {
-    font-size: 3rem;
+    font-size: 2.8rem;
   }
 
   /* Hover effect */
@@ -197,20 +196,21 @@
   /* Responsive */
   @media (max-width: 480px) {
     .gp-btn {
-      width: 85px;
-      height: 85px;
+      width: 78px;
+      height: 78px;
     }
 
     .btn-number {
-      font-size: 2.2rem;
+      font-size: 2rem;
     }
 
     #gp-zero {
-      height: 94px;
+      width: calc((78px * 3) + (0.5rem * 2));
+      height: 86px;
     }
 
     #gp-zero .btn-number {
-      font-size: 2.6rem;
+      font-size: 2.4rem;
     }
   }
 

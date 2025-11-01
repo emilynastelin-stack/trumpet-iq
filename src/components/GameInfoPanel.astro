@@ -1,0 +1,448 @@
+---
+// GameInfoPanel.astro - Displays game stats in a compact pill format
+interface Props {
+  mode?: string;
+}
+
+const { mode = 'learning' } = Astro.props;
+
+const showLives = mode === 'marathon';
+const showNotes = mode === 'learning';
+const showStreak = mode === 'speed';
+---
+
+<div id="game-info-panel" class="game-info-panel">
+  <!-- Transposition (all modes) - removed trumpet emoji -->
+  <div class="info-item">
+    <div id="panel-transposition" class="info-text">Default</div>
+  </div>
+  <div class="divider"></div>
+  
+  <!-- Score (all modes) -->
+  <div class="info-item">
+    <div class="info-icon">🎯</div>
+    <div id="panel-score" class="info-text">0%</div>
+  </div>
+  <div class="divider"></div>
+  
+  <!-- Marathon: Lives -->
+  {showLives && (
+    <div class="info-item lives-item">
+      <div id="panel-lives" class="info-hearts">
+        <span class="heart">❤️</span>
+        <span class="heart">❤️</span>
+        <span class="heart">❤️</span>
+      </div>
+    </div>
+  )}
+  
+  <!-- Learning: Notes Counter -->
+  {showNotes && (
+    <div class="info-item">
+      <div class="notes-counter">
+        <div class="notes-label">Notes</div>
+        <div id="panel-notes" class="notes-value">0/20</div>
+      </div>
+    </div>
+  )}
+  
+  <!-- Speed: Streak Badge -->
+  {showStreak && (
+    <div class="info-item">
+      <div id="panel-streak" class="streak-badge">
+        <span class="streak-icon">🔥</span>
+        <span class="streak-text">0</span>
+      </div>
+    </div>
+  )}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const panelTransposition = document.getElementById('panel-transposition');
+    const panelScore = document.getElementById('panel-score');
+    const panelLives = document.getElementById('panel-lives');
+    const panelNotes = document.getElementById('panel-notes');
+    const panelStreak = document.getElementById('panel-streak');
+
+    let currentStreak = 0;
+
+    // Listen for transposition changes
+    /**
+     * @param {CustomEvent} e
+     */
+    function updateTransposition(e) {
+      if (!panelTransposition) return;
+      const detail = (e instanceof CustomEvent) ? e.detail : {};
+      const hasEnabled = detail && Object.prototype.hasOwnProperty.call(detail, 'enabled');
+      const enabled = hasEnabled ? Boolean(detail.enabled) : !(detail && (detail.instrument === 'default' || detail.key === 'default'));
+
+      if (!detail || enabled === false || detail.instrument === 'default' || detail.key === 'default') {
+        panelTransposition.textContent = 'Default';
+      } else {
+        panelTransposition.textContent = `${detail.instrument} → ${detail.key}`;
+      }
+    }
+
+    document.addEventListener('transposition:change', updateTransposition);
+    window.addEventListener('transposition:change', updateTransposition);
+
+    // Listen for score updates
+    function updateScore(e) {
+      if (!panelScore) return;
+      if (!(e instanceof CustomEvent)) return;
+      const detail = e.detail || {};
+      const noteCount = typeof detail.noteCount === 'number' ? detail.noteCount : 0;
+      const correctCount = typeof detail.correctCount === 'number' ? detail.correctCount : 0;
+      
+      // Update notes counter (learning mode)
+      if (panelNotes) {
+        const displayCount = noteCount + 1; // Show current note (1-based)
+        panelNotes.textContent = `${displayCount}/20`;
+      }
+      
+      // Update score percentage
+      if (noteCount === 0) {
+        panelScore.textContent = '0%';
+      } else {
+        const pct = Math.round((correctCount / (noteCount + 1)) * 100);
+        panelScore.textContent = `${pct}%`;
+      }
+    }
+
+    window.addEventListener('game:progress', updateScore);
+    document.addEventListener('game:progress', updateScore);
+
+    // Listen for feedback (for streak tracking in speed mode)
+    function updateStreak(e) {
+      if (!panelStreak) return;
+      if (!(e instanceof CustomEvent)) return;
+      const detail = e.detail || {};
+      const ok = detail.ok === true;
+      
+      if (ok) {
+        currentStreak++;
+        const streakText = panelStreak.querySelector('.streak-text');
+        if (streakText) {
+          streakText.textContent = currentStreak.toString();
+        }
+        // Pulse animation on correct
+        panelStreak.classList.add('streak-pulse');
+        setTimeout(() => panelStreak.classList.remove('streak-pulse'), 400);
+      } else {
+        currentStreak = 0;
+        const streakText = panelStreak.querySelector('.streak-text');
+        if (streakText) {
+          streakText.textContent = '0';
+        }
+        // Shake animation on wrong
+        panelStreak.classList.add('streak-lost');
+        setTimeout(() => panelStreak.classList.remove('streak-lost'), 500);
+      }
+    }
+
+    window.addEventListener('game:feedback', updateStreak);
+    document.addEventListener('game:feedback', updateStreak);
+
+    // Listen for lives updates
+    function updateLives(e) {
+      if (!panelLives) return;
+      if (!(e instanceof CustomEvent)) return;
+      const detail = e.detail || {};
+      const lives = typeof detail.lives === 'number' ? detail.lives : 3;
+      const animate = detail.animate === true;
+      
+      const hearts = panelLives.querySelectorAll('.heart');
+      
+      if (animate) {
+        // Shake animation
+        panelLives.classList.add('shake');
+        setTimeout(() => panelLives.classList.remove('shake'), 500);
+        
+        // Update hearts
+        hearts.forEach((heart, index) => {
+          if (index < lives) {
+            heart.textContent = '❤️';
+            heart.classList.remove('lost');
+          } else {
+            heart.textContent = '🖤';
+            heart.classList.add('lost');
+            if (index === lives) {
+              heart.classList.add('pulse-out');
+              setTimeout(() => heart.classList.remove('pulse-out'), 600);
+            }
+          }
+        });
+      } else {
+        // Initial render
+        hearts.forEach((heart, index) => {
+          if (index < lives) {
+            heart.textContent = '❤️';
+            heart.classList.remove('lost');
+          } else {
+            heart.textContent = '🖤';
+            heart.classList.add('lost');
+          }
+        });
+      }
+    }
+
+    window.addEventListener('game:lives', updateLives);
+    document.addEventListener('game:lives', updateLives);
+  });
+</script>
+
+<style>
+  .game-info-panel {
+    width: 100%;
+    max-width: 304px;
+    margin: 0 auto 16px auto;
+    margin-top: calc(env(safe-area-inset-top, 0px) + 50px);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.3) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 100px;
+    padding: 10px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 6px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 12px;
+    animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .info-icon {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+  }
+
+  .info-text {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+  }
+
+  .lives-item {
+    gap: 6px;
+  }
+
+  .info-hearts {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .heart {
+    font-size: 1.2rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+
+  .heart.lost {
+    opacity: 0.4;
+    filter: grayscale(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .heart.pulse-out {
+    animation: pulseOut 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes pulseOut {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.3);
+      filter: drop-shadow(0 4px 12px rgba(239, 68, 68, 0.6));
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0.4;
+      filter: grayscale(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+  }
+
+  .info-hearts.shake {
+    animation: shake 0.5s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+    20%, 40%, 60%, 80% { transform: translateX(3px); }
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .game-info-panel {
+      padding: 8px 16px;
+      gap: 10px;
+    }
+
+    .info-icon {
+      font-size: 1rem;
+    }
+
+    .info-text {
+      font-size: 0.85rem;
+    }
+
+    .heart {
+      font-size: 1.1rem;
+    }
+
+    .divider {
+      height: 20px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .game-info-panel {
+      padding: 8px 14px;
+      gap: 8px;
+    }
+
+    .info-icon {
+      font-size: 0.9rem;
+    }
+
+    .info-text {
+      font-size: 0.8rem;
+    }
+
+    .heart {
+      font-size: 1rem;
+    }
+
+    .info-item {
+      gap: 5px;
+    }
+
+    .info-hearts {
+      gap: 3px;
+    }
+  }
+
+  /* Notes Counter (Learning Mode) */
+  .notes-counter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .notes-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+
+  .notes-value {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Streak Badge (Speed Mode) */
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.3) 0%, rgba(249, 115, 22, 0.3) 100%);
+    border: 1.5px solid rgba(251, 146, 60, 0.5);
+    border-radius: 18px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 2px 8px rgba(251, 146, 60, 0.3);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .streak-icon {
+    font-size: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .streak-text {
+    font-size: 0.9rem;
+    font-weight: 900;
+  }
+
+  .streak-badge.streak-pulse {
+    animation: streakPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes streakPulse {
+    0% { transform: scale(1); }
+    50% { 
+      transform: scale(1.15);
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.5) 0%, rgba(249, 115, 22, 0.5) 100%);
+      box-shadow: 0 4px 16px rgba(251, 146, 60, 0.5);
+    }
+    100% { transform: scale(1); }
+  }
+
+  .streak-badge.streak-lost {
+    animation: streakLost 0.5s ease;
+  }
+
+  @keyframes streakLost {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+    20%, 40%, 60%, 80% { transform: translateX(3px); }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .game-info-panel,
+    .info-icon,
+    .heart,
+    .streak-badge {
+      animation: none !important;
+    }
+  }
+</style>
