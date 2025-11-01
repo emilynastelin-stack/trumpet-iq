@@ -1,0 +1,772 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Your Progress">
+  <div class="progress-page">
+
+    <!-- HERO STATS -->
+    <div class="hero-section">
+      <div class="greeting">
+        <h1>My Progress</h1>
+        <p>You're on a <strong>7-day streak</strong></p>
+      </div>
+      
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-content">
+            <div class="stat-value">82%</div>
+            <div class="stat-label">Accuracy</div>
+          </div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-content">
+            <div class="stat-value">42min</div>
+            <div class="stat-label">Avg Session</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY CHART -->
+    <section class="glass-panel chart-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Activity</h2>
+        <div class="tab-pills">
+          <button class="pill-btn active" data-view="daily">Week</button>
+          <button class="pill-btn" data-view="weekly">Month</button>
+          <button class="pill-btn" data-view="progress">Year</button>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="bar-graph" id="barGraph"></div>
+      </div>
+      <div class="graph-labels" id="graphLabels"></div>
+    </section>
+
+    <!-- TODAY'S SUMMARY -->
+    <section class="glass-panel summary-panel">
+      <h2 class="panel-title">Today's Summary</h2>
+      
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-icon green">✓</div>
+          <div class="summary-info">
+            <div class="summary-value">24</div>
+            <div class="summary-label">Correct Notes</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon red">✗</div>
+          <div class="summary-info">
+            <div class="summary-value">5</div>
+            <div class="summary-label">Mistakes</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon blue">🎵</div>
+          <div class="summary-info">
+            <div class="summary-value">3</div>
+            <div class="summary-label">Sessions</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon orange">⚡</div>
+          <div class="summary-info">
+            <div class="summary-value">1.8s</div>
+            <div class="summary-label">Avg Speed</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSPOSITION MASTERY -->
+    <section class="glass-panel mastery-panel">
+      <h2 class="panel-title">Transposition Mastery</h2>
+      <p class="panel-subtitle">Track your proficiency across instruments and keys</p>
+
+      <div class="mastery-tabs">
+        <button class="mastery-tab active" data-instrument="c">C Trumpet</button>
+        <button class="mastery-tab" data-instrument="bb">Bb Trumpet</button>
+        <button class="mastery-tab" data-instrument="d">D Trumpet</button>
+        <button class="mastery-tab" data-instrument="eb">Eb Trumpet</button>
+      </div>
+
+      <div class="keys-container" id="keysContainer">
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">A Major</span>
+            <span class="key-percentage low">57%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill low" style="width: 57%"></div>
+          </div>
+          <div class="key-stats">
+            <span>12 attempts</span>
+            <span>7 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">Bb Major</span>
+            <span class="key-percentage low">52%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill low" style="width: 52%"></div>
+          </div>
+          <div class="key-stats">
+            <span>15 attempts</span>
+            <span>8 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">H Major</span>
+            <span class="key-percentage medium">65%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill medium" style="width: 65%"></div>
+          </div>
+          <div class="key-stats">
+            <span>18 attempts</span>
+            <span>12 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card disabled">
+          <div class="key-header">
+            <span class="key-name">C Major</span>
+            <span class="key-percentage">N/A</span>
+          </div>
+          <div class="key-note">Native key - no transposition needed</div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">D Major</span>
+            <span class="key-percentage medium">68%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill medium" style="width: 68%"></div>
+          </div>
+          <div class="key-stats">
+            <span>20 attempts</span>
+            <span>14 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">Eb Major</span>
+            <span class="key-percentage high">75%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill high" style="width: 75%"></div>
+          </div>
+          <div class="key-stats">
+            <span>16 attempts</span>
+            <span>12 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">E Major</span>
+            <span class="key-percentage medium">62%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill medium" style="width: 62%"></div>
+          </div>
+          <div class="key-stats">
+            <span>14 attempts</span>
+            <span>9 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">F Major</span>
+            <span class="key-percentage high">80%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill high" style="width: 80%"></div>
+          </div>
+          <div class="key-stats">
+            <span>22 attempts</span>
+            <span>18 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">G Major</span>
+            <span class="key-percentage high">85%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill high" style="width: 85%"></div>
+          </div>
+          <div class="key-stats">
+            <span>25 attempts</span>
+            <span>21 correct</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script type="module">
+  import { renderView } from "/scripts/progress.js";
+  import { auth, db, doc, getDoc, setDoc, onAuthStateChanged, signInAnonymously } from '/utils/firebase.js';
+
+    let currentUser = null;
+
+    async function initAuth() {
+      // Automatically sign in anonymously if no user signed in
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          console.log('Signed in as anonymous user:', user.uid);
+          // Now you can load user progress here
+          loadUserProgress(user.uid);
+        } else {
+          signInAnonymously(auth).catch((error) => {
+            console.error("Anonymous sign-in failed:", error);
+          });
+        }
+      });
+    }
+
+    initAuth();
+
+    async function loadUserProgress(uid) {
+  try {
+    const userDoc = doc(db, 'users', uid);
+    const snapshot = await getDoc(userDoc);
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      // TODO: Replace filler data in the UI with real data from Firestore
+      // Example: updateStats(data)
+      console.log('Loaded user progress:', data);
+      updateStats(data); // Update UI with loaded data
+    } else {
+      // If no data, create a default progress document
+      const defaultData = {
+        accuracy: 0,
+        avgSession: 0,
+        correctNotes: 0,
+        mistakes: 0,
+        sessions: 0,
+        avgSpeed: 0,
+        mastery: {},
+        activity: {},
+      };
+      await setDoc(userDoc, defaultData);
+      // TODO: update UI with defaultData
+      console.log('Created default user progress:', defaultData);
+    }
+  } catch (err) {
+    console.error('Error loading user progress:', err);
+  }
+}
+
+let progressData = null;
+
+function updateStats(data) {
+  progressData = data;
+  // Update hero stats
+  document.querySelector('.hero-stat .stat-value').textContent = `${data.accuracy || 0}%`;
+  document.querySelector('.hero-stat .stat-label').textContent = 'Accuracy';
+  document.querySelectorAll('.hero-stat')[1].querySelector('.stat-value').textContent = `${data.avgSession || 0}min`;
+  document.querySelectorAll('.hero-stat')[1].querySelector('.stat-label').textContent = 'Avg Session';
+
+  // Update summary cards
+  document.querySelector('.summary-card .summary-value').textContent = data.correctNotes || 0;
+  document.querySelector('.summary-card .summary-label').textContent = 'Correct Notes';
+  document.querySelectorAll('.summary-card')[1].querySelector('.summary-value').textContent = data.mistakes || 0;
+  document.querySelectorAll('.summary-card')[1].querySelector('.summary-label').textContent = 'Mistakes';
+  document.querySelectorAll('.summary-card')[2].querySelector('.summary-value').textContent = data.sessions || 0;
+  document.querySelectorAll('.summary-card')[2].querySelector('.summary-label').textContent = 'Sessions';
+  document.querySelectorAll('.summary-card')[3].querySelector('.summary-value').textContent = `${data.avgSpeed || 0}s`;
+  document.querySelectorAll('.summary-card')[3].querySelector('.summary-label').textContent = 'Avg Speed';
+
+  // TODO: Update mastery and activity sections as needed
+}
+
+// In loadUserProgress, call updateStats(data) after loading
+
+    const views = {
+      daily: {
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        values: [80, 65, 70, 90, 85, 100, 75],
+      },
+      weekly: {
+        labels: ["W1", "W2", "W3", "W4"],
+        values: [60, 75, 90, 80],
+      },
+      progress: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        values: [45, 50, 55, 58, 62, 68, 72, 75, 78, 82, 85, 88],
+      },
+    };
+    window.views = views;
+
+    const barGraph = document.getElementById("barGraph");
+    const graphLabels = document.getElementById("graphLabels");
+
+    renderView.call(window, "daily");
+
+    document.querySelectorAll(".pill-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".pill-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderView.call(window, btn.dataset.view);
+      });
+    });
+
+    document.querySelectorAll(".mastery-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".mastery-tab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+      });
+    });
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .progress-page {
+      min-height: 100vh;
+      width: 100%;
+      padding: 1rem 1rem 5rem;
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-x: hidden;
+    }
+
+    .hero-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .greeting h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .greeting p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.875rem;
+      margin: 0.25rem 0 0;
+    }
+
+    .greeting strong {
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.625rem;
+    }
+
+    .hero-stat {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .hero-stat .stat-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .hero-stat .stat-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .panel-title {
+      font-weight: 800;
+      font-size: 1.125rem;
+      margin: 0;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .panel-subtitle {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+      margin: 0.5rem 0 1.25rem;
+    }
+
+    .tab-pills {
+      display: flex;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 0.2rem;
+      gap: 0.2rem;
+    }
+
+    .pill-btn {
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .pill-btn.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .chart-container {
+      position: relative;
+      margin-bottom: 0.625rem;
+    }
+
+ .bar-graph {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  height: 140px;
+  overflow-x: auto; /* scroll if bars exceed width */
+  padding: 0 0.25rem;
+}
+
+.bar-wrapper {
+  flex: 0 0 24px; /* fixed width per bar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: visible; /* tooltip can appear */
+}
+
+.bar {
+  width: 100%;
+  min-height: 8px;
+  background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+  border-radius: 6px 6px 3px 3px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: height 0.5s ease;
+}
+
+.bar-tooltip {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 0.375rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+.graph-labels {
+  display: flex;
+  justify-content: flex-start; /* align labels with bars */
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0 0.25rem;
+  font-weight: 600;
+}
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.625rem;
+    }
+
+    .summary-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .summary-icon.green {
+      background: rgba(16, 185, 129, 0.2);
+    }
+
+    .summary-icon.red {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .summary-icon.blue {
+      background: rgba(59, 130, 246, 0.2);
+    }
+
+    .summary-icon.orange {
+/* Force bar visibility and background */
+.bar {
+  background: linear-gradient(180deg, #34d399 0%, #10b981 100%) !important;
+  min-height: 8px !important;
+  display: block !important;
+}
+      background: rgba(251, 146, 60, 0.2);
+    }
+
+    .summary-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .summary-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .mastery-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .mastery-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mastery-tab {
+      padding: 0.5rem 0.875rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .mastery-tab.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .keys-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+
+    .key-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .key-card:active:not(.disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(0.98);
+    }
+
+    .key-card.disabled {
+      opacity: 0.5;
+    }
+
+    .key-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.625rem;
+    }
+
+    .key-name {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .key-percentage {
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .key-percentage.low {
+      color: #ef4444;
+    }
+
+    .key-percentage.medium {
+      color: #f59e0b;
+    }
+
+    .key-percentage.high {
+      color: #10b981;
+    }
+
+    .key-progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .key-progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .key-progress-fill.low {
+      background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .key-progress-fill.medium {
+      background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .key-progress-fill.high {
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    }
+
+    .key-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+    }
+
+    .key-note {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+    }
+
+    @supports (padding: max(0px)) {
+      .progress-page {
+        padding-bottom: max(5rem, env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (max-width: 375px) {
+      .progress-page {
+        padding: 0.875rem 0.875rem 4.5rem;
+      }
+
+      .greeting h1 {
+        font-size: 1.375rem;
+      }
+
+      .hero-stat {
+        padding: 0.875rem;
+      }
+
+      .glass-panel {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .progress-page {
+        padding: 0.75rem 0.75rem 4.5rem;
+      }
+
+      .hero-stat .stat-value {
+        font-size: 1.25rem;
+      }
+
+      .summary-value {
+        font-size: 1.125rem;
+      }
+    }
+  </style>
+</Layout>

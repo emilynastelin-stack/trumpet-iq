@@ -1,11 +1,492 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<Welcome />
+  <main class="mode-select-page">
+    <div class="content-wrapper">
+      <div class="header-section">
+        <h1 class="main-title">Trumpet Trainer</h1>
+        <p class="subtitle">Select a mode and play!</p>
+      </div>
+
+      <div class="modes-container">
+        <!-- Learning Mode -->
+        <a href="/level/learning" class="mode-card glass-card learning">
+          <div class="mode-content">
+            <div class="mode-icon-wrapper">
+              <div class="mode-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mode-info">
+              <h2 class="mode-title">Learning</h2>
+              <p class="mode-description">Practice at your own pace</p>
+            </div>
+            <div class="mode-badge">20 Notes</div>
+          </div>
+          <div class="card-shine"></div>
+        </a>
+
+        <!-- Marathon Mode -->
+        <a href="/level/marathon" class="mode-card glass-card marathon">
+          <div class="mode-content">
+            <div class="mode-icon-wrapper">
+              <div class="mode-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mode-info">
+              <h2 class="mode-title">Marathon</h2>
+              <p class="mode-description">Endless practice, 3 lives</p>
+            </div>
+            <div class="mode-badge">∞ Notes</div>
+          </div>
+          <div class="card-shine"></div>
+        </a>
+
+        <!-- Speed Mode -->
+        <a href="/level/speed" class="mode-card glass-card speed">
+          <div class="mode-content">
+            <div class="mode-icon-wrapper">
+              <div class="mode-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+              </div>
+            </div>
+            <div class="mode-info">
+              <h2 class="mode-title">Speed</h2>
+              <p class="mode-description">Race against the clock</p>
+            </div>
+            <div class="mode-badge">Timed</div>
+          </div>
+          <div class="card-shine"></div>
+        </a>
+      </div>
+    </div>
+  </main>
 </Layout>
+
+<style>
+  
+  .mode-select-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    padding-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .mode-select-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    max-width: 100;
+    background-image: url('/assets/images/indexmast.png');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    z-index: -1;
+    opacity: 0.2;
+  }
+  .mode-select-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    padding-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .content-wrapper {
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 32px;
+    animation: fadeInDown 0.5s ease-out;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .main-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+    text-shadow: 
+      0 2px 10px rgba(0, 0, 0, 0.3),
+      0 0 30px rgba(16, 185, 129, 0.5);
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .modes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mode-card {
+    position: relative;
+    text-decoration: none;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    animation: fadeInUp 0.6s ease-out both;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mode-card:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  .mode-card:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  .card-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.3), 
+      transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+  }
+
+  .mode-card:active .card-shine {
+    left: 100%;
+  }
+
+  .mode-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .mode-icon-wrapper {
+    flex-shrink: 0;
+  }
+
+  .mode-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mode-icon svg {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .mode-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mode-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .mode-description {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .mode-badge {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.025em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Learning Mode - Green */
+  .mode-card.learning {
+    border-color: rgba(16, 185, 129, 0.5);
+  }
+
+  .mode-card.learning .mode-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  .mode-card.learning:active {
+    transform: scale(0.98);
+    border-color: rgba(16, 185, 129, 0.7);
+    box-shadow: 
+      0 4px 16px rgba(16, 185, 129, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  /* Marathon Mode - Teal */
+  .mode-card.marathon {
+    border-color: rgba(20, 184, 166, 0.5);
+  }
+
+  .mode-card.marathon .mode-icon {
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  }
+
+  .mode-card.marathon:active {
+    transform: scale(0.98);
+    border-color: rgba(20, 184, 166, 0.7);
+    box-shadow: 
+      0 4px 16px rgba(20, 184, 166, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  /* Speed Mode - Orange */
+  .mode-card.speed {
+    border-color: rgba(251, 146, 60, 0.5);
+  }
+
+  .mode-card.speed .mode-icon {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  }
+
+  .mode-card.speed:active {
+    transform: scale(0.98);
+    border-color: rgba(251, 146, 60, 0.7);
+    box-shadow: 
+      0 4px 16px rgba(251, 146, 60, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  /* Hover effects for desktop */
+  @media (hover: hover) and (pointer: fine) {
+    .mode-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .mode-card.learning:hover {
+      border-color: rgba(16, 185, 129, 0.7);
+      box-shadow: 
+        0 12px 40px rgba(16, 185, 129, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .mode-card.marathon:hover {
+      border-color: rgba(20, 184, 166, 0.7);
+      box-shadow: 
+        0 12px 40px rgba(20, 184, 166, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .mode-card.speed:hover {
+      border-color: rgba(251, 146, 60, 0.7);
+      box-shadow: 
+        0 12px 40px rgba(251, 146, 60, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .mode-card:hover .mode-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+
+  /* Extra small phones */
+  @media (max-width: 375px) {
+    .main-title {
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+    }
+
+    .mode-content {
+      padding: 16px;
+      gap: 12px;
+    }
+
+    .mode-icon {
+      width: 48px;
+      height: 48px;
+    }
+
+    .mode-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .mode-title {
+      font-size: 1.25rem;
+    }
+
+    .mode-description {
+      font-size: 0.8rem;
+    }
+
+    .mode-badge {
+      padding: 6px 10px;
+      font-size: 0.7rem;
+    }
+  }
+
+  /* Tablets and larger */
+  @media (min-width: 768px) {
+    .content-wrapper {
+      max-width: 600px;
+    }
+
+    .modes-container {
+      gap: 20px;
+    }
+
+    .mode-content {
+      padding: 24px;
+    }
+
+    .mode-icon {
+      width: 64px;
+      height: 64px;
+    }
+
+    .mode-icon svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .mode-title {
+      font-size: 1.75rem;
+    }
+
+    .mode-description {
+      font-size: 1rem;
+    }
+  }
+
+  /* Landscape mobile */
+  @media (max-height: 600px) and (orientation: landscape) {
+    .mode-select-page {
+      padding: 16px;
+    }
+
+    .header-section {
+      margin-bottom: 20px;
+    }
+
+    .main-title {
+      font-size: 2rem;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+    }
+
+    .modes-container {
+      gap: 12px;
+    }
+
+    .mode-content {
+      padding: 16px;
+    }
+
+    .mode-icon {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .mode-card,
+    .header-section,
+    .card-shine,
+    .mode-icon {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* Safe area insets for notched devices */
+  @supports (padding: max(0px)) {
+    .mode-select-page {
+      padding-left: max(20px, env(safe-area-inset-left));
+      padding-right: max(20px, env(safe-area-inset-right));
+      padding-bottom: max(40px, env(safe-area-inset-bottom));
+    }
+  }
+</style>

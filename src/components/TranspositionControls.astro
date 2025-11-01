@@ -1,0 +1,624 @@
+<!-- TranspositionControls.astro -->
+<!-- Reusable transposition control component -->
+---
+interface Props {
+  id: string;
+  showHeader?: boolean;
+  showRandomize?: boolean;
+  compact?: boolean;
+}
+
+const { 
+  id, 
+  showHeader = false,
+  showRandomize = true,
+  compact = false 
+} = Astro.props;
+
+const instrumentId = `instrument-${id}`;
+const wheelId = `wheel-${id}`;
+const randomizeId = `randomize-${id}`;
+---
+
+<div class={`transposition-controls ${compact ? 'compact' : ''}`} data-control-id={id}>
+  {showHeader && (
+    <div class="header">
+      <h2>Transposition</h2>
+      <p>Select instrument and concert key</p>
+    </div>
+  )}
+
+  <!-- Instrument Picker -->
+  <div class="control-group">
+    <label class="label">Instrument</label>
+    <select class="instrument-select" id={instrumentId}>
+      <option value="Bb" selected>Bb Trumpet</option>
+      <option value="C">C Trumpet</option>
+      <option value="D">D Trumpet</option>
+      <option value="Eb">Eb Trumpet</option>
+    </select>
+  </div>
+
+  <!-- Key Wheel -->
+  <div class="control-group">
+    <label class="label">Concert Key</label>
+    <div class="wheel-container">
+      <div class="fade-top"></div>
+      <div class="indicator"></div>
+      <div class="wheel" id={wheelId}>
+        <div class="wheel-padding"></div>
+        <div class="wheel-item" data-key="A">A</div>
+        <div class="wheel-item active" data-key="Bb">Bb</div>
+        <div class="wheel-item" data-key="H">H</div>
+        <div class="wheel-item" data-key="C">C</div>
+        <div class="wheel-item" data-key="D">D</div>
+        <div class="wheel-item" data-key="Eb">Eb</div>
+        <div class="wheel-item" data-key="E">E</div>
+        <div class="wheel-item" data-key="F">F</div>
+        <div class="wheel-item" data-key="G">G</div>
+        <div class="wheel-padding"></div>
+      </div>
+      <div class="fade-bottom"></div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  {showRandomize && (
+    <div class="control-group button-row">
+      <button class="action-btn randomize-btn" id={randomizeId} type="button">
+        <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="2"/>
+          <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+          <circle cx="16" cy="8" r="1.5" fill="currentColor"/>
+          <circle cx="8" cy="16" r="1.5" fill="currentColor"/>
+          <circle cx="16" cy="16" r="1.5" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+        </svg>
+        <span class="btn-text">Randomize</span>
+      </button>
+      <button class="action-btn reset-btn" id={`reset-${id}`} type="button">
+        <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"></polyline>
+          <polyline points="23 20 23 14 17 14"></polyline>
+          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+        </svg>
+        <span class="btn-text">Reset</span>
+      </button>
+    </div>
+  )}
+</div>
+
+<script define:vars={{ id, showRandomize }}>
+  window.addEventListener('DOMContentLoaded', () => {
+    const controlId = id;
+    const instrumentEl = document.getElementById(`instrument-${controlId}`);
+    const wheelEl = document.getElementById(`wheel-${controlId}`);
+    const randomizeEl = showRandomize ? document.getElementById(`randomize-${controlId}`) : null;
+    const resetEl = showRandomize ? document.getElementById(`reset-${controlId}`) : null;
+
+    if (!instrumentEl || !wheelEl) return;
+
+    const items = wheelEl.querySelectorAll('.wheel-item');
+    const keys = ['A', 'Bb', 'H', 'C', 'D', 'Eb', 'E', 'F', 'G'];
+    const instruments = ['Bb', 'C', 'D', 'Eb'];
+    let isAnimating = false;
+
+    // Center the active item on load
+    setTimeout(() => {
+      const activeItem = wheelEl.querySelector('.wheel-item.active');
+      if (activeItem) {
+        centerItem(activeItem);
+      }
+    }, 100);
+
+    // Click to select
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        items.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        centerItem(item);
+        updateState();
+      });
+    });
+
+    // Update active state based on scroll position
+    let scrollTimeout;
+    wheelEl.addEventListener('scroll', () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        updateActiveItem();
+      }, 150);
+    });
+
+    // Instrument change
+    instrumentEl.addEventListener('change', () => {
+      updateState();
+    });
+
+    // Randomize
+    if (randomizeEl) {
+      randomizeEl.addEventListener('click', async () => {
+        if (isAnimating) return;
+        
+        isAnimating = true;
+        randomizeEl.classList.add('spinning');
+        
+        const randInstrument = instruments[Math.floor(Math.random() * instruments.length)];
+        const randKey = keys[Math.floor(Math.random() * keys.length)];
+        
+        await Promise.all([
+          animateInstrumentSpin(randInstrument),
+          animateWheelSpin(randKey)
+        ]);
+        
+        randomizeEl.classList.remove('spinning');
+        isAnimating = false;
+        
+        updateState();
+      });
+    }
+
+    // Reset
+    if (resetEl) {
+      resetEl.addEventListener('click', () => {
+        // Reset to Bb trumpet in Bb
+        instrumentEl.value = 'Bb';
+        const targetItem = Array.from(items).find(i => i.dataset.key === 'Bb');
+        if (targetItem) {
+          items.forEach(i => i.classList.remove('active'));
+          targetItem.classList.add('active');
+          centerItem(targetItem);
+        }
+        updateState();
+      });
+    }
+
+    function centerItem(item) {
+      const wheelCenter = wheelEl.offsetHeight / 2;
+      const itemTop = item.offsetTop;
+      const itemHeight = item.offsetHeight;
+      const itemCenter = itemTop + itemHeight / 2;
+
+      wheelEl.scrollTo({
+        top: itemCenter - wheelCenter,
+        behavior: 'smooth'
+      });
+    }
+
+    function updateActiveItem() {
+      const wheelCenter = wheelEl.scrollTop + wheelEl.offsetHeight / 2;
+      
+      let closestItem = null;
+      let closestDistance = Infinity;
+
+      items.forEach(item => {
+        const itemCenter = item.offsetTop + item.offsetHeight / 2;
+        const distance = Math.abs(wheelCenter - itemCenter);
+        
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestItem = item;
+        }
+      });
+
+      if (closestItem) {
+        items.forEach(i => i.classList.remove('active'));
+        closestItem.classList.add('active');
+        updateState();
+      }
+    }
+
+    function updateState() {
+      if (!window.TranspositionState) return;
+
+      const activeKey = wheelEl.querySelector('.wheel-item.active')?.dataset.key;
+      const instrument = instrumentEl.value;
+
+      console.log('TranspositionControls updating state:', { instrument, key: activeKey });
+
+      window.TranspositionState.update({
+        instrument,
+        key: activeKey,
+        source: controlId
+      });
+
+      // Also dispatch the transposition:change event for game logic
+      const changeEvent = new CustomEvent('transposition:change', {
+        detail: { 
+          instrument, 
+          key: activeKey,
+          enabled: true 
+        },
+        bubbles: true,
+        composed: true
+      });
+      console.log('Dispatching transposition:change event:', changeEvent.detail);
+      document.dispatchEvent(changeEvent);
+      window.dispatchEvent(changeEvent);
+    }
+
+    // Listen for changes from other controls
+    function syncFromState(event) {
+      const { instrument, key, source } = event.detail;
+      
+      // Don't sync if this control triggered the change
+      if (source === controlId) return;
+
+      // Update instrument
+      if (instrumentEl.value !== instrument) {
+        instrumentEl.value = instrument;
+      }
+
+      // Update key
+      const currentActive = wheelEl.querySelector('.wheel-item.active');
+      if (currentActive?.dataset.key !== key) {
+        const targetItem = Array.from(items).find(i => i.dataset.key === key);
+        if (targetItem) {
+          items.forEach(i => i.classList.remove('active'));
+          targetItem.classList.add('active');
+          centerItem(targetItem);
+        }
+      }
+    }
+
+    function animateInstrumentSpin(finalValue, duration = 1000) {
+      return new Promise((resolve) => {
+        const spinInterval = 80;
+        const spinTimer = setInterval(() => {
+          const randomInstrument = instruments[Math.floor(Math.random() * instruments.length)];
+          instrumentEl.value = randomInstrument;
+        }, spinInterval);
+        
+        setTimeout(() => {
+          clearInterval(spinTimer);
+          instrumentEl.value = finalValue;
+          resolve();
+        }, duration);
+      });
+    }
+
+    function animateWheelSpin(finalKey, duration = 1200) {
+      return new Promise((resolve) => {
+        const wheelItems = Array.from(items);
+        const startTime = Date.now();
+        const startScroll = wheelEl.scrollTop;
+
+        const finalItem = wheelItems.find(i => i.dataset.key === finalKey);
+        if (!finalItem) {
+          resolve();
+          return;
+        }
+
+        const containerCenter = wheelEl.offsetHeight / 2;
+        const itemTop = finalItem.offsetTop;
+        const itemHeight = finalItem.offsetHeight;
+        const itemCenter = itemTop + itemHeight / 2;
+
+        const maxScroll = wheelEl.scrollHeight - wheelEl.clientHeight;
+        const targetScroll = Math.min(Math.max(itemCenter - containerCenter, 0), maxScroll);
+
+        const numSpins = 3;
+        const extraDistance = wheelEl.scrollHeight * numSpins;
+        const totalDistance = extraDistance + (targetScroll - startScroll);
+
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 4);
+
+          if (progress < 0.7) {
+            const currentDistance = totalDistance * eased;
+            wheelEl.scrollTop = (startScroll + currentDistance) % (wheelEl.scrollHeight - wheelEl.clientHeight);
+          } else {
+            const landingProgress = (progress - 0.7) / 0.3;
+            const landingEase = 1 - Math.pow(1 - landingProgress, 3);
+            wheelEl.scrollTop = startScroll + (targetScroll - startScroll) * landingEase;
+          }
+
+          const speed = progress < 0.7 ? 1 : (1 - ((progress - 0.7) / 0.3));
+          const blurAmount = speed * 4;
+          wheelItems.forEach(item => {
+            item.style.filter = `blur(${blurAmount}px)`;
+          });
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            wheelEl.scrollTop = targetScroll;
+            wheelItems.forEach(item => {
+              item.style.filter = 'blur(0px)';
+            });
+            
+            setTimeout(() => {
+              items.forEach(i => i.classList.remove('active'));
+              finalItem.classList.add('active');
+              resolve();
+            }, 100);
+          }
+        };
+
+        requestAnimationFrame(animate);
+      });
+    }
+
+    // Listen for state sync from other controls
+    window.addEventListener('transposition:sync', syncFromState);
+
+    // Initial state sync
+    setTimeout(() => {
+      console.log('TranspositionControls initializing for:', controlId);
+      if (window.TranspositionState) {
+        updateState();
+      } else {
+        console.warn('TranspositionState not available yet');
+      }
+    }, 100);
+  });
+</script>
+
+<style>
+  .transposition-controls {
+    width: 100%;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .control-group {
+    margin-bottom: 28px;
+  }
+
+  .control-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .label {
+    display: block;
+    text-align: center;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  /* Instrument Select */
+  .instrument-select {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #1e293b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 44px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .instrument-select:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .instrument-select:focus {
+    outline: none;
+    border-color: #12908e;
+    box-shadow: 0 0 0 3px rgba(18, 144, 142, 0.15);
+  }
+
+  .instrument-select option {
+    background: #ffffff;
+    color: #1e293b;
+  }
+
+  /* Wheel Container */
+  .wheel-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      inset 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .wheel {
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    cursor: grab;
+  }
+
+  .wheel:active {
+    cursor: grabbing;
+  }
+
+  .wheel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wheel-padding {
+    height: 75px;
+    flex-shrink: 0;
+  }
+
+  .wheel-item {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    scroll-snap-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .wheel-item:hover {
+    color: #94a3b8;
+  }
+
+  .wheel-item.active {
+    color: #12908e;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  /* Center indicator */
+  .indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 48px);
+    height: 50px;
+    border-top: 2px solid rgba(18, 144, 142, 0.2);
+    border-bottom: 2px solid rgba(18, 144, 142, 0.2);
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      rgba(18, 144, 142, 0.03) 50%,
+      transparent 100%);
+  }
+
+  /* Fade masks */
+  .fade-top,
+  .fade-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 75px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .fade-top {
+    top: 0;
+    background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.9) 40%,
+      transparent 100%);
+  }
+
+  .fade-bottom {
+    bottom: 0;
+    background: linear-gradient(to top,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.9) 40%,
+      transparent 100%);
+  }
+
+  /* Action Buttons */
+  .button-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .randomize-btn {
+    background: linear-gradient(135deg, #12908e 0%, #0d7270 100%);
+    color: #ffffff;
+  }
+
+  .randomize-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 4px 16px rgba(18, 144, 142, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .reset-btn {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    color: #ffffff;
+  }
+
+  .reset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 4px 16px rgba(100, 116, 139, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .action-btn:active {
+    transform: translateY(0);
+  }
+
+  .action-btn.spinning {
+    animation: btnPulse 0.6s ease-in-out infinite;
+  }
+
+  @keyframes btnPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  .btn-icon {
+    flex-shrink: 0;
+  }
+
+  .action-btn.spinning .btn-icon {
+    animation: diceRoll 0.3s ease-in-out infinite;
+  }
+
+  @keyframes diceRoll {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-12deg); }
+    75% { transform: rotate(12deg); }
+  }
+
+  /* Compact mode */
+  .transposition-controls.compact .control-group {
+    margin-bottom: 20px;
+  }
+
+  .transposition-controls.compact .wheel-container {
+    height: 200px;
+  }
+</style>

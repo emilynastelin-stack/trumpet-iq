@@ -1,0 +1,295 @@
+---
+// PauseOverlay.astro - Reusable pause menu component
+---
+
+<div id="pause-overlay" class="pause-overlay" style="display: none;">
+  <div class="pause-box">
+    <h2>Paused</h2>
+    <p class="pause-subtitle">Take a break</p>
+    
+    <div class="pause-buttons">
+      <button id="resume-btn" class="pause-btn primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <span>Resume</span>
+      </button>
+      
+      <button id="restart-from-pause-btn" class="pause-btn secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+        </svg>
+        <span>Restart</span>
+      </button>
+      
+      <a id="quit-btn" href="#" class="pause-btn tertiary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>Quit</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const pauseOverlay = document.getElementById('pause-overlay');
+    const resumeBtn = document.getElementById('resume-btn');
+    const restartBtn = document.getElementById('restart-from-pause-btn');
+    const quitBtn = document.getElementById('quit-btn');
+    
+    // Get mode from URL for quit button
+    const urlParams = new URLSearchParams(window.location.search);
+    const pathParts = window.location.pathname.split('/');
+    const mode = pathParts[2] || 'learning'; // /game/[mode]
+    
+    if (quitBtn) {
+      (quitBtn as HTMLAnchorElement).href = `/level/${mode}`;
+    }
+    
+    // Resume button
+    if (resumeBtn) {
+      resumeBtn.addEventListener('click', () => {
+        if (pauseOverlay) {
+          pauseOverlay.style.display = 'none';
+        }
+        window.dispatchEvent(new CustomEvent('game:resume'));
+      });
+    }
+    
+    // Restart button
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        window.location.reload();
+      });
+    }
+    
+    // Listen for pause event to show overlay
+    window.addEventListener('game:pause', () => {
+      if (pauseOverlay) {
+        pauseOverlay.style.display = 'flex';
+        pauseOverlay.classList.add('active');
+        pauseOverlay.style.pointerEvents = 'auto';
+      }
+    });
+    
+    // Listen for resume event to hide overlay
+    window.addEventListener('game:resume', () => {
+      if (pauseOverlay) {
+        pauseOverlay.style.display = 'none';
+        pauseOverlay.classList.remove('active');
+        pauseOverlay.style.pointerEvents = 'none';
+      }
+    });
+    
+    // Keyboard shortcut: ESC to toggle pause
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (pauseOverlay && pauseOverlay.style.display === 'flex') {
+          resumeBtn?.click();
+        } else {
+          window.dispatchEvent(new CustomEvent('game:pause'));
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .pause-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+    pointer-events: auto;
+  }
+  
+  .pause-overlay:not(.active) {
+    pointer-events: none;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .pause-box {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 48px 40px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.5);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .pause-box h2 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+  }
+
+  .pause-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0 0 32px 0;
+    font-weight: 500;
+  }
+
+  .pause-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pause-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-family: inherit;
+  }
+
+  .pause-btn svg {
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Primary button (Resume) */
+  .pause-btn.primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  }
+
+  .pause-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  }
+
+  .pause-btn.primary:active {
+    transform: translateY(0);
+  }
+
+  /* Secondary button (Restart) */
+  .pause-btn.secondary {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.3);
+  }
+
+  .pause-btn.secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(251, 146, 60, 0.4);
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  }
+
+  .pause-btn.secondary:active {
+    transform: translateY(0);
+  }
+
+  /* Tertiary button (Quit) */
+  .pause-btn.tertiary {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+    border: 2px solid rgba(100, 116, 139, 0.2);
+    box-shadow: none;
+  }
+
+  .pause-btn.tertiary:hover {
+    background: rgba(100, 116, 139, 0.15);
+    border-color: rgba(100, 116, 139, 0.3);
+    color: #475569;
+    transform: translateY(-2px);
+  }
+
+  .pause-btn.tertiary:active {
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .pause-box {
+      padding: 40px 32px;
+    }
+
+    .pause-box h2 {
+      font-size: 2rem;
+    }
+
+    .pause-subtitle {
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    .pause-btn {
+      padding: 12px 20px;
+      font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .pause-box {
+      padding: 32px 24px;
+    }
+
+    .pause-box h2 {
+      font-size: 1.75rem;
+    }
+
+    .pause-buttons {
+      gap: 10px;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .pause-overlay,
+    .pause-box,
+    .pause-btn {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>

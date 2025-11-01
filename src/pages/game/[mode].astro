@@ -1,0 +1,1000 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GameCard from '../../components/GameCard.astro';
+import GamePad from '../../components/GamePad.astro';
+import EndGameOverlay from '../../components/EndGameOverlay.astro';
+import BeginGameOverlay from '../../components/BeginGameOverlay.astro';
+import PauseOverlay from '../../components/PauseOverlay.astro';
+import { levels } from '../../levels/levels.js';
+import GameControls from '../../components/GameControls.astro';
+
+export async function getStaticPaths(){
+  return [
+    { params: { mode: 'learning' } },
+    { params: { mode: 'marathon' } },
+    { params: { mode: 'speed' } },
+  ];
+}
+
+const { mode: rawMode } = Astro.params;
+const mode = typeof rawMode === 'string' && rawMode.length > 0 ? rawMode : 'default';
+const urlParams = new URLSearchParams(Astro.request.url.split('?')[1] || '');
+const level = urlParams.get('level') || 'basic';
+
+// Default to Bb trumpet in Bb if not set
+let instrument = 'Bb';
+let key = 'Bb';
+
+const allowedLevels = Object.keys(levels);
+const selectedLevel = allowedLevels.includes(level) ? levels[level as keyof typeof levels] : [];
+const initialImage = Array.isArray(selectedLevel) && selectedLevel.length > 0 ? selectedLevel[0].note : '';
+
+---
+
+<Layout title={`Play ${mode.charAt(0).toUpperCase() + mode.slice(1)} - ${level.charAt(0).toUpperCase() + level.slice(1)}`}>
+  <div class="game-component flex flex-col items-center min-h-screen pt-2 pb-4 px-4">
+  <EndGameOverlay />
+  <BeginGameOverlay mode={mode} visible={true} />
+  <PauseOverlay />
+  <div class="game-area w-full max-w-lg flex flex-col items-center mt-2">
+      <h1 class="text-3xl font-bold mb-[50px] text-center" style="position: relative; z-index: 100;">
+        {mode.charAt(0).toUpperCase() + mode.slice(1)} Mode - {level.charAt(0).toUpperCase() + level.slice(1)}
+      </h1>
+
+      <div class="w-full">
+          <div style="position:relative; width:100%; text-align:center;">
+            <div id="gamecard-box" style="display:inline-block; position:relative; text-align:left; margin-top:0;">
+              <GameCard notes={selectedLevel} index={0} mode={mode} />
+            </div>
+            <div id="transposition-status" aria-live="polite" class="game-status-badge">Default</div>
+            <div id="lives-display" aria-live="polite" class="game-status-badge lives-badge" style="display:none;">
+              <div class="heart heart-1">❤️</div>
+              <div class="heart heart-2">❤️</div>
+              <div class="heart heart-3">❤️</div>
+            </div>
+            <div id="debug-note-count" aria-hidden="false" style="position:absolute; right:8px; top:8px; font-size:0.8rem; background:rgba(0,0,0,0.6); color:#fff; padding:6px 8px; border-radius:6px; z-index:100;">Note: 0</div>
+          </div>
+      </div>
+
+        <!-- Progress bar (visible in speed mode) placed between GameCard and GamePad -->
+  <div id="progress-wrap" style="width:304px; max-width:640px; margin:12px auto; display:none;">
+          <div id="game-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="game-progress-fill"></div>
+              <div id="game-progress-text">0%</div>
+              <div id="game-progress-countdown" style="display:none;">&nbsp;</div>
+          </div>
+        </div>
+
+      
+    </div>
+
+    <!-- GamePad (interactive buttons) -->
+    <GamePad />
+    
+   <!-- In your Layout, replace the game-controls-wrap div with: -->
+<GameControls mode={mode} />
+
+        
+      
+</Layout>
+
+<div id="game-data" data-mode={mode} data-level={level} style="display:none"></div>
+
+<script type="module">
+  // Sign in anonymously when game loads
+  import { firebaseReady } from '/scripts/firebase.js';
+
+  firebaseReady.then(({ auth, signInAnonymously }) => {
+    if (!auth.currentUser) {
+      signInAnonymously()
+        .then(() => {
+          console.log('Signed in anonymously');
+        })
+        .catch((error) => {
+          console.error('Error signing in:', error);
+        });
+    }
+  });
+  function updateGamePadBottom() {
+    const gamepad = document.getElementById('gamepad');
+    const controlsWrap = document.querySelector('.game-controls-wrap');
+    if (gamepad) {
+      const rect = gamepad.getBoundingClientRect();
+      document.body.style.setProperty('--gamepad-bottom', rect.bottom + 'px');
+      
+      // Position controls 10px below gamepad bottom
+      if (controlsWrap) {
+        const controlsTop = rect.bottom + 10;
+        controlsWrap.style.bottom = 'auto';
+        controlsWrap.style.top = controlsTop + 'px';
+        controlsWrap.style.position = 'fixed';
+      }
+    }
+  }
+  window.addEventListener('DOMContentLoaded', updateGamePadBottom);
+  window.addEventListener('resize', updateGamePadBottom);
+  window.addEventListener('scroll', updateGamePadBottom);
+  
+  // Update controls position after game elements load
+  setTimeout(updateGamePadBottom, 100);
+  setTimeout(updateGamePadBottom, 500);
+  setTimeout(updateGamePadBottom, 1000);
+  
+  function updateProgressBarBottom() {
+    const progress = document.getElementById('progress-wrap');
+    if (progress) {
+      const rect = progress.getBoundingClientRect();
+      document.body.style.setProperty('--progress-bar-bottom', rect.bottom + 'px');
+    }
+  }
+  window.addEventListener('DOMContentLoaded', updateProgressBarBottom);
+  window.addEventListener('resize', updateProgressBarBottom);
+  window.addEventListener('scroll', updateProgressBarBottom);
+  import { launchGame } from '/scripts/gameLauncher.js';
+  const dataEl = document.getElementById('game-data');
+  const runtimeParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const MODE = dataEl ? dataEl.dataset.mode : 'learning';
+  const LEVEL = (runtimeParams && runtimeParams.get('level')) || (dataEl ? dataEl.dataset.level : 'basic');
+  const container = document.getElementById('game-container') || document.body;
+  
+  // Pause functionality
+  let isPaused = false;
+  const pauseBtn = document.getElementById('pause-btn');
+  const restartBtn = document.getElementById('restart-btn');
+  
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      const pauseIcon = pauseBtn.querySelector('.pause-icon');
+      const playIcon = pauseBtn.querySelector('.play-icon');
+      if (isPaused) {
+        pauseIcon.style.display = 'none';
+        playIcon.style.display = 'block';
+        pauseBtn.setAttribute('aria-label', 'Resume game');
+        pauseBtn.setAttribute('title', 'Resume');
+        window.dispatchEvent(new CustomEvent('game:pause'));
+      } else {
+        pauseIcon.style.display = 'block';
+        playIcon.style.display = 'none';
+        pauseBtn.setAttribute('aria-label', 'Pause game');
+        pauseBtn.setAttribute('title', 'Pause');
+        window.dispatchEvent(new CustomEvent('game:resume'));
+      }
+    });
+  }
+  
+  if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+      window.location.reload();
+    });
+  }
+  
+  function start() {
+    const c = document.getElementById('game-container') || document.body;
+    let instrument = 'Bb';
+    let key = 'Bb';
+    const overlay = document.getElementById('begingame-overlay');
+    const panel = document.getElementById('transposition-panel');
+    
+    if (overlay) {
+      const overlayInstrument = overlay.querySelector('#instrument-select-overlay');
+      if (overlayInstrument) instrument = overlayInstrument.value;
+      const overlayKeyItem = overlay.querySelector('.wheel-item.active');
+      if (overlayKeyItem && overlayKeyItem.dataset.key) key = overlayKeyItem.dataset.key;
+    }
+    
+    if ((!instrument || !key || instrument === 'Bb' && key === 'Bb') && panel) {
+      const panelInstrument = panel.querySelector('#instrument');
+      if (panelInstrument) instrument = panelInstrument.value;
+      const panelKeyItem = panel.querySelector('.wheel-item.active');
+      if (panelKeyItem && panelKeyItem.dataset.key) key = panelKeyItem.dataset.key;
+    }
+    
+    let speedTimeout = 2000;
+    if (MODE === 'speed' && overlay?.dataset?.selectedSpeed) {
+      speedTimeout = Number(overlay.dataset.selectedSpeed) || 2000;
+    }
+    
+    launchGame(MODE || 'learning', c, { difficulty: LEVEL, instrument, key, speedTimeout });
+    setTimeout(() => {
+      requestAnimationFrame(alignTranspositionBadge);
+      updateGamePadBottom();
+    }, 50);
+  }
+
+  // Listen for the game:start event from BeginGameOverlay
+window.addEventListener('game:start', () => {
+  console.log('Game start event received');
+  requestAnimationFrame(start);
+}, { once: true });
+
+  function updateTranspositionBadge(detail) {
+    const el = document.getElementById('transposition-status');
+    if (!el) return;
+    const hasEnabled = detail && Object.prototype.hasOwnProperty.call(detail, 'enabled');
+    const enabled = hasEnabled ? Boolean(detail.enabled) : !(detail && (detail.instrument === 'default' || detail.key === 'default'));
+
+    if (!detail || enabled === false || detail.instrument === 'default' || detail.key === 'default') {
+      el.textContent = 'Default';
+    } else {
+      el.textContent = `${detail.instrument} to ${detail.key}`;
+    }
+  }
+
+  const transpositionHandler = (e) => {
+    try { updateTranspositionBadge((e && e.detail) || {}); } catch (err) {}
+  };
+  
+  document.addEventListener('transposition:change', transpositionHandler);
+  window.addEventListener('transposition:change', transpositionHandler);
+
+  requestAnimationFrame(() => {
+    try {
+      const panel = document.getElementById('transposition-panel');
+      if (panel) {
+        const enabledInput = panel.querySelector('#transposition-enabled');
+        const instrumentSelect = panel.querySelector('#instrument');
+        const activeKeyItem = panel.querySelector('#key-wheel .wheel-item.active') || panel.querySelector('.wheel-item.active');
+        const key = activeKeyItem ? (activeKeyItem.dataset && activeKeyItem.dataset.key ? activeKeyItem.dataset.key : activeKeyItem.getAttribute('data-key')) : 'default';
+
+        updateTranspositionBadge({
+          enabled: enabledInput ? enabledInput.checked : false,
+          instrument: instrumentSelect ? instrumentSelect.value : 'default',
+          key: key || 'default'
+        });
+      }
+    } catch (err) {}
+  });
+
+  function alignTranspositionBadge() {
+    try {
+      const badge = document.getElementById('transposition-status');
+      const livesDisplay = document.getElementById('lives-display');
+      if (!badge) return;
+
+      const viewportCenterX = window.innerWidth / 2;
+      
+      // Fixed top position (not relative to card)
+      const fixedTop = 85;
+
+      // Position transposition badge (left side) - right edge 159px left of center
+  badge.style.position = 'fixed';
+  const badgeRightEdge = viewportCenterX - 159;
+  const badgeLeft = badgeRightEdge - badge.offsetWidth;
+  const verticalPadding = 65; // px
+  badge.style.left = Math.max(40, badgeLeft) + 'px';
+  badge.style.top = verticalPadding + 'px';
+  badge.style.right = 'auto';
+
+      // Position lives badge (right side) - right edge 159px right of center
+      if (livesDisplay && livesDisplay.style.display !== 'none') {
+        livesDisplay.style.position = 'fixed';
+        const livesRightEdge = viewportCenterX + 159;
+        const livesLeft = livesRightEdge - livesDisplay.offsetWidth;
+        const verticalPadding = 65; // px
+        livesDisplay.style.left = livesLeft + 'px';
+        livesDisplay.style.top = verticalPadding + 'px';
+        livesDisplay.style.right = 'auto';
+
+        // Safely match transposition badge height to lives badge
+        if (badge && livesDisplay) {
+          const livesHeight = livesDisplay.offsetHeight;
+          if (livesHeight > 0) {
+            badge.style.height = livesHeight + 'px';
+          } else {
+            badge.style.height = '';
+          }
+        }
+      } else if (badge) {
+        badge.style.height = '';
+      }
+    } catch (err) {}
+  }
+
+  function moveBadgesToBody() {
+    try {
+      const badge = document.getElementById('transposition-status');
+      const livesDisplay = document.getElementById('lives-display');
+      
+      if (badge && badge.parentElement !== document.body) {
+        document.body.appendChild(badge);
+      }
+      if (badge) {
+        badge.style.zIndex = '100';
+        badge.style.position = 'fixed';
+      }
+      
+      if (livesDisplay && livesDisplay.parentElement !== document.body) {
+        document.body.appendChild(livesDisplay);
+      }
+      if (livesDisplay) {
+        livesDisplay.style.zIndex = '100';
+        livesDisplay.style.position = 'fixed';
+      }
+    } catch (err) {}
+  }
+
+  requestAnimationFrame(() => { moveBadgesToBody(); alignTranspositionBadge(); });
+  window.addEventListener('resize', () => requestAnimationFrame(() => { moveBadgesToBody(); alignTranspositionBadge(); }));
+  window.addEventListener('scroll', () => requestAnimationFrame(() => { moveBadgesToBody(); alignTranspositionBadge(); }));
+  window.addEventListener('transposition:change', () => requestAnimationFrame(() => { moveBadgesToBody(); alignTranspositionBadge(); }));
+
+  function showEndOverlayFromEvent(ev) {
+    try {
+      const detail = (ev && ev.detail) || {};
+      const overlay = document.getElementById('endgame-overlay');
+      const scoreEl = document.getElementById('endgame-score');
+      const artEl = document.getElementById('endgame-art');
+      const score = detail && typeof detail.score === 'number' ? detail.score : 0;
+      const total = detail && typeof detail.total === 'number' && detail.total > 0 ? detail.total : 1;
+      const pct = Math.round((score / total) * 100);
+      if (scoreEl) scoreEl.textContent = `Your score: ${score} (${pct}%)`;
+
+      try {
+        let img = '/assets/images/endgamemenus/1star.png';
+        if (pct > 80) img = '/assets/images/endgamemenus/3stars.png';
+        else if (pct > 50) img = '/assets/images/endgamemenus/2stars.png';
+        
+        const overlayBox = document.querySelector('.overlay-box');
+        const starsBox = document.getElementById('endgame-stars');
+        try {
+          if (overlayBox) {
+            overlayBox.style.backgroundImage = 'none';
+          }
+          if (artEl) {
+            artEl.style.display = 'block';
+            artEl.innerHTML = '';
+            const imgEl = document.createElement('img');
+            imgEl.src = img;
+            imgEl.alt = 'Stars';
+            imgEl.onerror = () => {
+              console.warn('Endgame stars image failed to load, falling back to 1star.png:', img);
+              imgEl.onerror = null;
+              imgEl.src = '/assets/images/endgamemenus/1star.png';
+            };
+            imgEl.style.display = 'block';
+            imgEl.style.height = 'auto';
+            imgEl.style.margin = '0 auto';
+            const targetWidth = (starsBox && starsBox.clientWidth) ? starsBox.clientWidth : null;
+            if (targetWidth && Number.isFinite(targetWidth) && targetWidth > 0) {
+              imgEl.style.width = targetWidth + 'px';
+            } else {
+              imgEl.style.maxWidth = '80%';
+            }
+            artEl.appendChild(imgEl);
+          }
+          if (starsBox) starsBox.style.display = 'none';
+        } catch (err) {}
+      } catch (err) {}
+
+      if (overlay) {
+        overlay.classList.remove('hide');
+        overlay.classList.add('show');
+      }
+    } catch (err) {}
+  }
+  
+  window.addEventListener('game:end', showEndOverlayFromEvent);
+  document.addEventListener('game:end', showEndOverlayFromEvent);
+
+ if (MODE === 'speed') {
+  let countdownInterval = null;
+  let countdownStart = 0;
+  let SPEED_TIMEOUT_MS = 2000;
+
+  // End session after 30 seconds
+  let speedSessionTimeout = null;
+  let hasStartedTimer = false;
+
+  function endSpeedSession() {
+    window.dispatchEvent(new CustomEvent('game:end', { detail: { reason: 'timeout' } }));
+  }
+
+  function startSpeedSessionTimer() {
+    // Only start the timer once per session
+    if (speedSessionTimeout || hasStartedTimer) return;
+    hasStartedTimer = true;
+    speedSessionTimeout = setTimeout(endSpeedSession, 30000);
+  }
+
+  function stopSpeedSessionTimer() {
+    if (speedSessionTimeout) clearTimeout(speedSessionTimeout);
+    speedSessionTimeout = null;
+    hasStartedTimer = false;
+  }
+
+  // Start timer only on the FIRST note set
+  window.addEventListener('game:setNote', startSpeedSessionTimer, { once: true });
+  
+  // Stop timer on pause/end
+  window.addEventListener('game:pause', stopSpeedSessionTimer);
+  window.addEventListener('game:end', stopSpeedSessionTimer);
+
+  // Start timer immediately if game is already loaded
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    startSpeedSessionTimer();
+  } else {
+    window.addEventListener('DOMContentLoaded', startSpeedSessionTimer);
+  }
+    window.addEventListener('game:setNote', (ev) => {
+      if (ev && ev.detail && typeof ev.detail.speedTimeout === 'number') {
+        SPEED_TIMEOUT_MS = ev.detail.speedTimeout;
+      }
+      try { startCountdown(); } catch (err) {}
+    });
+    
+    function startCountdown() {
+      const progWrap = document.getElementById('progress-wrap');
+      const fill = document.getElementById('game-progress-fill');
+      const text = document.getElementById('game-progress-text');
+      if (!progWrap || !fill || !text) return;
+      progWrap.style.display = 'block';
+      progWrap.style.width = '304px';
+      progWrap.style.margin = '12px auto';
+
+      fill.style.display = 'block';
+      fill.style.transition = 'none';
+      fill.style.width = '100%';
+      void fill.offsetWidth;
+      fill.style.transition = `width ${SPEED_TIMEOUT_MS}ms linear`;
+      fill.style.width = '0%';
+      fill.setAttribute('aria-valuenow', '0');
+
+      const countdownEl = document.getElementById('game-progress-countdown');
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      countdownStart = Date.now();
+      progWrap.dataset.countdown = 'active';
+      try { console.debug('[speed-countdown] start', { timeoutMs: SPEED_TIMEOUT_MS }); } catch (err) {}
+      if (countdownEl) {
+        countdownEl.style.display = 'block';
+        countdownEl.textContent = `${(SPEED_TIMEOUT_MS/1000).toFixed(1)}s`;
+      }
+      countdownInterval = setInterval(() => {
+        const elapsed = Date.now() - countdownStart;
+        const remaining = Math.max(0, SPEED_TIMEOUT_MS - elapsed);
+        if (countdownEl) countdownEl.textContent = `${Math.ceil(remaining / 100) / 10}s`;
+        if (remaining <= 0) {
+          clearInterval(countdownInterval); countdownInterval = null;
+        }
+      }, 100);
+    }
+
+    function stopCountdown() {
+      const fill = document.getElementById('game-progress-fill');
+      const text = document.getElementById('game-progress-text');
+      const countdownEl = document.getElementById('game-progress-countdown');
+      if (fill) {
+        fill.style.transition = 'width 220ms ease';
+        fill.style.width = '0%';
+      }
+      if (text) text.textContent = '';
+      if (countdownEl) { countdownEl.style.display = 'none'; countdownEl.textContent = '' }
+      const progWrap = document.getElementById('progress-wrap');
+      if (progWrap && progWrap.dataset) delete progWrap.dataset.countdown;
+      try { console.debug('[speed-countdown] stop'); } catch (err) {}
+    }
+
+    window.addEventListener('game:setNote', (ev) => {
+      try { startCountdown(); } catch (err) {}
+    });
+
+    window.addEventListener('game:feedback', (ev) => { try { stopCountdown(); } catch (err) {} });
+  }
+
+  document.addEventListener('click', (e) => {
+    const el = e.target;
+    if (!el) return;
+    if (el.id === 'endgame-retry') {
+      const overlay = document.getElementById('endgame-overlay');
+      if (overlay) overlay.classList.remove('show');
+      window.location.reload();
+    }
+  });
+
+  window.addEventListener('game:progress', (ev) => {
+    try {
+      if (!(ev instanceof CustomEvent)) return;
+      const detail = ev.detail || {};
+      const el = document.getElementById('debug-note-count');
+      if (el) el.textContent = `Notes: ${typeof detail.noteCount === 'number' ? detail.noteCount : 0} (Correct: ${typeof detail.correctCount === 'number' ? detail.correctCount : 0})`;
+      
+      try {
+        const progWrap = document.getElementById('progress-wrap');
+        const fill = document.getElementById('game-progress-fill');
+        const text = document.getElementById('game-progress-text');
+        if (!progWrap || !fill || !text) return;
+        progWrap.style.display = 'block';
+        try { progWrap.style.width = '304px'; progWrap.style.margin = '12px auto'; } catch (err) { progWrap.style.margin = '12px auto'; }
+        
+        if (progWrap.dataset && progWrap.dataset.countdown === 'active') {
+          try { console.debug('[speed-countdown] progress handler skipped due to active countdown'); } catch (err) {}
+          return;
+        }
+        if (MODE === 'speed') return;
+        const dataTotal = Number(document.getElementById('game-data')?.dataset?.total || 20);
+        const total = Number.isFinite(dataTotal) && dataTotal > 0 ? dataTotal : 20;
+        const count = (typeof detail.noteCount === 'number') ? (detail.noteCount + 1) : 0;
+        const pct = Math.max(0, Math.min(100, Math.round((count / total) * 100)));
+        fill.style.transition = 'width 220ms ease';
+        fill.style.width = pct + '%';
+        fill.setAttribute('aria-valuenow', String(pct));
+        text.textContent = `${pct}%`;
+      } catch (err) {}
+    } catch (err) {}
+  });
+
+  // Initialize lives display for marathon mode
+  if (MODE === 'marathon') {
+    const livesDisplay = document.getElementById('lives-display');
+    if (livesDisplay) {
+      livesDisplay.style.display = 'flex';
+    }
+  }
+  
+  // Handle lives updates with animation
+  window.addEventListener('game:lives', (ev) => {
+    try {
+      if (!(ev instanceof CustomEvent)) return;
+      const detail = ev.detail || {};
+      const lives = typeof detail.lives === 'number' ? detail.lives : 3;
+      const animate = detail.animate === true;
+      
+      const livesDisplay = document.getElementById('lives-display');
+      if (!livesDisplay) return;
+      
+      const hearts = livesDisplay.querySelectorAll('.heart');
+      
+      if (animate) {
+        // Shake the badge
+        livesDisplay.classList.add('shake');
+        setTimeout(() => livesDisplay.classList.remove('shake'), 500);
+        
+        // Animate the lost heart (from left to right, so animate the first "alive" heart that should now be lost)
+        const lostHeartIndex = lives; // If lives=2, we lost heart at index 2 (0-indexed: heart-3)
+        if (hearts[lostHeartIndex]) {
+          hearts[lostHeartIndex].classList.add('lost');
+          hearts[lostHeartIndex].textContent = '🖤';
+          
+          // Pulse remaining hearts
+          for (let i = 0; i < lives; i++) {
+            hearts[i].classList.add('pulse');
+            setTimeout(() => hearts[i].classList.remove('pulse'), 400);
+          }
+        }
+      } else {
+        // Initial render or non-animated update
+        hearts.forEach((heart, index) => {
+          if (index < lives) {
+            heart.textContent = '❤️';
+            heart.classList.remove('lost');
+          } else {
+            heart.textContent = '🖤';
+            heart.classList.add('lost');
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error updating lives display:', err);
+    }
+  });
+  
+  // Initial lives setup
+  if (MODE === 'marathon') {
+    window.dispatchEvent(new CustomEvent('game:lives', { 
+      detail: { lives: 3, animate: false } 
+    }));
+  }
+</script>
+<script>
+console.log('=== Transposition Debug Script Loaded ===');
+
+// Check if TranspositionState exists
+setTimeout(() => {
+  const win = window;
+  if ((win as any).TranspositionState) {
+    console.log('✅ TranspositionState found:', (win as any).TranspositionState.current);
+  } else {
+    console.error('❌ TranspositionState NOT found - TranspositionPanel may not be imported');
+  }
+}, 500);
+
+// Listen for all transposition events
+document.addEventListener('transposition:change', (e) => {
+  const detail = (e as CustomEvent).detail;
+  console.log('📣 Document received transposition:change:', detail);
+});
+
+window.addEventListener('transposition:change', (e) => {
+  const detail = (e as CustomEvent).detail;
+  console.log('📣 Window received transposition:change:', detail);
+});
+
+window.addEventListener('transposition:sync', (e) => {
+  const detail = (e as CustomEvent).detail;
+  console.log('🔄 Sync event received:', detail);
+});
+
+// Test manual dispatch
+(window as any).testTransposition = function() {
+  console.log('🧪 Testing manual transposition change...');
+  const event = new CustomEvent('transposition:change', {
+    detail: { instrument: 'C', key: 'D', enabled: true },
+    bubbles: true,
+    composed: true
+  });
+  document.dispatchEvent(event);
+  window.dispatchEvent(event);
+  console.log('🧪 Manual event dispatched');
+};
+
+console.log('💡 Run window.testTransposition() to test events manually');
+</script>
+<style>
+  /* Game status badges - transposition and lives */
+  .game-status-badge {
+    position: fixed;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(20, 184, 166, 0.25) 100%);
+    backdrop-filter: blur(16px);
+    padding: 10px 18px;
+    border-radius: 16px;
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 0 1px rgba(16, 185, 129, 0.3);
+    color: #fff;
+    z-index: 100;
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  
+  #transposition-status {
+     /* positioned dynamically by JS - 159px left of center */
+     width: 140px;
+     height: 53px;
+     min-width: 80px;
+     max-width: 180px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     /* flexbox centers text vertically and horizontally */
+  }
+  
+  .lives-badge {
+    /* positioned dynamically by JS - 159px right of center */
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 14px;
+  }
+  
+  .heart {
+    font-size: 1.4rem;
+    display: inline-block;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  
+  .heart.lost {
+    animation: heartLoss 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  
+  @keyframes heartLoss {
+    0% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+    25% {
+      transform: scale(1.3) rotate(-15deg);
+      filter: drop-shadow(0 4px 8px rgba(239, 68, 68, 0.6));
+    }
+    50% {
+      transform: scale(0.8) rotate(15deg);
+      opacity: 0.7;
+    }
+    75% {
+      transform: scale(1.1) rotate(-5deg);
+      opacity: 0.4;
+    }
+    100% {
+      transform: scale(0.6) rotate(0deg);
+      opacity: 0.3;
+      filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)) grayscale(1);
+    }
+  }
+  
+  /* Pulse animation for remaining hearts when one is lost */
+  .heart.pulse {
+    animation: heartPulse 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @keyframes heartPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+      filter: drop-shadow(0 4px 8px rgba(239, 68, 68, 0.5));
+    }
+  }
+  
+  /* Shake the entire lives badge when losing a life */
+  .lives-badge.shake {
+    animation: badgeShake 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @keyframes badgeShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+  }
+  
+  /* Hover effects */
+  .game-status-badge:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(20, 184, 166, 0.35) 100%);
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 
+      0 12px 32px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 0 1px rgba(16, 185, 129, 0.4),
+      0 0 20px rgba(16, 185, 129, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .game-status-badge {
+      font-size: 0.85rem;
+      padding: 8px 14px;
+    }
+    
+    .lives-badge {
+      padding: 6px 10px;
+      gap: 6px;
+    }
+    
+    .heart {
+      font-size: 1.2rem;
+    }
+  }
+  
+  @media (max-width: 400px) {
+    .game-status-badge {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+    }
+    
+    .lives-badge {
+      gap: 4px;
+    }
+    
+    .heart {
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Game controls bar below GamePad */
+  .game-controls-wrap {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: auto; /* will be set by JS */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 100;
+    transition: top 0.15s ease-out;
+  }
+  
+  .game-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%);
+    backdrop-filter: blur(12px);
+    padding: 12px 20px;
+    border-radius: 20px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 0 1px rgba(16, 185, 129, 0.2);
+    pointer-events: auto;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .control-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    border-radius: 14px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .control-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.3) 0%, rgba(249, 115, 22, 0.3) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .control-btn:hover::before {
+    opacity: 1;
+  }
+  
+  .control-btn:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.35) 100%);
+    border-color: rgba(251, 146, 60, 0.6);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+      0 6px 20px rgba(16, 185, 129, 0.4),
+      0 0 20px rgba(251, 146, 60, 0.3);
+  }
+  
+  .control-btn:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+  
+  .control-btn svg {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  
+  /* Progress bar styles */
+  #game-progress {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.08) 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  
+  #game-progress-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: linear-gradient(90deg, #10b981 0%, #14b8a6 50%, #fb923c 100%);
+    transition: width 220ms ease;
+    box-shadow: 
+      0 0 10px rgba(16, 185, 129, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  
+  #game-progress-text {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    font-size: 0.85rem; 
+    font-weight: 800;
+    color: #fff;
+    pointer-events: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+  }
+  
+  #game-progress-countdown {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    font-size: 0.85rem; 
+    font-weight: 800;
+    color: #fff;
+    pointer-events: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 480px) {
+    .game-controls {
+      gap: 12px;
+      padding: 10px 16px;
+    }
+    
+    .control-btn {
+      width: 44px;
+      height: 44px;
+    }
+  }
+  @media (min-width: 768px) {
+    .game-component .gamepad,
+    .game-component GamePad {
+      position: relative;
+      bottom: 50px;
+    }
+  }
+</style>
+<style>
+  /* Background gradient animation */
+  .background-gradient {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+      #10b981 0%, 
+      #059669 25%, 
+      #fb923c 50%, 
+      #f97316 75%, 
+      #10b981 100%);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+    z-index: -2;
+  }
+
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Floating orbs */
+  .floating-orbs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(40px);
+    animation: floatOrb 20s infinite ease-in-out;
+  }
+
+  .orb-1 {
+    width: 400px;
+    height: 400px;
+    top: -200px;
+    left: -200px;
+    animation-delay: 0s;
+  }
+
+  .orb-2 {
+    width: 300px;
+    height: 300px;
+    bottom: -150px;
+    right: -150px;
+    animation-delay: 7s;
+    animation-duration: 25s;
+  }
+
+  .orb-3 {
+    width: 350px;
+    height: 350px;
+    top: 40%;
+    left: 50%;
+    animation-delay: 14s;
+    animation-duration: 30s;
+  }
+
+  @keyframes floatOrb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(50px, -50px) scale(1.1); }
+    66% { transform: translate(-30px, 30px) scale(0.9); }
+  }
+</style>

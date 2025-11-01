@@ -1,0 +1,25 @@
+---
+---
+
+<h1>Test Page</h1>
+<div id="test-result">Testing anonymous sign-in...</div>
+
+<script type="module">
+	import { renderView } from '/scripts/progress.js';
+	import { firebaseReady } from '/utils/firebase.js';
+
+	async function testAnonymousSignIn() {
+		try {
+			const { auth, signInAnonymously } = await firebaseReady;
+			const userCredential = await signInAnonymously();
+			const user = userCredential.user;
+			document.getElementById('test-result').textContent = `Success! Signed in anonymously as UID: ${user.uid}`;
+			// Optionally, call renderView or other progress.js logic here
+			renderView && renderView();
+		} catch (error) {
+			document.getElementById('test-result').textContent = `Failed: ${error.code || 'Unknown'} - ${error.message || error}`;
+		}
+	}
+
+	testAnonymousSignIn();
+</script>

@@ -1,0 +1,209 @@
+---
+// GameControls.astro - Bottom control bar for game page
+interface Props {
+  mode: string;
+}
+
+const { mode } = Astro.props;
+---
+
+<div class="game-controls-wrap">
+  <div class="game-controls">
+    <a href={`/level/${mode}`} class="control-btn" aria-label="Back to level select" title="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    
+    <button id="pause-btn" class="control-btn" aria-label="Pause game" title="Pause">
+      <svg class="pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="4" width="4" height="16"/>
+        <rect x="14" y="4" width="4" height="16"/>
+      </svg>
+      <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+    </button>
+    
+    <button id="restart-btn" class="control-btn" aria-label="Restart game" title="Restart">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let isPaused = false;
+    const pauseBtn = document.getElementById('pause-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    
+    // Position controls below gamepad
+    function updateGamePadBottom() {
+      const gamepad = document.getElementById('gamepad');
+      const controlsWrap = document.querySelector('.game-controls-wrap');
+      if (gamepad && controlsWrap) {
+        const rect = gamepad.getBoundingClientRect();
+        const controlsTop = rect.bottom + 10;
+        (controlsWrap as HTMLElement).style.top = controlsTop + 'px';
+      }
+    }
+    
+    // Update position on various events
+    window.addEventListener('DOMContentLoaded', updateGamePadBottom);
+    window.addEventListener('resize', updateGamePadBottom);
+    window.addEventListener('scroll', updateGamePadBottom);
+    
+    // Update after delays for dynamic content
+    setTimeout(updateGamePadBottom, 100);
+    setTimeout(updateGamePadBottom, 500);
+    setTimeout(updateGamePadBottom, 1000);
+    
+    // Pause button functionality
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', () => {
+        isPaused = !isPaused;
+        const pauseIcon = pauseBtn.querySelector('.pause-icon');
+        const playIcon = pauseBtn.querySelector('.play-icon');
+        
+        if (isPaused) {
+          if (pauseIcon) (pauseIcon as HTMLElement).style.display = 'none';
+          if (playIcon) (playIcon as HTMLElement).style.display = 'block';
+          pauseBtn.setAttribute('aria-label', 'Resume game');
+          pauseBtn.setAttribute('title', 'Resume');
+          window.dispatchEvent(new CustomEvent('game:pause'));
+        } else {
+          if (pauseIcon) (pauseIcon as HTMLElement).style.display = 'block';
+          if (playIcon) (playIcon as HTMLElement).style.display = 'none';
+          pauseBtn.setAttribute('aria-label', 'Pause game');
+          pauseBtn.setAttribute('title', 'Pause');
+          window.dispatchEvent(new CustomEvent('game:resume'));
+        }
+      });
+    }
+    
+    // Restart button functionality
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        window.location.reload();
+      });
+    }
+    
+    // Listen for resume events to update button state
+    window.addEventListener('game:resume', () => {
+      isPaused = false;
+      const pauseIcon = pauseBtn?.querySelector('.pause-icon');
+      const playIcon = pauseBtn?.querySelector('.play-icon');
+      if (pauseIcon) (pauseIcon as HTMLElement).style.display = 'block';
+      if (playIcon) (playIcon as HTMLElement).style.display = 'none';
+      if (pauseBtn) {
+        pauseBtn.setAttribute('aria-label', 'Pause game');
+        pauseBtn.setAttribute('title', 'Pause');
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Game controls bar below GamePad */
+  .game-controls-wrap {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 100;
+    transition: top 0.15s ease-out;
+  }
+  
+  .game-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%);
+    backdrop-filter: blur(12px);
+    padding: 12px 20px;
+    border-radius: 20px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 0 1px rgba(16, 185, 129, 0.2);
+    pointer-events: auto;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .control-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    border-radius: 14px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .control-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.3) 0%, rgba(249, 115, 22, 0.3) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .control-btn:hover::before {
+    opacity: 1;
+  }
+  
+  .control-btn:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.35) 100%);
+    border-color: rgba(251, 146, 60, 0.6);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+      0 6px 20px rgba(16, 185, 129, 0.4),
+      0 0 20px rgba(251, 146, 60, 0.3);
+  }
+  
+  .control-btn:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+  
+  .control-btn svg {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  
+  /* Responsive */
+  @media (max-width: 480px) {
+    .game-controls {
+      gap: 12px;
+      padding: 10px 16px;
+    }
+    
+    .control-btn {
+      width: 44px;
+      height: 44px;
+    }
+  }
+  
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .game-controls-wrap,
+    .control-btn {
+      transition: none !important;
+    }
+  }
+</style>

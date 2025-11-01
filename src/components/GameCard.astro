@@ -1,0 +1,99 @@
+---
+const {
+  image,
+  notes,
+  index = 0,
+  altText = undefined,
+  className = "fingering-img",
+  mode = 'learning'
+} = Astro.props;
+
+// Choose image source: explicit image prop wins, otherwise take from notes[index].note
+const imageFile = image || (Array.isArray(notes) && notes[index] && notes[index].note) || '';
+const resolvedAlt = altText || (imageFile ? imageFile.replace(/\.png$/i, '') : 'Fingering note');
+---
+
+<div id="game-container" style="position: relative; width: 100%; max-width: 320px; margin: 0 auto; aspect-ratio: 1.02 / 1; z-index: 500; pointer-events: auto;">
+  <!-- main image / game card -->
+  <img
+    src={imageFile ? `/notes/${imageFile}` : ''}
+    id="fingeringImg"
+    alt={resolvedAlt}
+    class={className}
+    tabindex="0"
+    role="img"
+    aria-label={resolvedAlt}
+    style="width: 100%; height: 100%; position: relative; z-index: 10; border-radius: 1rem; display: block; margin: 0 auto; object-fit: cover;"
+  />
+
+  {mode === 'marathon' && (
+    <div
+      id="lifePanelIcons"
+      aria-hidden="true"
+      style="position: absolute; z-index: 31; pointer-events: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px;"
+    >
+      <span class="life-icon" role="img" aria-label="life"></span>
+      <span class="life-icon" role="img" aria-label="life"></span>
+      <span class="life-icon" role="img" aria-label="life"></span>
+    </div>
+  )}
+</div>
+
+<style>
+/* Shake animation for wrong answers */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(-8px); }
+  20% { transform: translateX(8px); }
+  30% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  50% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  70% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+  90% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+.shake {
+  animation: shake 360ms ease-in-out;
+}
+
+/* Success pulse for correct answers */
+@keyframes successPulse {
+  0% { transform: scale(1); box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+  40% { transform: scale(1.06); box-shadow: 0 18px 40px rgba(34,197,94,0.28); }
+  70% { transform: scale(1.02); box-shadow: 0 12px 26px rgba(34,197,94,0.22); }
+  100% { transform: scale(1); box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+}
+.success {
+  animation: successPulse 520ms cubic-bezier(.2,.9,.3,1);
+}
+</style>
+
+<script>
+// @ts-nocheck
+(function(){
+  // Listen for game events dispatched on window to update the GameCard image and feedback
+  try {
+    const imgEl = document.getElementById('fingeringImg');
+    if (!imgEl) return;
+
+    window.addEventListener('game:setNote', (e) => {
+      try {
+        const note = e && e.detail && e.detail.note;
+        if (note) imgEl.src = `/notes/${note}`;
+      } catch (err) { /* ignore */ }
+    });
+
+    window.addEventListener('game:feedback', (e) => {
+      try {
+        const ok = e && e.detail && e.detail.ok;
+        imgEl.classList.remove('shake', 'success');
+        void imgEl.offsetWidth; // reflow
+        imgEl.classList.add(ok ? 'success' : 'shake');
+        setTimeout(() => imgEl.classList.remove('shake', 'success'), ok ? 700 : 360);
+      } catch (err) { /* ignore */ }
+    });
+  } catch (err) { /* ignore */ }
+})();
+</script>

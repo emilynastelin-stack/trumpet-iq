@@ -1,0 +1,286 @@
+<div id="gamepad" role="toolbar" aria-label="gamepad"
+  style="display:flex; flex-direction:column; align-items:center; gap:0.6rem; margin-top:10px; z-index:5; position:sticky; top:calc(var(--progress-bar-bottom, 0px) + 10px);">
+
+  <!-- Top row buttons -->
+  <div style="display:flex; gap:0.6rem; justify-content:center;">
+    <button data-button="1" class="gp-btn" aria-pressed="false" aria-label="button 1">
+      <span class="btn-number">1</span>
+    </button>
+    <button data-button="2" class="gp-btn" aria-pressed="false" aria-label="button 2">
+      <span class="btn-number">2</span>
+    </button>
+    <button data-button="3" class="gp-btn" aria-pressed="false" aria-label="button 3">
+      <span class="btn-number">3</span>
+    </button>
+  </div>
+
+  <!-- Zero button -->
+  <button data-button="0" id="gp-zero" class="gp-btn" aria-pressed="false" aria-label="button 0">
+    <span class="btn-number">0</span>
+  </button>
+
+</div>
+
+<style>
+  /* Gamepad container fixed at bottom */
+  #gamepad {
+    width: min(92%, 420px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 10px auto 0 auto;
+    position: sticky;
+    top: calc(var(--progress-bar-bottom, 0px) + 10px);
+    z-index: 5;
+  }
+
+  /* Buttons base - glassmorphic style */
+  .gp-btn {
+    width: 95px;
+    height: 95px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 0 0 1px rgba(16, 185, 129, 0.1);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Gradient overlay effect */
+  .gp-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(16, 185, 129, 0.2) 0%, 
+      rgba(20, 184, 166, 0.2) 50%,
+      rgba(251, 146, 60, 0.2) 100%);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .gp-btn:hover::before {
+    opacity: 1;
+  }
+
+  /* Number styling */
+  .btn-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(16, 185, 129, 0.3);
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* Zero button larger */
+  #gp-zero {
+    width: 100%;
+    max-width: calc(285px + 1.2rem);
+    height: 104px;
+    border-radius: 28px;
+  }
+
+  #gp-zero .btn-number {
+    font-size: 3rem;
+  }
+
+  /* Hover effect */
+  .gp-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      0 0 25px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+  }
+
+  /* Active/pressed state - depressed effect */
+  .gp-btn.active, .gp-btn:active,
+  #gp-zero.active, #gp-zero:active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(20, 184, 166, 0.4) 100%);
+    border-color: rgba(16, 185, 129, 0.8);
+    transform: translateY(4px) scale(0.96);
+    box-shadow: 
+      inset 0 4px 12px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(16, 185, 129, 0.6),
+      0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .gp-btn.active::before,
+  .gp-btn:active::before {
+    opacity: 1;
+  }
+
+  .gp-btn.active .btn-number,
+  .gp-btn:active .btn-number {
+    text-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.6),
+      0 0 30px rgba(16, 185, 129, 0.8);
+    transform: scale(1.05);
+  }
+
+  /* Hint state - orange glow */
+  .gp-btn.hint {
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.35) 0%, rgba(249, 115, 22, 0.35) 100%);
+    border-color: rgba(251, 146, 60, 0.8);
+    box-shadow: 
+      0 8px 32px rgba(251, 146, 60, 0.5),
+      0 -8px 32px rgba(251, 146, 60, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 0 40px rgba(251, 146, 60, 0.7);
+    animation: hintPulse 2s ease-in-out infinite;
+  }
+
+  .gp-btn.hint::before {
+    opacity: 1;
+    background: linear-gradient(135deg, 
+      rgba(251, 146, 60, 0.4) 0%, 
+      rgba(249, 115, 22, 0.4) 100%);
+  }
+
+  .gp-btn.hint .btn-number {
+    color: #ffffff;
+    text-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(251, 146, 60, 0.9),
+      0 -2px 15px rgba(251, 146, 60, 0.6);
+  }
+
+  @keyframes hintPulse {
+    0%, 100% {
+      box-shadow: 
+        0 8px 32px rgba(251, 146, 60, 0.5),
+        0 -8px 32px rgba(251, 146, 60, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 0 40px rgba(251, 146, 60, 0.7);
+    }
+    50% {
+      box-shadow: 
+        0 12px 40px rgba(251, 146, 60, 0.7),
+        0 -12px 40px rgba(251, 146, 60, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 0 60px rgba(251, 146, 60, 1);
+    }
+  }
+
+  /* Brief undepress animation for touch */
+  .gp-btn.cleared, #gp-zero.cleared {
+    animation: gp-clear 260ms cubic-bezier(.2,.9,.3,1);
+  }
+  
+  @keyframes gp-clear {
+    0% { 
+      transform: translateY(4px) scale(0.96); 
+      opacity: 1; 
+    }
+    100% { 
+      transform: translateY(0) scale(1); 
+      opacity: 1; 
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .gp-btn {
+      width: 85px;
+      height: 85px;
+    }
+
+    .btn-number {
+      font-size: 2.2rem;
+    }
+
+    #gp-zero {
+      height: 94px;
+    }
+
+    #gp-zero .btn-number {
+      font-size: 2.6rem;
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .gp-btn:hover {
+      transform: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .gp-btn,
+    .gp-btn.hint {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+<!-- Keyboard handling moved to gameLogic for consistent simultaneous-press behavior -->
+
+<script>
+// hint wiring: listen for game:hint and toggle .hint on correct buttons
+(function(){
+  function clearHints() {
+    document.querySelectorAll('.gp-btn.hint').forEach(el => el.classList.remove('hint'));
+  }
+
+  let autoHintEnabled = false;
+
+  // listen for auto-hint toggle from the TranspositionPanel
+  document.addEventListener('game:autohint', (ev) => {
+    try {
+      if (ev instanceof CustomEvent && ev.detail) autoHintEnabled = !!ev.detail.enabled;
+    } catch (err) {}
+  });
+
+  window.addEventListener('game:hint', (ev) => {
+    try {
+      clearHints();
+      if (!(ev instanceof CustomEvent)) return;
+      // support either { keys: [] } or detail being an array directly
+      const keys = Array.isArray(ev.detail && ev.detail.keys ? ev.detail.keys : ev.detail) ? (ev.detail.keys || ev.detail) : [];
+      if (!Array.isArray(keys)) return;
+      // add hint class to each key button
+      keys.forEach(k => {
+        const el = document.querySelector(`[data-button="${k}"]`);
+        if (el) el.classList.add('hint');
+      });
+    } catch (err) { /* ignore */ }
+  });
+
+  // Clear hints when a new note is set
+  window.addEventListener('game:setNote', (ev) => {
+    try {
+      clearHints();
+      // Only apply auto-hints when autoHintEnabled is true and we're not in
+      // speed mode (speed mode should not show hints).
+      if (autoHintEnabled && ev instanceof CustomEvent && !(ev.detail && ev.detail.mode === 'speed')) {
+        const keys = Array.isArray(ev.detail && ev.detail.keys ? ev.detail.keys : ev.detail) ? (ev.detail.keys || ev.detail) : [];
+        if (Array.isArray(keys)) {
+          keys.forEach(k => {
+            const el = document.querySelector(`[data-button="${k}"]`);
+            if (el) el.classList.add('hint');
+          });
+        }
+      }
+    } catch (err) {}
+  });
+})();
+</script>

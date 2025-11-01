@@ -1,0 +1,255 @@
+---
+const { mode } = Astro.props || {};
+---
+<footer class="footer">
+  <div class="footer-bg"></div>
+  <button id="transposition-toggle" class="footer-btn btn-leftmid" type="button" aria-label="Transpose">
+    <div class="btn-glass">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15V6M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM12 12H3M16 6H3M12 18H3"/>
+      </svg>
+    </div>
+  </button>
+  <div class="footer-center">
+    <a href="/" class="footer-btn btn-center" aria-label="Home">
+      <div class="btn-glass">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+    </a>
+    <a href="/Progress" class="footer-btn btn-rightmid" aria-label="View Progress">
+      <div class="btn-glass">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+      </div>
+    </a>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    display: block;
+    padding: 0;
+    z-index: 300500;
+    pointer-events: none;
+  }
+
+  .footer-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 -8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    pointer-events: auto;
+  }
+
+  .footer-center {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .footer-btn {
+    background: transparent;
+    padding: 0;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+    z-index: 2;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-glass {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .btn-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(16, 185, 129, 0.3) 0%, 
+      rgba(142, 140, 127, 0.3) 50%,
+      rgba(255, 255, 255, 0.3) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-glass svg {
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+  }
+
+  /* Hover effects for desktop */
+  @media (hover: hover) and (pointer: fine) {
+    .footer-btn:hover {
+      transform: translate(-50%, -60%);
+    }
+
+    .footer-btn:hover .btn-glass {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 
+        0 8px 28px rgba(0, 0, 0, 0.2),
+        0 0 25px rgba(16, 185, 129, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .footer-btn:hover .btn-glass::before {
+      opacity: 1;
+    }
+
+    .footer-btn:hover .btn-glass svg {
+      transform: scale(1.1);
+    }
+  }
+
+  /* Active/pressed state */
+  .footer-btn:active {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  .footer-btn:active .btn-glass {
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  /* Position helpers */
+  .btn-leftmid {
+    left: 25%;
+  }
+
+  .btn-center {
+    left: 50%;
+  }
+
+  .btn-rightmid {
+    left: 75%;
+  }
+
+  /* Individual button color accents */
+  .btn-leftmid .btn-glass::before {
+    background: linear-gradient(135deg, 
+      rgba(16, 185, 129, 0.4) 0%, 
+      rgba(142, 140, 127, 0.3) 100%);
+  }
+
+  .btn-center .btn-glass::before {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.4) 0%, 
+      rgba(142, 140, 127, 0.3) 100%);
+  }
+
+  .btn-rightmid .btn-glass::before {
+    background: linear-gradient(135deg, 
+      rgba(142, 140, 127, 0.4) 0%, 
+      rgba(16, 185, 129, 0.3) 100%);
+  }
+
+  /* Mobile optimization */
+  @media (max-width: 640px) {
+    .footer {
+      height: 72px;
+    }
+
+    .btn-glass {
+      width: 52px;
+      height: 52px;
+    }
+
+    .btn-glass svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  @media (max-width: 375px) {
+    .footer {
+      height: 68px;
+    }
+
+    .btn-glass {
+      width: 48px;
+      height: 48px;
+    }
+
+    .btn-glass svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  /* Safe area insets for notched devices */
+  @supports (padding: max(0px)) {
+    .footer {
+      padding-bottom: env(safe-area-inset-bottom);
+      height: calc(80px + env(safe-area-inset-bottom));
+    }
+
+    .footer-center {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .footer-btn:active {
+      transform: translate(-50%, -50%) scale(0.92);
+    }
+
+    .footer-btn:active .btn-glass {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .footer-btn:active .btn-glass::before {
+      opacity: 1;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .footer-btn,
+    .btn-glass,
+    .btn-glass svg,
+    .btn-glass::before {
+      transition: none !important;
+    }
+  }
+</style>

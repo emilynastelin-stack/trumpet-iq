@@ -1,0 +1,269 @@
+<!-- TranspositionPanel.astro -->
+<!-- Overlay panel that deploys the transposition controls -->
+---
+import TranspositionControls from './TranspositionControls.astro';
+---
+
+<div id="transposition-overlay" class="transposition-overlay">
+  <div class="overlay-backdrop"></div>
+  <div class="transposition-panel">
+    <div class="panel-header">
+      <h3 class="panel-title">Transposition</h3>
+    </div>
+    
+    <div class="panel-body">
+      <TranspositionControls 
+        id="overlay" 
+        showHeader={false}
+        showRandomize={true}
+        compact={false}
+      />
+      
+      <div class="state-display">
+        Playing in <strong id="overlay-state-key">C</strong> on <strong id="overlay-state-instrument">Bb Trumpet</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Global state manager script -->
+<script is:inline>
+  // Global transposition state manager
+  if (!window.TranspositionState) {
+    window.TranspositionState = {
+      current: {
+        instrument: 'Bb',
+        key: 'C'
+      },
+      
+      update(data) {
+        const { instrument, key, source } = data;
+        
+        if (instrument) this.current.instrument = instrument;
+        if (key) this.current.key = key;
+        
+        // Broadcast to all controls except source
+        window.dispatchEvent(new CustomEvent('transposition:sync', {
+          detail: { instrument: this.current.instrument, key: this.current.key, source }
+        }));
+        
+        // Update state displays
+        this.updateDisplays();
+      },
+      
+      updateDisplays() {
+        // Update all state displays on the page
+        document.querySelectorAll('[id$="-state-key"]').forEach(el => {
+          el.textContent = this.current.key;
+        });
+        
+        document.querySelectorAll('[id$="-state-instrument"]').forEach(el => {
+          el.textContent = `${this.current.instrument} Trumpet`;
+        });
+      }
+    };
+  }
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('transposition-overlay');
+    const toggleBtn = document.getElementById('transposition-toggle');
+    const backdrop = overlay?.querySelector('.overlay-backdrop');
+
+    function openPanel() {
+      if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closePanel() {
+      if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function togglePanel() {
+      if (overlay?.classList.contains('active')) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    }
+
+    // Footer toggle button
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', togglePanel);
+    }
+
+    // Listen for custom events to open panel
+    window.addEventListener('transposition:open', openPanel);
+    window.addEventListener('transposition:close', closePanel);
+    window.addEventListener('transposition:toggle', togglePanel);
+
+    // Click backdrop to close
+    if (backdrop) {
+      backdrop.addEventListener('click', closePanel);
+    }
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay?.classList.contains('active')) {
+        closePanel();
+      }
+    });
+  });
+</script>
+
+<style>
+  .transposition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .transposition-overlay.active {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .transposition-overlay.active .overlay-backdrop {
+    opacity: 1;
+  }
+
+  .transposition-panel {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 
+      0 -8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-bottom: none;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .transposition-overlay.active .transposition-panel {
+    transform: translateY(0);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 24px 16px;
+    border-bottom: 2px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    z-index: 1;
+  }
+
+  .panel-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.02em;
+  }
+
+  .panel-body {
+    padding: 24px;
+  }
+
+  /* State Display */
+  .state-display {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    color: #64748b;
+    text-align: center;
+  }
+
+  .state-display strong {
+    color: #1e293b;
+    font-weight: 700;
+  }
+
+  /* Mobile optimization */
+  @media (max-width: 640px) {
+    .transposition-panel {
+      max-width: 100%;
+      max-height: 90vh;
+    }
+
+    .panel-header {
+      padding: 20px 20px 14px;
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+  }
+
+  /* Safe area for notched devices */
+  @supports (padding: max(0px)) {
+    .transposition-panel {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* Scrollbar styling */
+  .transposition-panel::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .transposition-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .transposition-panel::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+
+  .transposition-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .transposition-overlay,
+    .overlay-backdrop,
+    .transposition-panel,
+    .close-btn {
+      transition: none !important;
+    }
+  }
+</style>

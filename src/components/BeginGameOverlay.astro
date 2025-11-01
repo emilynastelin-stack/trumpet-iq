@@ -1,0 +1,259 @@
+---
+import TranspositionControls from './TranspositionControls.astro';
+
+interface Props {
+  mode: string;
+  visible?: boolean;
+}
+
+const { mode, visible = true } = Astro.props;
+---
+
+<div id="begingame-overlay" class="overlay" data-visible={visible}>
+  <div class="overlay-box">
+    <!-- Header with back button -->
+    <div class="overlay-header">
+      <a href={`/mode/${mode}`} class="back-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <h2>Get Ready!</h2>
+      <div class="spacer"></div>
+    </div>
+    
+    <p class="overlay-subtitle">Configure your settings and start when ready</p>
+    
+    <div class="panel-body">
+      <TranspositionControls 
+        id="overlay" 
+        showHeader={false}
+        showRandomize={true}
+        compact={false}
+      />
+    </div>
+    
+    <button id="start-game" class="start-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <span>Start Game</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start-game');
+    const overlay = document.getElementById('begingame-overlay');
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        console.log('Starting game...');
+        
+        // Hide overlay with animation
+        if (overlay) {
+          overlay.style.opacity = '0';
+          overlay.style.pointerEvents = 'none';
+          
+          setTimeout(() => {
+            overlay.style.display = 'none';
+          }, 300);
+        }
+        
+        // Dispatch game start event
+        const startEvent = new CustomEvent('game:start', {
+          bubbles: true,
+          composed: true
+        });
+        document.dispatchEvent(startEvent);
+        window.dispatchEvent(startEvent);
+      });
+    }
+  });
+</script>
+
+<style>
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  .overlay[data-visible="false"] {
+    display: none;
+  }
+
+  .overlay-box {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.5);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Header with back button */
+  .overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(100, 116, 139, 0.1);
+    border: 1.5px solid rgba(100, 116, 139, 0.2);
+    border-radius: 12px;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .back-btn:hover {
+    background: rgba(100, 116, 139, 0.15);
+    border-color: rgba(100, 116, 139, 0.3);
+    color: #475569;
+    transform: translateX(-2px);
+  }
+
+  .back-btn:active {
+    transform: scale(0.95) translateX(-2px);
+  }
+
+  .overlay-header h2 {
+    flex: 1;
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .spacer {
+    width: 40px;
+    flex-shrink: 0;
+  }
+
+  .overlay-subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 28px 0;
+    font-weight: 500;
+  }
+
+  .panel-body {
+    margin-bottom: 28px;
+  }
+
+  /* Start button */
+  .start-btn {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 
+      0 4px 16px rgba(16, 185, 129, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .start-btn svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+
+  .start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 6px 24px rgba(16, 185, 129, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  }
+
+  .start-btn:active {
+    transform: translateY(0);
+    box-shadow: 
+      0 2px 8px rgba(16, 185, 129, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .overlay {
+      padding: 16px;
+    }
+
+    .overlay-box {
+      padding: 24px;
+    }
+
+    .overlay-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .overlay-subtitle {
+      font-size: 0.85rem;
+    }
+
+    .start-btn {
+      padding: 14px 20px;
+      font-size: 1rem;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .overlay-box {
+      animation: none;
+    }
+
+    .overlay,
+    .back-btn,
+    .start-btn {
+      transition: none;
+    }
+  }
+</style>
