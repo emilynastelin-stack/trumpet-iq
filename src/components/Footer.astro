@@ -87,7 +87,11 @@ const { showTransposition = false } = Astro.props || {};
     transform: translate(-50%, -50%);
     pointer-events: auto;
     z-index: 2;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .btn-glass {
@@ -102,7 +106,7 @@ const { showTransposition = false } = Astro.props || {};
     border-radius: 16px;
     color: #fff;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     box-shadow: 
@@ -115,18 +119,30 @@ const { showTransposition = false } = Astro.props || {};
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, 
-      rgba(16, 185, 129, 0.3) 0%, 
-      rgba(142, 140, 127, 0.3) 50%,
-      rgba(255, 255, 255, 0.3) 100%);
+      rgba(16, 185, 129, 0.4) 0%, 
+      rgba(20, 184, 166, 0.4) 50%,
+      rgba(251, 146, 60, 0.4) 100%);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.12s ease;
+  }
+
+  /* Ripple effect on click */
+  .btn-glass::after {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
   }
 
   .btn-glass svg {
     position: relative;
     z-index: 1;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    transition: transform 0.3s ease;
+    transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Hover effects for desktop */
@@ -153,15 +169,30 @@ const { showTransposition = false } = Astro.props || {};
     }
   }
 
-  /* Active/pressed state */
+  /* Active/pressed state - more dramatic */
   .footer-btn:active {
-    transform: translate(-50%, -50%) scale(0.95);
+    transform: translate(-50%, -50%) scale(0.88);
   }
 
   .footer-btn:active .btn-glass {
+    background: rgba(255, 255, 255, 0.35);
     box-shadow: 
-      0 2px 8px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 2px 8px rgba(0, 0, 0, 0.2),
+      0 0 20px rgba(16, 185, 129, 0.6);
+  }
+
+  .footer-btn:active .btn-glass::before {
+    opacity: 1;
+  }
+
+  .footer-btn:active .btn-glass::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .footer-btn:active .btn-glass svg {
+    transform: scale(0.9);
   }
 
   /* Position helpers */
@@ -241,7 +272,7 @@ const { showTransposition = false } = Astro.props || {};
     }
   }
 
-  /* Touch device optimizations - faster, more dramatic */
+  /* Touch device optimizations - instant feedback with ripple */
   @media (hover: none) and (pointer: coarse) {
     .footer-btn {
       transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
@@ -251,20 +282,34 @@ const { showTransposition = false } = Astro.props || {};
       transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    .btn-glass::after {
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .footer-btn:active {
-      transform: translate(-50%, -50%) scale(0.85) !important;
+      transform: translate(-50%, -50%) scale(0.82) !important;
     }
 
     .footer-btn:active .btn-glass {
       background: rgba(255, 255, 255, 0.5) !important;
+      border-color: rgba(255, 255, 255, 0.7) !important;
       box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.3),
-        inset 0 2px 8px rgba(0, 0, 0, 0.2),
-        0 0 20px rgba(16, 185, 129, 0.6) !important;
+        0 4px 20px rgba(0, 0, 0, 0.35),
+        inset 0 3px 10px rgba(0, 0, 0, 0.25),
+        0 0 30px rgba(16, 185, 129, 0.8) !important;
     }
 
     .footer-btn:active .btn-glass::before {
       opacity: 1;
+    }
+
+    .footer-btn:active .btn-glass::after {
+      opacity: 1;
+      transform: scale(1.5);
+    }
+
+    .footer-btn:active .btn-glass svg {
+      transform: scale(0.85);
     }
   }
 
@@ -273,8 +318,40 @@ const { showTransposition = false } = Astro.props || {};
     .footer-btn,
     .btn-glass,
     .btn-glass svg,
-    .btn-glass::before {
+    .btn-glass::before,
+    .btn-glass::after {
       transition: none !important;
     }
   }
 </style>
+
+<script>
+  // Enhanced touch feedback for footer buttons
+  document.addEventListener('DOMContentLoaded', () => {
+    const footerButtons = document.querySelectorAll('.footer-btn');
+    
+    footerButtons.forEach(btn => {
+      // Add touchend listener to reset ripple faster
+      btn.addEventListener('touchend', () => {
+        const glass = btn.querySelector('.btn-glass') as HTMLElement;
+        if (glass) {
+          // Reset ripple after animation
+          setTimeout(() => {
+            glass.style.transform = '';
+          }, 100);
+        }
+      }, { passive: true });
+
+      // Prevent double-tap zoom on iOS
+      let lastTap = 0;
+      btn.addEventListener('touchstart', (e) => {
+        const currentTime = Date.now();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+          e.preventDefault();
+        }
+        lastTap = currentTime;
+      }, { passive: false });
+    });
+  });
+</script>

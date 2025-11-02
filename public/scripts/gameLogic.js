@@ -449,20 +449,37 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
   gpButtons.forEach(b => b.addEventListener('click', onClick));
 
   // Touch handling for multi-touch chord support on touchscreens
+  let touchActivationTimeout = null;
+  
   function onTouchStart(e) {
     // prevent mouse-emulation click events
     e.preventDefault();
     e.stopPropagation();
     const el = e.currentTarget;
+    
+    // Map all touches to this button
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
       touchMap.set(t.identifier, el);
-      // mark pressed visually with immediate feedback
-      el.classList.add('active');
-      el.setAttribute('aria-pressed', 'true');
-      // Force style recalculation for immediate visual update
-      void el.offsetWidth;
     }
+    
+    // Clear any pending activation
+    if (touchActivationTimeout) {
+      clearTimeout(touchActivationTimeout);
+    }
+    
+    // Batch activate all touched buttons together after a tiny delay
+    // This ensures multi-touch combos activate simultaneously
+    touchActivationTimeout = setTimeout(() => {
+      const allTouchedButtons = new Set(touchMap.values());
+      allTouchedButtons.forEach(btn => {
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        // Force style recalculation for immediate visual update
+        void btn.offsetWidth;
+      });
+      touchActivationTimeout = null;
+    }, 10); // 10ms batch window for multi-touch
   }
 
   // When touches end, if there are no remaining touches, submit the current chord
