@@ -51,9 +51,13 @@
       0 8px 32px rgba(0, 0, 0, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.5),
       0 0 0 1px rgba(16, 185, 129, 0.1);
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   /* Gradient overlay effect */
@@ -108,16 +112,16 @@
     transform: translateY(-2px);
   }
 
-  /* Active/pressed state - depressed effect */
+  /* Active/pressed state - dramatic depressed effect for touch */
   .gp-btn.active, .gp-btn:active,
   #gp-zero.active, #gp-zero:active {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(20, 184, 166, 0.4) 100%);
-    border-color: rgba(16, 185, 129, 0.8);
-    transform: translateY(4px) scale(0.96);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.5) 0%, rgba(20, 184, 166, 0.5) 100%) !important;
+    border-color: rgba(16, 185, 129, 0.9) !important;
+    transform: translateY(6px) scale(0.90) !important;
     box-shadow: 
-      inset 0 4px 12px rgba(0, 0, 0, 0.5),
-      0 0 30px rgba(16, 185, 129, 0.6),
-      0 2px 8px rgba(0, 0, 0, 0.3);
+      inset 0 6px 16px rgba(0, 0, 0, 0.6),
+      0 0 40px rgba(16, 185, 129, 0.8),
+      0 1px 4px rgba(0, 0, 0, 0.4) !important;
   }
 
   .gp-btn.active::before,
@@ -177,14 +181,14 @@
     }
   }
 
-  /* Brief undepress animation for touch */
+  /* Brief undepress animation for touch - faster and smoother */
   .gp-btn.cleared, #gp-zero.cleared {
-    animation: gp-clear 260ms cubic-bezier(.2,.9,.3,1);
+    animation: gp-clear 180ms cubic-bezier(.2,.9,.3,1) !important;
   }
   
   @keyframes gp-clear {
     0% { 
-      transform: translateY(4px) scale(0.96); 
+      transform: translateY(6px) scale(0.90); 
       opacity: 1; 
     }
     100% { 
@@ -214,11 +218,25 @@
     }
   }
 
-  /* Touch device optimizations */
+  /* Touch device optimizations - instant feedback */
   @media (hover: none) and (pointer: coarse) {
+    .gp-btn {
+      transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .gp-btn:hover {
       transform: none;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    }
+    
+    /* More dramatic active state on touch */
+    .gp-btn.active, .gp-btn:active,
+    #gp-zero.active, #gp-zero:active {
+      transform: translateY(8px) scale(0.88) !important;
+      box-shadow: 
+        inset 0 8px 20px rgba(0, 0, 0, 0.7),
+        0 0 50px rgba(16, 185, 129, 1),
+        0 1px 4px rgba(0, 0, 0, 0.5) !important;
     }
   }
 

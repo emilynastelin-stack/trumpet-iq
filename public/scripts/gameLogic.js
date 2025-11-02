@@ -169,8 +169,10 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       // add a cleared state so we can animate the undepress for touch
       el.classList.add('cleared');
       el.setAttribute('aria-pressed', 'false');
-      // remove the cleared marker after the animation
-      window.setTimeout(() => el.classList.remove('cleared'), 260);
+      // Force reflow to ensure animation plays
+      void el.offsetWidth;
+      // remove the cleared marker after the animation (faster for touch)
+      window.setTimeout(() => el.classList.remove('cleared'), 180);
     });
   }
 
@@ -450,21 +452,30 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
   function onTouchStart(e) {
     // prevent mouse-emulation click events
     e.preventDefault();
+    e.stopPropagation();
     const el = e.currentTarget;
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
       touchMap.set(t.identifier, el);
-      // mark pressed visually
+      // mark pressed visually with immediate feedback
       el.classList.add('active');
       el.setAttribute('aria-pressed', 'true');
+      // Force style recalculation for immediate visual update
+      void el.offsetWidth;
     }
   }
 
   // When touches end, if there are no remaining touches, submit the current chord
   function onTouchEnd(e) {
-    // remove mappings for changed touches
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Track which buttons are being released
+    const releasedButtons = new Set();
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
+      const btn = touchMap.get(t.identifier);
+      if (btn) releasedButtons.add(btn);
       touchMap.delete(t.identifier);
     }
 
@@ -474,14 +485,46 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
         .map(el => Number(el.dataset.button))
         .filter(n => !Number.isNaN(n));
       if (activeBtns.length) handleInput(activeBtns);
+      
+      // Ensure all released buttons are immediately cleared
+      setTimeout(() => {
+        releasedButtons.forEach(btn => {
+          if (btn && !touchMap.has(btn)) {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        });
+      }, 50);
+    }
+  }
+
+  // Touch cancel handler to prevent stuck buttons
+  function onTouchCancel(e) {
+    // Clear all touch mappings
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      const btn = touchMap.get(t.identifier);
+      if (btn) {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      }
+      touchMap.delete(t.identifier);
+    }
+    
+    // If all touches are gone, clear all active buttons
+    if (touchMap.size === 0) {
+      document.querySelectorAll('.gp-btn.active').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
     }
   }
 
   gpButtons.forEach(b => {
     b.addEventListener('touchstart', onTouchStart, { passive: false });
   });
-  window.addEventListener('touchend', onTouchEnd);
-  window.addEventListener('touchcancel', onTouchEnd);
+  window.addEventListener('touchend', onTouchEnd, { passive: false });
+  window.addEventListener('touchcancel', onTouchCancel, { passive: false });
 
   // --- Keyboard support: simultaneous key presses ---
   const activeKeys = new Set();
@@ -524,6 +567,18 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
 
   window.addEventListener('keydown', onGlobalKeyDown);
   window.addEventListener('keyup', onGlobalKeyUp);
+  
+  // Failsafe: clear any stuck active buttons on visibility change
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      touchMap.clear();
+      document.querySelectorAll('.gp-btn.active').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+    }
+  });
+  
   window.addEventListener('blur', () => {
     activeKeys.forEach(k => {
       const el = document.querySelector(`[data-button="${k}"]`);

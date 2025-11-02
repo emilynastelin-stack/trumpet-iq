@@ -75,6 +75,17 @@ const { showTransposition = false } = Astro.props;
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    /* Optimize touch interactions */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Global touch optimization for all buttons and interactive elements */
+  button, a, .gp-btn, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   /* Background gradient animation - optimized for mobile */
@@ -339,12 +350,16 @@ const { showTransposition = false } = Astro.props;
     border-radius: 14px;
     color: #fff;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     box-shadow: 
       0 4px 16px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   :global(.glass-btn::before) {
@@ -464,20 +479,34 @@ const { showTransposition = false } = Astro.props;
     }
   }
 
-  /* Touch device optimizations */
+  /* Touch device optimizations - faster, more dramatic feedback */
   @media (hover: none) and (pointer: coarse) {
+    :global(.glass-btn) {
+      transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     :global(.glass-btn:hover) {
       transform: none;
       background: rgba(255, 255, 255, 0.3);
     }
 
     :global(.glass-btn:active) {
-      transform: scale(0.95);
-      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0.85) !important;
+      background: rgba(255, 255, 255, 0.5) !important;
+      border-color: rgba(255, 255, 255, 0.8) !important;
+      box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.25),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(16, 185, 129, 0.6) !important;
     }
 
     :global(.glass-card:hover) {
       transform: none;
+    }
+
+    :global(.glass-card:active) {
+      transform: scale(0.98);
+      background: rgba(255, 255, 255, 0.25);
     }
   }
 

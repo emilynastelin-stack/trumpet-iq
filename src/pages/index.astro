@@ -170,7 +170,7 @@ import Layout from '../layouts/Layout.astro';
     position: relative;
     text-decoration: none;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
     display: block;
     border-radius: 24px;
     background: rgba(255, 255, 255, 0.25);
@@ -181,6 +181,9 @@ import Layout from '../layouts/Layout.astro';
       inset 0 1px 0 rgba(255, 255, 255, 0.5);
     animation: fadeInUp 0.6s ease-out both;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   @keyframes fadeInUp {
@@ -214,6 +217,10 @@ import Layout from '../layouts/Layout.astro';
       transparent);
     transition: left 0.5s ease;
     pointer-events: none;
+  }
+
+  .mode-card:active {
+    transform: scale(0.96) !important;
   }
 
   .mode-card:active .card-shine {
