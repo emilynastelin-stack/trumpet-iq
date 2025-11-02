@@ -24,7 +24,8 @@
 <style>
   /* Gamepad container fixed at bottom */
   #gamepad {
-    width: min(92%, 420px);
+    width: fit-content;
+    max-width: 280px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,8 +38,8 @@
 
   /* Buttons base - glassmorphic style */
   .gp-btn {
-    width: 88px;
-    height: 88px;
+    width: 72px;
+    height: 72px;
     border-radius: 18px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
     backdrop-filter: blur(20px) saturate(180%);
@@ -79,7 +80,7 @@
 
   /* Number styling */
   .btn-number {
-    font-size: 2.3rem;
+    font-size: 2rem;
     font-weight: 900;
     color: #ffffff;
     text-shadow: 
@@ -92,13 +93,13 @@
 
   /* Zero button larger */
   #gp-zero {
-    width: calc((88px * 3) + (0.5rem * 2));
-    height: 96px;
-    border-radius: 24px;
+    width: calc((72px * 3) + (0.5rem * 2));
+    height: 80px;
+    border-radius: 20px;
   }
 
   #gp-zero .btn-number {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
   }
 
   /* Hover effect */
@@ -197,11 +198,11 @@
     }
   }
 
-  /* Responsive */
+  /* Responsive - keep consistent size */
   @media (max-width: 480px) {
     .gp-btn {
-      width: 78px;
-      height: 78px;
+      width: 72px;
+      height: 72px;
     }
 
     .btn-number {
@@ -209,8 +210,8 @@
     }
 
     #gp-zero {
-      width: calc((78px * 3) + (0.5rem * 2));
-      height: 86px;
+      width: calc((72px * 3) + (0.5rem * 2));
+      height: 80px;
     }
 
     #gp-zero .btn-number {
