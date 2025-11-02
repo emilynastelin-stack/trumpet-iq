@@ -483,36 +483,43 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
   }
 
   // When touches end, if there are no remaining touches, submit the current chord
+  let touchReleaseTimeout = null;
+  
   function onTouchEnd(e) {
     e.preventDefault();
     e.stopPropagation();
     
     // Track which buttons are being released
-    const releasedButtons = new Set();
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
-      const btn = touchMap.get(t.identifier);
-      if (btn) releasedButtons.add(btn);
       touchMap.delete(t.identifier);
     }
 
-    // If no touches remain, submit the active buttons as a chord and clear
-    if (touchMap.size === 0) {
-      const activeBtns = Array.from(document.querySelectorAll('.gp-btn.active'))
-        .map(el => Number(el.dataset.button))
-        .filter(n => !Number.isNaN(n));
-      if (activeBtns.length) handleInput(activeBtns);
-      
-      // Ensure all released buttons are immediately cleared
-      setTimeout(() => {
-        releasedButtons.forEach(btn => {
-          if (btn && !touchMap.has(btn)) {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-pressed', 'false');
-          }
-        });
-      }, 50);
+    // Clear any pending release
+    if (touchReleaseTimeout) {
+      clearTimeout(touchReleaseTimeout);
     }
+
+    // Batch release all buttons together after a tiny delay
+    // This ensures multi-touch combos release simultaneously
+    touchReleaseTimeout = setTimeout(() => {
+      // If no touches remain, submit the active buttons as a chord
+      if (touchMap.size === 0) {
+        const activeBtns = Array.from(document.querySelectorAll('.gp-btn.active'))
+          .map(el => Number(el.dataset.button))
+          .filter(n => !Number.isNaN(n));
+        if (activeBtns.length) handleInput(activeBtns);
+        
+        // Clear ALL active buttons simultaneously
+        document.querySelectorAll('.gp-btn.active').forEach(btn => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
+          // Force reflow for synchronized animation
+          void btn.offsetWidth;
+        });
+      }
+      touchReleaseTimeout = null;
+    }, 10); // 10ms batch window for multi-touch release
   }
 
   // Touch cancel handler to prevent stuck buttons
