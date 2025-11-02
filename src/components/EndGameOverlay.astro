@@ -73,11 +73,59 @@ const { visible = false, score = 0 } = Astro.props;
       (quitBtn as HTMLAnchorElement).href = `/level/${mode}`;
     }
 
-    // Retry button handler
+    // Retry button handler with touch support
     if (retryBtn) {
-      retryBtn.addEventListener('click', () => {
+      let touchStartTime = 0;
+      let touchMoved = false;
+      
+      retryBtn.addEventListener('touchstart', () => {
+        touchStartTime = Date.now();
+        touchMoved = false;
+      }, { passive: true });
+      
+      retryBtn.addEventListener('touchmove', () => {
+        touchMoved = true;
+      }, { passive: true });
+      
+      retryBtn.addEventListener('touchend', (e) => {
+        const touchDuration = Date.now() - touchStartTime;
+        if (!touchMoved && touchDuration < 500) {
+          e.preventDefault();
+          window.location.reload();
+        }
+      }, { passive: false });
+      
+      retryBtn.addEventListener('click', (e) => {
+        // Prevent double-firing on touch devices
+        if (e.detail === 0) return; // This is a programmatic click, ignore it
         window.location.reload();
       });
+    }
+    
+    // Quit button touch support
+    if (quitBtn) {
+      let touchStartTime = 0;
+      let touchMoved = false;
+      
+      quitBtn.addEventListener('touchstart', () => {
+        touchStartTime = Date.now();
+        touchMoved = false;
+      }, { passive: true });
+      
+      quitBtn.addEventListener('touchmove', () => {
+        touchMoved = true;
+      }, { passive: true });
+      
+      quitBtn.addEventListener('touchend', (e) => {
+        const touchDuration = Date.now() - touchStartTime;
+        if (!touchMoved && touchDuration < 500) {
+          const href = (quitBtn as HTMLAnchorElement).href;
+          if (href) {
+            e.preventDefault();
+            window.location.href = href;
+          }
+        }
+      }, { passive: false });
     }
 
     // Watch for overlay to become visible
@@ -377,13 +425,18 @@ const { visible = false, score = 0 } = Astro.props;
     font-weight: 800;
     font-size: 1.05rem;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
     text-decoration: none;
     border: none;
     font-family: inherit;
     letter-spacing: 0.025em;
     opacity: 0;
     transform: translateY(20px);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
   }
 
   @keyframes slideInUp {
@@ -427,6 +480,13 @@ const { visible = false, score = 0 } = Astro.props;
     transform: rotate(-180deg);
   }
 
+  .primary-btn:active {
+    transform: translateY(0) scale(0.96) !important;
+    box-shadow: 
+      0 4px 16px rgba(16, 185, 129, 0.4),
+      inset 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  }
+
   .primary-btn:active { 
     transform: translateY(-1px);
   }
@@ -456,7 +516,10 @@ const { visible = false, score = 0 } = Astro.props;
   }
 
   .secondary-btn:active { 
-    transform: translateY(-1px);
+    transform: translateY(0) scale(0.96) !important;
+    box-shadow: 
+      0 2px 12px rgba(0, 0, 0, 0.25),
+      inset 0 2px 6px rgba(0, 0, 0, 0.2) !important;
   }
 
   /* Responsive */
@@ -544,6 +607,33 @@ const { visible = false, score = 0 } = Astro.props;
     .action-btn {
       opacity: 1;
       transform: none;
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .action-btn {
+      transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 18px 32px; /* Larger touch targets */
+      font-size: 1.1rem;
+    }
+
+    .action-btn:hover {
+      transform: none; /* Disable hover on touch */
+    }
+
+    .primary-btn:active {
+      transform: translateY(0) scale(0.92) !important;
+      box-shadow: 
+        0 4px 20px rgba(16, 185, 129, 0.5),
+        inset 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .secondary-btn:active {
+      transform: translateY(0) scale(0.92) !important;
+      box-shadow: 
+        0 2px 16px rgba(0, 0, 0, 0.3),
+        inset 0 3px 10px rgba(0, 0, 0, 0.3) !important;
     }
   }
 </style>

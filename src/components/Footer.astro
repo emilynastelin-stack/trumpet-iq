@@ -331,26 +331,52 @@ const { showTransposition = false } = Astro.props || {};
     const footerButtons = document.querySelectorAll('.footer-btn');
     
     footerButtons.forEach(btn => {
-      // Add touchend listener to reset ripple faster
-      btn.addEventListener('touchend', () => {
+      let touchStartTime = 0;
+      let touchMoved = false;
+      
+      // Track touch start
+      btn.addEventListener('touchstart', (e) => {
+        touchStartTime = Date.now();
+        touchMoved = false;
+      }, { passive: true });
+      
+      // Track if touch moved (scrolling vs tapping)
+      btn.addEventListener('touchmove', () => {
+        touchMoved = true;
+      }, { passive: true });
+
+      // Handle touch end - trigger click if it was a tap
+      btn.addEventListener('touchend', (e) => {
+        const touchDuration = Date.now() - touchStartTime;
+        
+        // If touch was quick and didn't move, it's a tap
+        if (!touchMoved && touchDuration < 500) {
+          // For links, navigate directly
+          if (btn.tagName === 'A') {
+            const href = btn.getAttribute('href');
+            if (href) {
+              e.preventDefault();
+              window.location.href = href;
+            }
+          }
+          // For buttons, trigger click event
+          else if (btn.tagName === 'BUTTON') {
+            const clickEvent = new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window
+            });
+            btn.dispatchEvent(clickEvent);
+          }
+        }
+        
+        // Reset ripple
         const glass = btn.querySelector('.btn-glass') as HTMLElement;
         if (glass) {
-          // Reset ripple after animation
           setTimeout(() => {
             glass.style.transform = '';
           }, 100);
         }
-      }, { passive: true });
-
-      // Prevent double-tap zoom on iOS
-      let lastTap = 0;
-      btn.addEventListener('touchstart', (e) => {
-        const currentTime = Date.now();
-        const tapLength = currentTime - lastTap;
-        if (tapLength < 300 && tapLength > 0) {
-          e.preventDefault();
-        }
-        lastTap = currentTime;
       }, { passive: false });
     });
   });
