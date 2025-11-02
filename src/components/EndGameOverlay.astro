@@ -96,12 +96,10 @@ const { visible = false, score = 0 } = Astro.props;
 
     function animateContent() {
       if (!overlay) return;
-      // Animate stars based on score
-      const scoreText = overlay.querySelector('.score-value')?.textContent || '0%';
-      const scoreNum = parseInt(scoreText);
+      // Animate stars based on stars from scoring system
+      const starsToShow = parseInt(overlay.dataset.stars || '1');
       
       const stars = overlay.querySelectorAll('.star-icon.filled');
-      const starsToShow = scoreNum >= 80 ? 3 : scoreNum >= 50 ? 2 : 1;
       
       stars.forEach((star, index) => {
         const el = star as HTMLElement;
@@ -131,7 +129,7 @@ const { visible = false, score = 0 } = Astro.props;
       }
 
       if (scoreMessage) {
-        const msg = scoreNum >= 80 ? 'Excellent!' : scoreNum >= 50 ? 'Good job!' : 'Keep practicing!';
+        const msg = starsToShow >= 3 ? 'Excellent!' : starsToShow >= 2 ? 'Good job!' : 'Keep practicing!';
         scoreMessage.textContent = msg;
         (scoreMessage as HTMLElement).style.animation = 'none';
         setTimeout(() => {
@@ -156,11 +154,19 @@ const { visible = false, score = 0 } = Astro.props;
       const detail = ev.detail || {};
       const score = typeof detail.score === 'number' ? detail.score : 0;
       const total = typeof detail.total === 'number' && detail.total > 0 ? detail.total : 1;
-      const pct = Math.round((score / total) * 100);
+      
+      // Use accuracy from scoring system if available, otherwise calculate
+      const accuracy = typeof detail.accuracy === 'number' ? detail.accuracy : Math.round((score / total) * 100);
+      const stars = typeof detail.stars === 'number' ? detail.stars : (accuracy >= 80 ? 3 : accuracy >= 60 ? 2 : 1);
       
       const scoreEl = overlay.querySelector('.score-value');
       if (scoreEl) {
-        scoreEl.textContent = `${pct}%`;
+        scoreEl.textContent = `${accuracy}%`;
+      }
+      
+      // Store stars for animation
+      if (overlay) {
+        overlay.dataset.stars = String(stars);
       }
       
       overlay.classList.remove('hide');

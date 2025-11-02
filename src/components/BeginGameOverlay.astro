@@ -92,6 +92,14 @@ const { mode, visible = true } = Astro.props;
       startBtn.addEventListener('click', () => {
         console.log('Starting game with speed:', selectedSpeed + 'ms');
         
+        // Get transposition settings from TranspositionState.current (most reliable source)
+        const transState = (window as any).TranspositionState;
+        const instrument = transState?.current?.instrument || transState?.instrument || 'Bb';
+        const key = transState?.current?.key || transState?.key || 'Bb';
+        
+        console.log('📊 Captured from TranspositionState:', { instrument, key });
+        console.log('📊 Full TranspositionState.current:', transState?.current);
+        
         // Hide overlay with animation
         if (overlay) {
           overlay.style.opacity = '0';
@@ -102,9 +110,13 @@ const { mode, visible = true } = Astro.props;
           }, 300);
         }
         
-        // Dispatch game start event with speed timeout
+        // Dispatch game start event with speed timeout and transposition
         const startEvent = new CustomEvent('game:start', {
-          detail: { speedTimeout: selectedSpeed },
+          detail: { 
+            speedTimeout: selectedSpeed,
+            instrument: instrument,
+            key: key
+          },
           bubbles: true,
           composed: true
         });

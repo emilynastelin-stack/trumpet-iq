@@ -2,6 +2,7 @@
 import { levels } from '/data/levels.js';
 import { getFingering } from '/utils/getFingerings.js';
 import { firebaseReady } from '/utils/firebase.js';
+import { ScoringManager } from './ScoringManager.js';
 
 /**
  * Initialize the game with dynamic fingerings.
@@ -18,6 +19,13 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
   let paused = false;
   // Marathon mode: track lives
   let lives = mode === 'marathon' ? 3 : Infinity;
+  
+  // Initialize scoring system
+  const scorer = ScoringManager.create(mode, {
+    difficulty: difficulty,
+    totalQuestions: 20,
+    intervalSpeed: speedTimeout
+  });
   
   // Pause/resume event listeners
   window.addEventListener('game:pause', () => {
@@ -196,11 +204,16 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       showFeedback(true);
       wrongStreak = 0;
       // Only award a point if the current note hasn't already been marked wrong
-      if (!noteWasMarkedWrong) correctCount++;
+      if (!noteWasMarkedWrong) {
+        correctCount++;
+        scorer.markCorrect();
+      }
       // If this was the final learning note, end the game now so the
       // player's point for this note is included in the final score.
       if (mode === 'learning' && !ended && noteCount >= 20) {
         ended = true;
+        // Get scores from scorer
+        const scores = scorer.getScores();
         // Save to Firebase
         firebaseReady.then(({ db, auth, collection, addDoc }) => {
           const user = auth.currentUser;
@@ -212,6 +225,9 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             score: correctCount,
             total: noteCount,
             percentage: Math.round((correctCount / noteCount) * 100),
+            displayScore: scores.displayScore,
+            proficiencyScore: scores.proficiencyScore,
+            stars: scores.stars,
             instrument: instrument,
             key: key,
             timestamp: new Date(),
@@ -224,7 +240,7 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             console.error('❌ Error saving score:', error);
           });
         });
-        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount }, bubbles: true, composed: true });
+        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: scores.displayScore, stars: scores.stars }, bubbles: true, composed: true });
         try { container.dispatchEvent(endEv); } catch (err) {}
         try { window.dispatchEvent(endEv); } catch (err) {}
       } else {
@@ -261,9 +277,14 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           showFeedback(true);
           wrongStreak = 0;
           // Only award a point if the current note hasn't already been marked wrong
-          if (!noteWasMarkedWrong) correctCount++;
+          if (!noteWasMarkedWrong) {
+            correctCount++;
+            scorer.markCorrect();
+          }
           if (mode === 'learning' && !ended && noteCount >= 20) {
             ended = true;
+            // Get scores from scorer
+            const scores = scorer.getScores();
             // Save to Firebase
             firebaseReady.then(({ db, auth, collection, addDoc }) => {
               const user = auth.currentUser;
@@ -275,6 +296,9 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
                 score: correctCount,
                 total: noteCount,
                 percentage: Math.round((correctCount / noteCount) * 100),
+                displayScore: scores.displayScore,
+                proficiencyScore: scores.proficiencyScore,
+                stars: scores.stars,
                 instrument: instrument,
                 key: key,
                 timestamp: new Date(),
@@ -285,7 +309,7 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
                 console.error('Error saving score:', error);
               });
             });
-            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount }, bubbles: true, composed: true });
+            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: scores.displayScore, stars: scores.stars }, bubbles: true, composed: true });
             try { container.dispatchEvent(endEv); } catch (err) {}
             try { window.dispatchEvent(endEv); } catch (err) {}
           } else {
@@ -301,6 +325,7 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           // correct presses won't award a point for it
           noteWasMarkedWrong = true;
           wrongStreak++;
+          scorer.markIncorrect();
           
           // Marathon mode: lose a life on wrong answer
           if (mode === 'marathon') {
@@ -317,6 +342,8 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             // Check if game over
             if (lives <= 0) {
               ended = true;
+              // Get scores from scorer
+              const scores = scorer.getScores();
               // Save to Firebase
               firebaseReady.then(({ db, auth, collection, addDoc }) => {
                 const user = auth.currentUser;
@@ -328,6 +355,9 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
                   score: correctCount,
                   total: noteCount,
                   percentage: Math.round((correctCount / noteCount) * 100),
+                  displayScore: scores.displayScore,
+                  proficiencyScore: scores.proficiencyScore,
+                  stars: scores.stars,
                   instrument: instrument,
                   key: key,
                   livesLost: 3 - lives,
@@ -337,7 +367,7 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
                 });
               });
               const endEv = new CustomEvent('game:end', { 
-                detail: { score: correctCount, total: noteCount, reason: 'lives' }, 
+                detail: { score: correctCount, total: noteCount, reason: 'lives', accuracy: scores.displayScore, stars: scores.stars }, 
                 bubbles: true, 
                 composed: true 
               });
@@ -546,6 +576,8 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
     if (ended) return; // Already ended and saved
     if (e && e.detail && e.detail.reason === 'timeout' && mode === 'speed') {
       ended = true;
+      // Get scores from scorer
+      const scores = scorer.getScores();
       // Save speed mode score to Firebase
       firebaseReady.then(({ db, auth, collection, addDoc }) => {
         const user = auth.currentUser;
@@ -557,6 +589,9 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           score: correctCount,
           total: noteCount,
           percentage: noteCount > 0 ? Math.round((correctCount / noteCount) * 100) : 0,
+          displayScore: scores.displayScore,
+          proficiencyScore: scores.proficiencyScore,
+          stars: scores.stars,
           instrument: instrument,
           key: key,
           timestamp: new Date(),
@@ -570,6 +605,20 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           console.error('❌ Error saving speed mode score:', error);
         });
       });
+      // Dispatch event with scores for EndGameOverlay
+      const endEv = new CustomEvent('game:end', { 
+        detail: { 
+          score: correctCount, 
+          total: noteCount, 
+          reason: 'timeout',
+          accuracy: scores.displayScore,
+          stars: scores.stars
+        }, 
+        bubbles: true, 
+        composed: true 
+      });
+      try { container.dispatchEvent(endEv); } catch (err) {}
+      try { window.dispatchEvent(endEv); } catch (err) {}
     }
   };
   

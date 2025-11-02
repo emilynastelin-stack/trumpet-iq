@@ -169,17 +169,30 @@ const initialImage = Array.isArray(selectedLevel) && selectedLevel.length > 0 ? 
     const overlay = document.getElementById('begingame-overlay');
     const panel = document.getElementById('transposition-panel');
     
-    // First check TranspositionState (most reliable source)
-    if (window.TranspositionState && window.TranspositionState.instrument && window.TranspositionState.key) {
-      instrument = window.TranspositionState.instrument;
-      key = window.TranspositionState.key;
+    // First check overlay dataset (set by game:start event before overlay is hidden)
+    if (overlay && overlay.dataset.instrument && overlay.dataset.key) {
+      instrument = overlay.dataset.instrument;
+      key = overlay.dataset.key;
+      console.log('📊 Got from overlay dataset:', { instrument, key });
     }
-    // Then check overlay
+    // Then check overlay DOM elements (if dataset wasn't set)
     else if (overlay) {
       const overlayInstrument = overlay.querySelector('#instrument-select-overlay');
-      if (overlayInstrument && overlayInstrument.value) instrument = overlayInstrument.value;
+      if (overlayInstrument && overlayInstrument.value) {
+        instrument = overlayInstrument.value;
+        console.log('📊 Got instrument from overlay DOM:', instrument);
+      }
       const overlayKeyItem = overlay.querySelector('.wheel-item.active');
-      if (overlayKeyItem && overlayKeyItem.dataset.key) key = overlayKeyItem.dataset.key;
+      if (overlayKeyItem && overlayKeyItem.dataset.key) {
+        key = overlayKeyItem.dataset.key;
+        console.log('📊 Got key from overlay DOM:', key);
+      }
+    }
+    // Then check TranspositionState as fallback
+    else if (window.TranspositionState && window.TranspositionState.instrument && window.TranspositionState.key) {
+      instrument = window.TranspositionState.instrument;
+      key = window.TranspositionState.key;
+      console.log('📊 Got from TranspositionState:', {instrument, key});
     }
     // Finally check panel
     else if (panel) {
@@ -187,6 +200,7 @@ const initialImage = Array.isArray(selectedLevel) && selectedLevel.length > 0 ? 
       if (panelInstrument && panelInstrument.value) instrument = panelInstrument.value;
       const panelKeyItem = panel.querySelector('.wheel-item.active');
       if (panelKeyItem && panelKeyItem.dataset.key) key = panelKeyItem.dataset.key;
+      console.log('📊 Got from panel:', {instrument, key});
     }
     
     let speedTimeout = 2000;
@@ -208,11 +222,19 @@ const initialImage = Array.isArray(selectedLevel) && selectedLevel.length > 0 ? 
   window.addEventListener('game:start', (e) => {
     console.log('Game start event received');
     const detail = e.detail || {};
-    // Store speed timeout if provided
-    if (detail.speedTimeout) {
-      const overlay = document.getElementById('begingame-overlay');
-      if (overlay) {
+    // Store speed timeout and transposition if provided
+    const overlay = document.getElementById('begingame-overlay');
+    if (overlay) {
+      if (detail.speedTimeout) {
         overlay.dataset.selectedSpeed = String(detail.speedTimeout);
+      }
+      if (detail.instrument) {
+        overlay.dataset.instrument = detail.instrument;
+        console.log('📊 Stored instrument in overlay dataset:', detail.instrument);
+      }
+      if (detail.key) {
+        overlay.dataset.key = detail.key;
+        console.log('📊 Stored key in overlay dataset:', detail.key);
       }
     }
     requestAnimationFrame(start);

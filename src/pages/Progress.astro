@@ -372,13 +372,13 @@ import Layout from "../layouts/Layout.astro";
         const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
         const dateKey = scoreDate.toISOString().split('T')[0];
         
-        console.log('Processing score:', { date: dateKey, score: score.score, total: score.total });
+        console.log('Processing score:', { date: dateKey, proficiencyScore: score.proficiencyScore });
         
         if (!activityByDate[dateKey]) {
-          activityByDate[dateKey] = { total: 0, correct: 0 };
+          activityByDate[dateKey] = { count: 0, totalProficiency: 0 };
         }
-        activityByDate[dateKey].total += score.total || 0;
-        activityByDate[dateKey].correct += score.score || 0;
+        activityByDate[dateKey].count++;
+        activityByDate[dateKey].totalProficiency += score.proficiencyScore || 0;
       });
       
       console.log('Activity by date:', activityByDate);
@@ -395,9 +395,10 @@ import Layout from "../layouts/Layout.astro";
         
         dailyLabels.push(dayName);
         const dayData = activityByDate[dateKey];
-        const accuracy = dayData ? Math.round((dayData.correct / dayData.total) * 100) : 0;
-        dailyValues.push(accuracy);
-        console.log(`Day ${dayName} (${dateKey}): ${accuracy}% (${dayData?.correct || 0}/${dayData?.total || 0})`);
+        // Calculate average proficiency for the day
+        const avgProficiency = dayData ? Math.round(dayData.totalProficiency / dayData.count) : 0;
+        dailyValues.push(avgProficiency);
+        console.log(`Day ${dayName} (${dateKey}): ${avgProficiency} proficiency (${dayData?.count || 0} sessions)`);
       }
       
       console.log('Daily values for chart:', dailyValues);
@@ -416,19 +417,18 @@ import Layout from "../layouts/Layout.astro";
       const masteryData = {};
       
       scores.forEach(score => {
-        const instrument = score.instrument || 'C';
-        const key = score.key || 'C';
+        const instrument = score.instrument || 'Bb';
+        const key = score.key || 'Bb';
         
         if (!masteryData[instrument]) {
           masteryData[instrument] = {};
         }
         
         if (!masteryData[instrument][key]) {
-          masteryData[instrument][key] = { attempts: 0, correct: 0, totalNotes: 0 };
+          masteryData[instrument][key] = { attempts: 0, totalProficiency: 0 };
         }
         
-        masteryData[instrument][key].totalNotes += score.total || 0;
-        masteryData[instrument][key].correct += score.score || 0;
+        masteryData[instrument][key].totalProficiency += score.proficiencyScore || 0;
         masteryData[instrument][key].attempts++;
       });
       
@@ -495,34 +495,37 @@ import Layout from "../layouts/Layout.astro";
           if (statsDiv) statsDiv.style.display = '';
           if (noteDiv) noteDiv.style.display = 'none';
           
-          if (keyData && keyData.totalNotes > 0) {
-            const percentage = Math.round((keyData.correct / keyData.totalNotes) * 100);
-            const level = percentage >= 75 ? 'high' : percentage >= 50 ? 'medium' : 'low';
+          if (keyData && keyData.attempts > 0) {
+            // Calculate average proficiency for this instrument/key combination
+            const avgProficiency = Math.round(keyData.totalProficiency / keyData.attempts);
+            const level = avgProficiency >= 75 ? 'high' : avgProficiency >= 50 ? 'medium' : 'low';
             
             if (percentageSpan) {
-              percentageSpan.textContent = `${percentage}%`;
+              percentageSpan.textContent = `${avgProficiency}`;
               percentageSpan.className = `key-percentage ${level}`;
             }
             
             if (fillDiv) {
-              fillDiv.style.width = `${percentage}%`;
+              // Cap at 100 for display purposes
+              const displayWidth = Math.min(avgProficiency, 100);
+              fillDiv.style.width = `${displayWidth}%`;
               fillDiv.className = `key-progress-fill ${level}`;
             }
             
-            if (statsSpans[0]) statsSpans[0].textContent = `${keyData.attempts} attempts`;
-            if (statsSpans[1]) statsSpans[1].textContent = `${keyData.correct} correct`;
+            if (statsSpans[0]) statsSpans[0].textContent = `${keyData.attempts} sessions`;
+            if (statsSpans[1]) statsSpans[1].textContent = `${avgProficiency} proficiency`;
           } else {
             // Reset to 0 if no data
             if (percentageSpan) {
-              percentageSpan.textContent = '0%';
+              percentageSpan.textContent = '0';
               percentageSpan.className = 'key-percentage';
             }
             if (fillDiv) {
               fillDiv.style.width = '0%';
               fillDiv.className = 'key-progress-fill';
             }
-            if (statsSpans[0]) statsSpans[0].textContent = '0 attempts';
-            if (statsSpans[1]) statsSpans[1].textContent = '0 correct';
+            if (statsSpans[0]) statsSpans[0].textContent = '0 sessions';
+            if (statsSpans[1]) statsSpans[1].textContent = '0 proficiency';
           }
         }
       });
