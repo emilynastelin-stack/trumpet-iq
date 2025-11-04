@@ -171,6 +171,15 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
     const ev = new CustomEvent('game:feedback', { detail: { ok }, bubbles: true, composed: true });
     try { container.dispatchEvent(ev); } catch (err) {}
     try { window.dispatchEvent(ev); } catch (err) {}
+    
+    // Trigger haptic feedback based on correctness
+    if (window.haptics) {
+      if (ok) {
+        window.haptics.onCorrectNote();
+      } else {
+        window.haptics.onWrongNote();
+      }
+    }
   }
 
   function handleInput(activeBtns) {
@@ -414,6 +423,11 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       // mark pressed visually
       el.classList.add('active');
       el.setAttribute('aria-pressed', 'true');
+    }
+    
+    // Trigger haptic feedback on valve press
+    if (window.haptics) {
+      window.haptics.onValvePress();
     }
   }
 

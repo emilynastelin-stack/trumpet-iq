@@ -27,6 +27,9 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
 
     <!-- Tailwind CSS -->
   <link rel="stylesheet" href="/global.css" />
+  
+  <!-- Haptic Feedback Manager -->
+  <script is:inline src="/scripts/HapticManager.js"></script>
   </head>
   <body class="min-h-screen flex flex-col">
     <!-- Loading overlay to prevent white flashes -->
@@ -364,6 +367,11 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
             touchStartY = e.touches[0].clientY;
             touchStartX = e.touches[0].clientX;
             console.log('[footer] Touch started on button');
+            
+            // Trigger haptic feedback on button press
+            if (window.haptics) {
+              window.haptics.onButtonPress();
+            }
           }
         }, { passive: true });
         

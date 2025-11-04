@@ -36,6 +36,28 @@
           <strong>Advanced Mode</strong> shows transposition controls to practice playing in different keys.
         </p>
       </div>
+
+      <div class="settings-section">
+        <h4 class="section-title">Haptic Feedback</h4>
+        <p class="section-description">
+          Enable vibration feedback when pressing buttons and answering notes (requires device support).
+        </p>
+        
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="haptics-toggle" class="setting-label">Enable Haptics</label>
+            <p class="setting-hint">Vibrate on button press and feedback</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="haptics-toggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <button id="test-haptics" class="test-btn" type="button">
+          Test Vibration
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -228,6 +250,60 @@
           transpositionToggleBtn.style.display = 'none';
         }
       }
+    }
+
+    // Haptic Feedback toggle
+    const hapticsToggle = document.getElementById('haptics-toggle') as HTMLInputElement;
+    const testHapticsBtn = document.getElementById('test-haptics');
+
+    // Load haptics preference
+    if (hapticsToggle) {
+      hapticsToggle.checked = localStorage.getItem('haptics-enabled') !== 'false';
+      
+      // Sync with HapticManager
+      if (window.haptics) {
+        if (hapticsToggle.checked) {
+          window.haptics.enable();
+        } else {
+          window.haptics.disable();
+        }
+      }
+    }
+
+    // Handle haptics toggle change
+    if (hapticsToggle) {
+      hapticsToggle.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        const enabled = target.checked;
+        
+        localStorage.setItem('haptics-enabled', enabled.toString());
+        
+        // Update HapticManager state
+        if (window.haptics) {
+          if (enabled) {
+            window.haptics.enable();
+            // Give immediate feedback
+            window.haptics.trigger('medium');
+          } else {
+            window.haptics.disable();
+          }
+        }
+        
+        console.log('[Settings] Haptics', enabled ? 'enabled' : 'disabled');
+      });
+    }
+
+    // Test haptics button
+    if (testHapticsBtn) {
+      testHapticsBtn.addEventListener('click', async () => {
+        if (window.haptics) {
+          console.log('[Settings] Testing haptics...');
+          await window.haptics.test();
+        } else {
+          console.log('[Settings] Haptics not available');
+          alert('Haptic feedback is not supported on this device');
+        }
+      });
     }
   });
 </script>
@@ -551,6 +627,33 @@
     box-shadow: 
       inset 0 2px 4px rgba(0, 0, 0, 0.1),
       0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Test Button */
+  .test-btn {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 12px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1.5px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    color: #059669;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .test-btn:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .test-btn:active {
+    transform: translateY(0) scale(0.98);
+    background: rgba(16, 185, 129, 0.2);
   }
 
   /* Warning Modal */

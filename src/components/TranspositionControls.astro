@@ -134,12 +134,42 @@ const randomizeId = `randomize-${id}`;
         item.classList.add('active');
         centerItem(item);
         updateState();
+        
+        // Haptic feedback on click
+        if (window.haptics) {
+          window.haptics.trigger('light');
+        }
       });
     });
 
+    // Track user interaction for haptics
+    let userHasInteracted = false;
+    
+    // Establish user interaction on first touch/click
+    wheelEl.addEventListener('touchstart', () => {
+      userHasInteracted = true;
+    }, { once: true, passive: true });
+    
+    wheelEl.addEventListener('mousedown', () => {
+      userHasInteracted = true;
+    }, { once: true, passive: true });
+
     // Update active state based on scroll position
     let scrollTimeout;
+    let lastScrollY = wheelEl.scrollTop;
+    
     wheelEl.addEventListener('scroll', () => {
+      // Check for active item change immediately during scroll
+      const currentScrollY = wheelEl.scrollTop;
+      const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+      
+      // Only check if we've scrolled a meaningful amount
+      if (scrollDelta > 5) {
+        lastScrollY = currentScrollY;
+        updateActiveItem(); // This will trigger haptic if item changed
+      }
+      
+      // Also debounce for final settle
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         updateActiveItem();
@@ -309,6 +339,9 @@ const randomizeId = `randomize-${id}`;
       });
     }
 
+    // Track previous active item for haptic feedback
+    let previousActiveKey = null;
+
     function updateActiveItem() {
       const wheelCenter = wheelEl.scrollTop + wheelEl.offsetHeight / 2;
       
@@ -326,6 +359,16 @@ const randomizeId = `randomize-${id}`;
       });
 
       if (closestItem) {
+        const newActiveKey = closestItem.dataset.key;
+        
+        // Trigger haptic feedback only when the active item actually changes
+        if (newActiveKey !== previousActiveKey && previousActiveKey !== null) {
+          if (window.haptics) {
+            window.haptics.trigger('light');
+          }
+        }
+        
+        previousActiveKey = newActiveKey;
         items.forEach(i => i.classList.remove('active'));
         closestItem.classList.add('active');
         updateState();

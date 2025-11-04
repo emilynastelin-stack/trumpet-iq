@@ -118,84 +118,6 @@ import GamePad from "../../components/GamePad.astro";
       animation: fadeIn 0.5s ease 0.4s both;
     }
 
-    /* Fingering Display */
-    .fingering-display {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      width: 100%;
-      max-width: 500px;
-      animation: fadeIn 0.5s ease 0.3s both;
-    }
-
-    .fingering-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.7);
-      margin: 0 0 1.5rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    /* Simple Gamepad */
-    .simple-gamepad {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      align-items: center;
-    }
-
-    .valve-button {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: 900;
-      color: rgba(255, 255, 255, 0.5);
-      transition: all 0.3s ease;
-    }
-
-    .valve-button.highlighted {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border-color: #10b981;
-      color: white;
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
-      transform: scale(1.1);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    /* Continue Button */
-    .continue-btn {
-      padding: 1rem 3rem;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      border: none;
-      border-radius: 16px;
-      font-size: 1.125rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
-      animation: fadeIn 0.5s ease 0.5s both;
-    }
-
-    .continue-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
-    }
-
-    .continue-btn:active {
-      transform: translateY(0);
-    }
-
     /* Completion Screen */
     .completion-screen {
       text-align: center;
@@ -436,16 +358,6 @@ import GamePad from "../../components/GamePad.astro";
         font-size: 3rem;
       }
 
-      .valve-button {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-      }
-
-      .simple-gamepad {
-        gap: 1rem;
-      }
-
       .completion-title {
         font-size: 2rem;
       }
@@ -457,37 +369,112 @@ import GamePad from "../../components/GamePad.astro";
   </style>
 
   <script>
-    // Lesson sequence - introduces notes with hints, then practices without hints
-    const lessons = [
-      // Introduce G with hint
-      { type: 'note', title: 'Meet Your First Note!', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: true },
-      
-      // Introduce F with hint
-      { type: 'note', title: 'Your Second Note!', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: true },
-      
-      // Introduce E with hint
-      { type: 'note', title: 'Your Third Note!', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: true },
-      
-      // Practice 10 notes without hints (mistake-based hints after 1 wrong attempt)
-      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
-      { type: 'practice', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: false },
-      { type: 'practice', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: false },
-      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
-      { type: 'practice', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: false },
-      { type: 'practice', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: false },
-      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
-      { type: 'practice', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: false },
-      { type: 'practice', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: false },
-      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
-      
-      { type: 'completion' }
-    ];
+    // ============================================
+    // LESSON CONFIGURATION
+    // ============================================
+    
+    // Define all note fingerings
+    const NOTE_FINGERINGS = {
+      'G': [0],
+      'F': [1],
+      'E': [1, 2],
+      'D': [1, 2, 3],
+      'C': [0, 2, 3],
+      'B0': [1, 2],
+      'A0': [0, 1, 2],
+      'A1': [1, 2],
+      'B1': [1],
+      'C2': [0],
+      'Bflat1': [1],
+      'Bflat0': [2],
+      'Fsharp1': [2, 3],
+      'Eflat1': [2, 3],
+      'Aflat1': [2, 3],
+      'Gsharp1': [2, 3],
+      'Dsharp1': [1, 3],
+      'D2': [0],
+      'Csharp1': [1, 2, 3],
+      'Csharp2': [0, 2, 3],
+      'Dflat2': [1, 2, 3]
+    };
 
+    // ============================================
+    // LESSON BUILDER FUNCTION
+    // ============================================
+    
+    /**
+     * Builds a complete lesson with introduction and practice phases
+     * @param {Array<string>} newNotes - Notes to introduce in this lesson
+     * @param {Array<string>} reviewNotes - Previously learned notes to review
+     * @param {number} practiceCount - Number of practice exercises
+     * @param {number} newWeight - Percentage of practice that should be new notes (0-1)
+     */
+    function buildLesson(newNotes, reviewNotes = [], practiceCount = 10, newWeight = 1.0) {
+      const lessons = [];
+      
+      // Phase 1: Introduction - show each new note with hints
+      newNotes.forEach((note, index) => {
+        lessons.push({
+          type: 'note',
+          title: index === 0 ? 'Meet Your First Note!' : 
+                 index === 1 ? 'Your Second Note!' :
+                 index === 2 ? 'Your Third Note!' :
+                 `Note ${index + 1}!`,
+          note: note,
+          image: `/notes/${note}.png`,
+          fingering: NOTE_FINGERINGS[note],
+          showHint: true
+        });
+      });
+      
+      // Phase 2: Practice - weighted random selection
+      const allNotes = [...newNotes, ...reviewNotes];
+      
+      for (let i = 0; i < practiceCount; i++) {
+        // Decide if we should use a new note or review note
+        const useNewNote = Math.random() < newWeight || reviewNotes.length === 0;
+        const pool = useNewNote ? newNotes : reviewNotes;
+        const randomNote = pool[Math.floor(Math.random() * pool.length)];
+        
+        lessons.push({
+          type: 'practice',
+          note: randomNote,
+          image: `/notes/${randomNote}.png`,
+          fingering: NOTE_FINGERINGS[randomNote],
+          showHint: false
+        });
+      }
+      
+      // Phase 3: Completion
+      lessons.push({ type: 'completion' });
+      
+      return lessons;
+    }
+
+    // ============================================
+    // CURRENT LESSON: Unit 1, Level 1
+    // ============================================
+    
+    const lessons = buildLesson(
+      ['G', 'F', 'E'],  // New notes to introduce
+      [],                // No review notes (first lesson)
+      10,                // 10 practice exercises
+      1.0                // 100% new notes (no review notes available)
+    );
+
+    // ============================================
+    // LESSON STATE
+    // ============================================
+    
     let currentStep = 0;
     let pressedButtons = new Set();
     let mistakeCount = 0;
     let currentLesson = null;
 
+    // ============================================
+    // PROGRESS BAR
+    // ============================================
+    
     function updateProgress() {
       const progressFill = document.getElementById('progressFill');
       const progress = ((currentStep + 1) / lessons.length) * 100;
@@ -496,6 +483,10 @@ import GamePad from "../../components/GamePad.astro";
       }
     }
 
+    // ============================================
+    // HINT SYSTEM
+    // ============================================
+    
     function highlightButtons(fingering) {
       // Clear all highlights
       document.querySelectorAll('.gp-btn').forEach(btn => {
@@ -511,6 +502,16 @@ import GamePad from "../../components/GamePad.astro";
       });
     }
 
+    function clearHints() {
+      document.querySelectorAll('.gp-btn').forEach(btn => {
+        btn.classList.remove('hint');
+      });
+    }
+
+    // ============================================
+    // ANSWER CHECKING
+    // ============================================
+    
     function checkAnswer(lesson) {
       const expected = new Set(lesson.fingering);
       
@@ -524,6 +525,54 @@ import GamePad from "../../components/GamePad.astro";
       return true;
     }
 
+    function checkAndAdvance(lesson) {
+      if (checkAnswer(lesson)) {
+        // Correct! Show celebration and advance
+        celebrateCorrect();
+        
+        setTimeout(() => {
+          pressedButtons.clear();
+          nextStep();
+        }, 800);
+      } else {
+        // Wrong answer - check if we should show hint
+        if (pressedButtons.size > 0) {
+          mistakeCount++;
+          
+          // Show hint after 1 mistake (if not already showing hint)
+          if (mistakeCount >= 1 && !lesson.showHint) {
+            setTimeout(() => {
+              highlightButtons(lesson.fingering);
+            }, 200);
+          }
+        }
+      }
+    }
+
+    // ============================================
+    // CELEBRATION
+    // ============================================
+    
+    function celebrateCorrect() {
+      const celebration = document.createElement('div');
+      celebration.className = 'celebration-overlay';
+      celebration.innerHTML = `
+        <div class="celebration-content">
+          <div class="celebration-icon">✨</div>
+          <div class="celebration-text">Correct!</div>
+        </div>
+      `;
+      document.body.appendChild(celebration);
+      
+      setTimeout(() => {
+        celebration.remove();
+      }, 800);
+    }
+
+    // ============================================
+    // RENDERING
+    // ============================================
+    
     function renderNoteLesson(lesson) {
       const container = document.getElementById('lessonContainer');
       if (!container) return;
@@ -551,101 +600,6 @@ import GamePad from "../../components/GamePad.astro";
 
       // Listen for button presses
       setupButtonListeners(lesson);
-    }
-
-    function clearHints() {
-      document.querySelectorAll('.gp-btn').forEach(btn => {
-        btn.classList.remove('hint');
-      });
-    }
-
-    function setupButtonListeners(lesson) {
-      const buttons = document.querySelectorAll('.gp-btn');
-      
-      function handlePress(valve) {
-        pressedButtons.add(valve);
-        checkAndAdvance(lesson);
-      }
-      
-      function handleRelease(valve) {
-        pressedButtons.delete(valve);
-      }
-
-      buttons.forEach(btn => {
-        const valveAttr = btn.getAttribute('data-button');
-        if (!valveAttr) return;
-        const valve = parseInt(valveAttr);
-        
-        // Mouse/touch events
-        btn.addEventListener('mousedown', () => handlePress(valve));
-        btn.addEventListener('touchstart', () => handlePress(valve));
-        btn.addEventListener('mouseup', () => handleRelease(valve));
-        btn.addEventListener('touchend', () => handleRelease(valve));
-        btn.addEventListener('mouseleave', () => handleRelease(valve));
-      });
-
-      // Keyboard events
-      document.addEventListener('keydown', (e) => {
-        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
-        const valve = keyMap[e.key as keyof typeof keyMap];
-        if (valve !== undefined && !e.repeat) {
-          handlePress(valve);
-          const btn = document.querySelector(`[data-button="${valve}"]`);
-          if (btn) btn.classList.add('active');
-        }
-      });
-
-      document.addEventListener('keyup', (e) => {
-        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
-        const valve = keyMap[e.key as keyof typeof keyMap];
-        if (valve !== undefined) {
-          handleRelease(valve);
-          const btn = document.querySelector(`[data-button="${valve}"]`);
-          if (btn) btn.classList.remove('active');
-        }
-      });
-    }
-
-    function checkAndAdvance(lesson) {
-      if (checkAnswer(lesson)) {
-        // Correct! Show celebration and advance
-        celebrateCorrect();
-        
-        setTimeout(() => {
-          pressedButtons.clear();
-          nextStep();
-        }, 800);
-      } else {
-        // Wrong answer - check if we should show hint
-        if (pressedButtons.size > 0) {
-          mistakeCount++;
-          
-          // Show hint after 1 mistake (if not already showing hint)
-          if (mistakeCount >= 1 && !lesson.showHint) {
-            setTimeout(() => {
-              highlightButtons(lesson.fingering);
-            }, 200);
-          }
-        }
-      }
-    }
-
-    function celebrateCorrect() {
-      // Add celebration overlay
-      const celebration = document.createElement('div');
-      celebration.className = 'celebration-overlay';
-      celebration.innerHTML = `
-        <div class="celebration-content">
-          <div class="celebration-icon">✨</div>
-          <div class="celebration-text">Correct!</div>
-        </div>
-      `;
-      document.body.appendChild(celebration);
-      
-      // Remove after animation
-      setTimeout(() => {
-        celebration.remove();
-      }, 800);
     }
 
     function renderCompletion() {
@@ -689,6 +643,61 @@ import GamePad from "../../components/GamePad.astro";
       localStorage.setItem('lesson1-complete', 'true');
     }
 
+    // ============================================
+    // INPUT HANDLING
+    // ============================================
+    
+    function setupButtonListeners(lesson) {
+      const buttons = document.querySelectorAll('.gp-btn');
+      
+      function handlePress(valve) {
+        pressedButtons.add(valve);
+        checkAndAdvance(lesson);
+      }
+      
+      function handleRelease(valve) {
+        pressedButtons.delete(valve);
+      }
+
+      buttons.forEach(btn => {
+        const valveAttr = btn.getAttribute('data-button');
+        if (!valveAttr) return;
+        const valve = parseInt(valveAttr);
+        
+        // Mouse/touch events
+        btn.addEventListener('mousedown', () => handlePress(valve));
+        btn.addEventListener('touchstart', () => handlePress(valve));
+        btn.addEventListener('mouseup', () => handleRelease(valve));
+        btn.addEventListener('touchend', () => handleRelease(valve));
+        btn.addEventListener('mouseleave', () => handleRelease(valve));
+      });
+
+      // Keyboard events
+      document.addEventListener('keydown', (e) => {
+        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const valve = keyMap[e.key];
+        if (valve !== undefined && !e.repeat) {
+          handlePress(valve);
+          const btn = document.querySelector(`[data-button="${valve}"]`);
+          if (btn) btn.classList.add('active');
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const valve = keyMap[e.key];
+        if (valve !== undefined) {
+          handleRelease(valve);
+          const btn = document.querySelector(`[data-button="${valve}"]`);
+          if (btn) btn.classList.remove('active');
+        }
+      });
+    }
+
+    // ============================================
+    // NAVIGATION
+    // ============================================
+    
     function nextStep() {
       currentStep++;
       if (currentStep >= lessons.length) {
@@ -705,9 +714,11 @@ import GamePad from "../../components/GamePad.astro";
       }
     }
 
-    // Wait for page to load
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
     window.addEventListener('DOMContentLoaded', () => {
-      // Initialize first lesson
       updateProgress();
       renderNoteLesson(lessons[0]);
     });

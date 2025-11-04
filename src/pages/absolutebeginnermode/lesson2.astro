@@ -296,38 +296,92 @@ import GamePad from "../../components/GamePad.astro";
   </style>
 
   <script>
-    // Lesson structure: 3 new notes (D, C, B) with hints, then 10 practice notes with all 6 notes (G, F, E, D, C, B)
-    const lessons = [
-      // Part 1: Intro to new notes (D, C, B)
-      { note: 'D1', noteName: 'D', fingering: [1, 3], showHint: true, title: 'Meet Note D!' },
-      { note: 'C1', noteName: 'C', fingering: [0], showHint: true, title: 'Meet Note C!' },
-      { note: 'B0', noteName: 'B', fingering: [1, 2], showHint: true, title: 'Meet Note B!' },
+    // ============================================
+    // BUILD LESSON FUNCTION
+    // ============================================
+    
+    function buildLesson(newNotes, reviewNotes = [], practiceCount = 10, newWeight = 1.0) {
+      const lessons = [];
+      const noteData = {
+        'G': { note: 'G1', fingering: [0] },
+        'F': { note: 'F1', fingering: [1] },
+        'E': { note: 'E1', fingering: [1, 2] },
+        'D': { note: 'D1', fingering: [1, 3] },
+        'C': { note: 'C1', fingering: [0] },
+        'B0': { note: 'B0', fingering: [1, 2] },
+        'A0': { note: 'A0', fingering: [1, 2, 3] }
+      };
       
-      // Part 2: Practice with ALL 6 notes (randomized)
-      ...generatePracticeNotes(10)
-    ];
-
-    // Generate 10 random practice notes from all 6 notes learned
-    function generatePracticeNotes(count) {
-      const allNotes = [
-        { note: 'G1', noteName: 'G', fingering: [0], title: 'Practice Time!' },
-        { note: 'F1', noteName: 'F', fingering: [1], title: 'Practice Time!' },
-        { note: 'E1', noteName: 'E', fingering: [1, 2], title: 'Practice Time!' },
-        { note: 'D1', noteName: 'D', fingering: [1, 3], title: 'Practice Time!' },
-        { note: 'C1', noteName: 'C', fingering: [0], title: 'Practice Time!' },
-        { note: 'B0', noteName: 'B', fingering: [1, 2], title: 'Practice Time!' }
-      ];
+      // Part 1: Introduce new notes with hints
+      newNotes.forEach(noteName => {
+        const data = noteData[noteName];
+        if (data) {
+          lessons.push({
+            note: data.note,
+            noteName: noteName,
+            fingering: data.fingering,
+            showHint: true,
+            title: `Meet Note ${noteName}!`
+          });
+        }
+      });
+      
+      // Part 2: Practice with mix of new and review notes
+      const allNotesPool = [...newNotes, ...reviewNotes];
+      const newNotesCount = Math.round(practiceCount * newWeight);
+      const reviewNotesCount = practiceCount - newNotesCount;
       
       const practiceNotes = [];
-      for (let i = 0; i < count; i++) {
-        const randomNote = allNotes[Math.floor(Math.random() * allNotes.length)];
-        practiceNotes.push({
-          ...randomNote,
-          showHint: false
-        });
+      
+      // Add weighted new notes
+      for (let i = 0; i < newNotesCount; i++) {
+        const noteName = newNotes[Math.floor(Math.random() * newNotes.length)];
+        const data = noteData[noteName];
+        if (data) {
+          practiceNotes.push({
+            note: data.note,
+            noteName: noteName,
+            fingering: data.fingering,
+            showHint: false,
+            title: 'Practice Time!'
+          });
+        }
       }
-      return practiceNotes;
+      
+      // Add review notes
+      for (let i = 0; i < reviewNotesCount; i++) {
+        const noteName = reviewNotes[Math.floor(Math.random() * reviewNotes.length)];
+        const data = noteData[noteName];
+        if (data) {
+          practiceNotes.push({
+            note: data.note,
+            noteName: noteName,
+            fingering: data.fingering,
+            showHint: false,
+            title: 'Practice Time!'
+          });
+        }
+      }
+      
+      // Shuffle practice notes
+      for (let i = practiceNotes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [practiceNotes[i], practiceNotes[j]] = [practiceNotes[j], practiceNotes[i]];
+      }
+      
+      return [...lessons, ...practiceNotes];
     }
+
+    // ============================================
+    // LESSON CONFIGURATION - Unit 1, Level 2
+    // ============================================
+    
+    const lessons = buildLesson(
+      ['D', 'C'],                  // New notes to introduce
+      ['G', 'F', 'E'],            // Review from Level 1
+      12,                          // 12 practice exercises
+      0.65                         // 65% new, 35% review
+    );
 
     let currentLessonIndex = 0;
     let mistakeCount = 0;
@@ -517,9 +571,18 @@ import GamePad from "../../components/GamePad.astro";
               <div class="stat-label">Accuracy</div>
             </div>
             <div class="stat-item">
-              <div class="stat-value">6</div>
-              <div class="stat-label">Notes Learned</div>
+              <div class="stat-value">2</div>
+              <div class="stat-label">New Notes</div>
             </div>
+            <div class="stat-item">
+              <div class="stat-value">5</div>
+              <div class="stat-label">Total Notes</div>
+            </div>
+          </div>
+          
+          <div class="notes-learned">
+            <h3>You learned: D, C</h3>
+            <p>Total notes mastered: G, F, E, D, C</p>
           </div>
           
           <a href="/absolutebeginnermode/lessonindex" class="next-lesson-btn">Back to Lessons</a>
