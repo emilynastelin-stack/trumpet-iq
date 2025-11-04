@@ -14,13 +14,15 @@ class HapticManager {
 
   async initCapacitor() {
     try {
-      if (window.Capacitor) {
+      // Only try to import Capacitor if window.Capacitor exists
+      if (typeof window !== 'undefined' && window.Capacitor) {
         const { Haptics } = await import('@capacitor/haptics');
         this.Haptics = Haptics;
         this.supportsCapacitor = true;
         console.log('[Haptics] Capacitor Haptics initialized');
       }
     } catch (error) {
+      // Silently fail - Capacitor not available
       console.log('[Haptics] Capacitor not available, using Vibration API');
     }
   }
@@ -122,8 +124,16 @@ class HapticManager {
    * Trigger haptic using Capacitor (native iOS/Android)
    */
   async triggerCapacitor(pattern) {
+    if (!this.Haptics) {
+      // Fallback if Haptics wasn't initialized
+      this.triggerVibration(pattern);
+      return;
+    }
+    
     try {
-      const { ImpactStyle, NotificationType } = await import('@capacitor/haptics');
+      // Use dynamic import for Capacitor enums
+      const capacitorHaptics = await import('@capacitor/haptics');
+      const { ImpactStyle, NotificationType } = capacitorHaptics;
       
       switch (pattern) {
         case 'light':
