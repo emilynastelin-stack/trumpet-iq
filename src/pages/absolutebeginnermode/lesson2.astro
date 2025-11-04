@@ -1,0 +1,543 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GamePad from "../../components/GamePad.astro";
+---
+
+<Layout title="Lesson 2: Three More Notes">
+  <div class="lesson-page">
+    <!-- Progress Bar -->
+    <div class="lesson-progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Lesson Container -->
+    <div class="lesson-container" id="lessonContainer">
+      <!-- Lesson content will be dynamically inserted here -->
+    </div>
+
+    <!-- GamePad -->
+    <GamePad />
+  </div>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .lesson-page {
+      min-height: 100vh;
+      width: 100%;
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lesson-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .lesson-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: max(2rem, env(safe-area-inset-top)) 1.5rem max(2rem, env(safe-area-inset-bottom));
+      text-align: center;
+    }
+
+    /* Note Display */
+    .note-display {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 500px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .note-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .note-image {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      margin: 0 auto 2rem;
+      filter: brightness(1.1);
+      animation: slideIn 0.6s ease;
+    }
+
+    .note-letter-above {
+      font-size: 4rem;
+      font-weight: 900;
+      color: #10b981;
+      margin: 0 0 1rem;
+      text-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      animation: popIn 0.4s ease 0.1s both;
+    }
+
+    .note-prompt {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 1.5rem;
+      animation: fadeIn 0.5s ease 0.4s both;
+    }
+
+    /* Completion Screen */
+    .completion-screen {
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .completion-icon {
+      font-size: 5rem;
+      margin-bottom: 2rem;
+      animation: bounceIn 0.8s ease;
+    }
+
+    .completion-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .completion-message {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 2rem;
+    }
+
+    .completion-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #10b981;
+      margin: 0 0 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .next-lesson-btn {
+      padding: 1rem 3rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.125rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .next-lesson-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
+    }
+
+    .next-lesson-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Celebration Overlay */
+    .celebration-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .celebration-content {
+      font-size: 4rem;
+      font-weight: 900;
+      color: #10b981;
+      text-shadow: 0 4px 30px rgba(16, 185, 129, 0.8);
+      animation: celebratePop 0.6s ease;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      70% {
+        transform: scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes celebratePop {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes hintPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7);
+      }
+      50% {
+        box-shadow: 0 0 0 15px rgba(251, 146, 60, 0);
+      }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 640px) {
+      .note-letter-above {
+        font-size: 3rem;
+      }
+
+      .completion-icon {
+        font-size: 4rem;
+      }
+
+      .completion-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+
+  <script>
+    // Lesson structure: 3 new notes (D, C, B) with hints, then 10 practice notes with all 6 notes (G, F, E, D, C, B)
+    const lessons = [
+      // Part 1: Intro to new notes (D, C, B)
+      { note: 'D1', noteName: 'D', fingering: [1, 3], showHint: true, title: 'Meet Note D!' },
+      { note: 'C1', noteName: 'C', fingering: [0], showHint: true, title: 'Meet Note C!' },
+      { note: 'B0', noteName: 'B', fingering: [1, 2], showHint: true, title: 'Meet Note B!' },
+      
+      // Part 2: Practice with ALL 6 notes (randomized)
+      ...generatePracticeNotes(10)
+    ];
+
+    // Generate 10 random practice notes from all 6 notes learned
+    function generatePracticeNotes(count) {
+      const allNotes = [
+        { note: 'G1', noteName: 'G', fingering: [0], title: 'Practice Time!' },
+        { note: 'F1', noteName: 'F', fingering: [1], title: 'Practice Time!' },
+        { note: 'E1', noteName: 'E', fingering: [1, 2], title: 'Practice Time!' },
+        { note: 'D1', noteName: 'D', fingering: [1, 3], title: 'Practice Time!' },
+        { note: 'C1', noteName: 'C', fingering: [0], title: 'Practice Time!' },
+        { note: 'B0', noteName: 'B', fingering: [1, 2], title: 'Practice Time!' }
+      ];
+      
+      const practiceNotes = [];
+      for (let i = 0; i < count; i++) {
+        const randomNote = allNotes[Math.floor(Math.random() * allNotes.length)];
+        practiceNotes.push({
+          ...randomNote,
+          showHint: false
+        });
+      }
+      return practiceNotes;
+    }
+
+    let currentLessonIndex = 0;
+    let mistakeCount = 0;
+    let currentLesson = null;
+    let pressedButtons = new Set();
+    let correctCount = 0;
+    let totalAttempts = 0;
+
+    function updateProgress() {
+      const progress = ((currentLessonIndex + 1) / lessons.length) * 100;
+      const progressFill = document.getElementById('progressFill');
+      if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+      }
+    }
+
+    function renderNoteLesson(lesson) {
+      const container = document.getElementById('lessonContainer');
+      if (!container) return;
+
+      const title = lesson.title || 'Practice Time!';
+      
+      // Clear hints FIRST before any rendering
+      clearHints();
+      
+      // Render the HTML content
+      container.innerHTML = `
+        <div class="note-display">
+          <h2 class="note-title">${title}</h2>
+          <div class="note-letter-above">${lesson.noteName}</div>
+          <img src="/notes/${lesson.note}.png" alt="${lesson.noteName} note" class="note-image" />
+          <div class="note-prompt">${lesson.showHint ? 'Press the highlighted buttons!' : 'What note is this?'}</div>
+        </div>
+      `;
+      
+      // THEN add hints if needed (after DOM is updated)
+      if (lesson.showHint) {
+        highlightButtons(lesson.fingering);
+      }
+    }
+
+    function clearHints() {
+      const buttons = document.querySelectorAll('.gamepad-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('hint');
+      });
+    }
+
+    function highlightButtons(fingering) {
+      const buttons = document.querySelectorAll('.gamepad-btn');
+      buttons.forEach(btn => {
+        const valve = parseInt(btn.dataset.valve);
+        if (fingering.includes(valve)) {
+          btn.classList.add('hint');
+        }
+      });
+    }
+
+    function checkAnswer(lesson) {
+      const expected = new Set(lesson.fingering);
+      const pressed = new Set(pressedButtons);
+      
+      if (expected.size === pressed.size && [...expected].every(v => pressed.has(v))) {
+        return true;
+      }
+      return false;
+    }
+
+    function celebrateCorrect() {
+      const overlay = document.createElement('div');
+      overlay.className = 'celebration-overlay';
+      overlay.innerHTML = '<div class="celebration-content">✨ Correct!</div>';
+      document.body.appendChild(overlay);
+
+      setTimeout(() => {
+        overlay.remove();
+      }, 800);
+    }
+
+    function checkAndAdvance(lesson) {
+      if (checkAnswer(lesson)) {
+        celebrateCorrect();
+        correctCount++;
+        totalAttempts++;
+        
+        setTimeout(() => {
+          currentLessonIndex++;
+          mistakeCount = 0;
+          pressedButtons.clear();
+          
+          if (currentLessonIndex < lessons.length) {
+            currentLesson = lessons[currentLessonIndex];
+            renderNoteLesson(currentLesson);
+            updateProgress();
+          } else {
+            showCompletion();
+          }
+        }, 800);
+      } else {
+        totalAttempts++;
+        mistakeCount++;
+        
+        // Show hint after 1 mistake in practice mode
+        if (!lesson.showHint && mistakeCount >= 1) {
+          highlightButtons(lesson.fingering);
+        }
+      }
+    }
+
+    function setupButtonListeners() {
+      const buttons = document.querySelectorAll('.gamepad-btn');
+      
+      buttons.forEach(btn => {
+        const valve = parseInt(btn.dataset.valve);
+        
+        // Mouse events
+        btn.addEventListener('mousedown', () => {
+          pressedButtons.add(valve);
+          btn.classList.add('active');
+        });
+        
+        btn.addEventListener('mouseup', () => {
+          checkAndAdvance(currentLesson);
+          pressedButtons.delete(valve);
+          btn.classList.remove('active');
+        });
+        
+        // Touch events
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          pressedButtons.add(valve);
+          btn.classList.add('active');
+        });
+        
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          checkAndAdvance(currentLesson);
+          pressedButtons.delete(valve);
+          btn.classList.remove('active');
+        });
+      });
+      
+      // Keyboard events
+      document.addEventListener('keydown', (e) => {
+        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const valve = keyMap[e.key];
+        
+        if (valve !== undefined && !pressedButtons.has(valve)) {
+          pressedButtons.add(valve);
+          const btn = document.querySelector(`[data-valve="${valve}"]`);
+          if (btn) btn.classList.add('active');
+        }
+      });
+      
+      document.addEventListener('keyup', (e) => {
+        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const valve = keyMap[e.key];
+        
+        if (valve !== undefined && pressedButtons.has(valve)) {
+          checkAndAdvance(currentLesson);
+          pressedButtons.delete(valve);
+          const btn = document.querySelector(`[data-valve="${valve}"]`);
+          if (btn) btn.classList.remove('active');
+        }
+      });
+    }
+
+    function showCompletion() {
+      const accuracy = Math.round((correctCount / totalAttempts) * 100);
+      
+      const container = document.getElementById('lessonContainer');
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="completion-screen">
+          <div class="completion-icon">🎉</div>
+          <h1 class="completion-title">Lesson 2 Complete!</h1>
+          <p class="completion-message">You've learned 6 notes now!</p>
+          
+          <div class="completion-stats">
+            <div class="stat-item">
+              <div class="stat-value">${correctCount}</div>
+              <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${accuracy}%</div>
+              <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">6</div>
+              <div class="stat-label">Notes Learned</div>
+            </div>
+          </div>
+          
+          <a href="/absolutebeginnermode/lessonindex" class="next-lesson-btn">Back to Lessons</a>
+        </div>
+      `;
+      
+      // Mark lesson 2 as complete
+      localStorage.setItem('lesson2-complete', 'true');
+      
+      // Hide gamepad
+      const gamepad = document.querySelector('.gamepad-container');
+      if (gamepad) gamepad.style.display = 'none';
+    }
+
+    // Initialize first lesson
+    currentLesson = lessons[0];
+    renderNoteLesson(currentLesson);
+    setupButtonListeners();
+    updateProgress();
+  </script>
+</Layout>

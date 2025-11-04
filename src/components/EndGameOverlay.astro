@@ -202,14 +202,21 @@ const { visible = false, score = 0 } = Astro.props;
       const detail = ev.detail || {};
       const score = typeof detail.score === 'number' ? detail.score : 0;
       const total = typeof detail.total === 'number' && detail.total > 0 ? detail.total : 1;
+      const mode = detail.mode || '';
       
-      // Use accuracy from scoring system if available, otherwise calculate
-      const accuracy = typeof detail.accuracy === 'number' ? detail.accuracy : Math.round((score / total) * 100);
-      const stars = typeof detail.stars === 'number' ? detail.stars : (accuracy >= 80 ? 3 : accuracy >= 60 ? 2 : 1);
+      // For Marathon and Speed modes, displayScore is raw points (not percentage)
+      // For Learning mode, it's percentage
+      const displayValue = typeof detail.accuracy === 'number' ? detail.accuracy : Math.round((score / total) * 100);
+      const stars = typeof detail.stars === 'number' ? detail.stars : (displayValue >= 80 ? 3 : displayValue >= 60 ? 2 : 1);
       
       const scoreEl = overlay.querySelector('.score-value');
       if (scoreEl) {
-        scoreEl.textContent = `${accuracy}%`;
+        // Marathon and Speed modes show raw points, Learning mode shows percentage
+        if (mode === 'marathon' || mode === 'speed') {
+          scoreEl.textContent = `${displayValue}`;
+        } else {
+          scoreEl.textContent = `${displayValue}%`;
+        }
       }
       
       // Store stars for animation
@@ -228,7 +235,7 @@ const { visible = false, score = 0 } = Astro.props;
   .overlay {
     position: fixed;
     inset: 0;
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     background: rgba(0, 0, 0, 0.85);
@@ -240,11 +247,13 @@ const { visible = false, score = 0 } = Astro.props;
   }
 
   .overlay.show { 
+    display: flex;
     opacity: 1; 
     pointer-events: auto; 
   }
 
   .overlay.hide { 
+    display: none;
     opacity: 0; 
     pointer-events: none; 
   }

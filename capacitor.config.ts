@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.example.trumpetiq',
+  appId: 'com.user944848.trumpetiq',
   appName: 'Trumpet IQ',
   webDir: 'dist'
 };

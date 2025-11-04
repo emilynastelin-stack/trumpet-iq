@@ -1,0 +1,715 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GamePad from "../../components/GamePad.astro";
+---
+
+<Layout title="Lesson 1: Your First Notes">
+  <div class="lesson-page">
+    <!-- Progress Bar -->
+    <div class="lesson-progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Lesson Container -->
+    <div class="lesson-container" id="lessonContainer">
+      <!-- Lesson content will be dynamically inserted here -->
+    </div>
+
+    <!-- GamePad -->
+    <GamePad />
+  </div>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .lesson-page {
+      min-height: 100vh;
+      width: 100%;
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lesson-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .lesson-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: max(2rem, env(safe-area-inset-top)) 1.5rem max(2rem, env(safe-area-inset-bottom));
+      text-align: center;
+    }
+
+    /* Note Display */
+    .note-display {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 500px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .note-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .note-image {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      margin: 0 auto 2rem;
+      filter: brightness(1.1);
+      animation: slideIn 0.6s ease;
+    }
+
+    .note-letter {
+      font-size: 6rem;
+      font-weight: 900;
+      color: #10b981;
+      margin: 0;
+      text-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      animation: popIn 0.4s ease 0.2s both;
+    }
+
+    .note-letter-above {
+      font-size: 4rem;
+      font-weight: 900;
+      color: #10b981;
+      margin: 0 0 1rem;
+      text-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      animation: popIn 0.4s ease 0.1s both;
+    }
+
+    .note-prompt {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 1.5rem;
+      animation: fadeIn 0.5s ease 0.4s both;
+    }
+
+    /* Fingering Display */
+    .fingering-display {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 500px;
+      animation: fadeIn 0.5s ease 0.3s both;
+    }
+
+    .fingering-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Simple Gamepad */
+    .simple-gamepad {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .valve-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .valve-button.highlighted {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+      color: white;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
+      transform: scale(1.1);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Continue Button */
+    .continue-btn {
+      padding: 1rem 3rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.125rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+      animation: fadeIn 0.5s ease 0.5s both;
+    }
+
+    .continue-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
+    }
+
+    .continue-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Completion Screen */
+    .completion-screen {
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .completion-icon {
+      font-size: 6rem;
+      margin-bottom: 1.5rem;
+      animation: popIn 0.4s ease;
+    }
+
+    .completion-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .completion-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 3rem;
+    }
+
+    .completion-stats {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      margin: 0 auto 2rem;
+      max-width: 400px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      color: #10b981;
+      font-weight: 900;
+    }
+
+    .completion-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .action-btn {
+      padding: 1rem 2rem;
+      border-radius: 16px;
+      font-size: 1.125rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      text-decoration: none;
+      display: block;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    .action-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
+    }
+
+    .action-btn.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Celebration Overlay */
+    .celebration-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 2000;
+      animation: fadeIn 0.2s ease;
+      pointer-events: none;
+    }
+
+    .celebration-content {
+      background: rgba(16, 185, 129, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 2rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: celebrate 0.6s ease;
+      box-shadow: 0 20px 60px rgba(16, 185, 129, 0.6);
+    }
+
+    .celebration-icon {
+      font-size: 4rem;
+      animation: spin 0.6s ease;
+    }
+
+    .celebration-text {
+      font-size: 2rem;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .animate-in {
+      animation: slideInUp 0.5s ease;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes celebrate {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg) scale(0.8);
+      }
+      50% {
+        transform: rotate(180deg) scale(1.2);
+      }
+      100% {
+        transform: rotate(360deg) scale(1);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1.1);
+        box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
+      }
+      50% {
+        transform: scale(1.15);
+        box-shadow: 0 12px 40px rgba(16, 185, 129, 0.8);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .note-display {
+        padding: 2rem 1.5rem;
+      }
+
+      .note-letter-above {
+        font-size: 3rem;
+      }
+
+      .valve-button {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+      }
+
+      .simple-gamepad {
+        gap: 1rem;
+      }
+
+      .completion-title {
+        font-size: 2rem;
+      }
+
+      .completion-icon {
+        font-size: 4rem;
+      }
+    }
+  </style>
+
+  <script>
+    // Lesson sequence - introduces notes with hints, then practices without hints
+    const lessons = [
+      // Introduce G with hint
+      { type: 'note', title: 'Meet Your First Note!', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: true },
+      
+      // Introduce F with hint
+      { type: 'note', title: 'Your Second Note!', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: true },
+      
+      // Introduce E with hint
+      { type: 'note', title: 'Your Third Note!', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: true },
+      
+      // Practice 10 notes without hints (mistake-based hints after 1 wrong attempt)
+      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
+      { type: 'practice', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: false },
+      { type: 'practice', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: false },
+      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
+      { type: 'practice', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: false },
+      { type: 'practice', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: false },
+      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
+      { type: 'practice', note: 'F', image: '/notes/F1.png', fingering: [1], showHint: false },
+      { type: 'practice', note: 'E', image: '/notes/E1.png', fingering: [1, 2], showHint: false },
+      { type: 'practice', note: 'G', image: '/notes/G1.png', fingering: [0], showHint: false },
+      
+      { type: 'completion' }
+    ];
+
+    let currentStep = 0;
+    let pressedButtons = new Set();
+    let mistakeCount = 0;
+    let currentLesson = null;
+
+    function updateProgress() {
+      const progressFill = document.getElementById('progressFill');
+      const progress = ((currentStep + 1) / lessons.length) * 100;
+      if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+      }
+    }
+
+    function highlightButtons(fingering) {
+      // Clear all highlights
+      document.querySelectorAll('.gp-btn').forEach(btn => {
+        btn.classList.remove('hint');
+      });
+      
+      // Add hints to correct buttons
+      fingering.forEach(valve => {
+        const btn = document.querySelector(`[data-button="${valve}"]`);
+        if (btn) {
+          btn.classList.add('hint');
+        }
+      });
+    }
+
+    function checkAnswer(lesson) {
+      const expected = new Set(lesson.fingering);
+      
+      // Check if pressed buttons match expected
+      if (expected.size !== pressedButtons.size) return false;
+      
+      for (let btn of expected) {
+        if (!pressedButtons.has(btn)) return false;
+      }
+      
+      return true;
+    }
+
+    function renderNoteLesson(lesson) {
+      const container = document.getElementById('lessonContainer');
+      if (!container) return;
+
+      // Store current lesson for mistake tracking
+      currentLesson = lesson;
+      mistakeCount = 0;
+
+      container.innerHTML = `
+        <div class="note-display animate-in">
+          <h2 class="note-title">${lesson.title || 'Play This Note'}</h2>
+          <div class="note-letter-above">${lesson.note}</div>
+          <img src="${lesson.image}" alt="Note ${lesson.note}" class="note-image" />
+          <div class="note-prompt">Press the ${lesson.fingering.length === 1 && lesson.fingering[0] === 0 ? 'open' : 'correct'} button${lesson.fingering.length > 1 && lesson.fingering[0] !== 0 ? 's' : ''}!</div>
+        </div>
+      `;
+
+      // Clear hints first to prevent flashing
+      clearHints();
+
+      // Show hint initially if lesson says to
+      if (lesson.showHint) {
+        setTimeout(() => highlightButtons(lesson.fingering), 300);
+      }
+
+      // Listen for button presses
+      setupButtonListeners(lesson);
+    }
+
+    function clearHints() {
+      document.querySelectorAll('.gp-btn').forEach(btn => {
+        btn.classList.remove('hint');
+      });
+    }
+
+    function setupButtonListeners(lesson) {
+      const buttons = document.querySelectorAll('.gp-btn');
+      
+      function handlePress(valve) {
+        pressedButtons.add(valve);
+        checkAndAdvance(lesson);
+      }
+      
+      function handleRelease(valve) {
+        pressedButtons.delete(valve);
+      }
+
+      buttons.forEach(btn => {
+        const valveAttr = btn.getAttribute('data-button');
+        if (!valveAttr) return;
+        const valve = parseInt(valveAttr);
+        
+        // Mouse/touch events
+        btn.addEventListener('mousedown', () => handlePress(valve));
+        btn.addEventListener('touchstart', () => handlePress(valve));
+        btn.addEventListener('mouseup', () => handleRelease(valve));
+        btn.addEventListener('touchend', () => handleRelease(valve));
+        btn.addEventListener('mouseleave', () => handleRelease(valve));
+      });
+
+      // Keyboard events
+      document.addEventListener('keydown', (e) => {
+        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const valve = keyMap[e.key as keyof typeof keyMap];
+        if (valve !== undefined && !e.repeat) {
+          handlePress(valve);
+          const btn = document.querySelector(`[data-button="${valve}"]`);
+          if (btn) btn.classList.add('active');
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const valve = keyMap[e.key as keyof typeof keyMap];
+        if (valve !== undefined) {
+          handleRelease(valve);
+          const btn = document.querySelector(`[data-button="${valve}"]`);
+          if (btn) btn.classList.remove('active');
+        }
+      });
+    }
+
+    function checkAndAdvance(lesson) {
+      if (checkAnswer(lesson)) {
+        // Correct! Show celebration and advance
+        celebrateCorrect();
+        
+        setTimeout(() => {
+          pressedButtons.clear();
+          nextStep();
+        }, 800);
+      } else {
+        // Wrong answer - check if we should show hint
+        if (pressedButtons.size > 0) {
+          mistakeCount++;
+          
+          // Show hint after 1 mistake (if not already showing hint)
+          if (mistakeCount >= 1 && !lesson.showHint) {
+            setTimeout(() => {
+              highlightButtons(lesson.fingering);
+            }, 200);
+          }
+        }
+      }
+    }
+
+    function celebrateCorrect() {
+      // Add celebration overlay
+      const celebration = document.createElement('div');
+      celebration.className = 'celebration-overlay';
+      celebration.innerHTML = `
+        <div class="celebration-content">
+          <div class="celebration-icon">✨</div>
+          <div class="celebration-text">Correct!</div>
+        </div>
+      `;
+      document.body.appendChild(celebration);
+      
+      // Remove after animation
+      setTimeout(() => {
+        celebration.remove();
+      }, 800);
+    }
+
+    function renderCompletion() {
+      const container = document.getElementById('lessonContainer');
+      if (!container) return;
+
+      // Hide gamepad
+      const gamepad = document.getElementById('gamepad');
+      if (gamepad) gamepad.style.display = 'none';
+
+      container.innerHTML = `
+        <div class="completion-screen">
+          <div class="completion-icon">🎉</div>
+          <h1 class="completion-title">Lesson Complete!</h1>
+          <p class="completion-subtitle">You learned 3 notes!</p>
+
+          <div class="completion-stats">
+            <div class="stat-item">
+              <span class="stat-label">Notes Learned</span>
+              <span class="stat-value">3</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Notes: G, F, E</span>
+              <span class="stat-value">✓</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">XP Earned</span>
+              <span class="stat-value">+10</span>
+            </div>
+          </div>
+
+          <div class="completion-actions">
+            <a href="/absolutebeginnermode/lessonindex" class="action-btn primary">
+              Back to Lessons
+            </a>
+          </div>
+        </div>
+      `;
+      
+      // Mark lesson 1 as complete
+      localStorage.setItem('lesson1-complete', 'true');
+    }
+
+    function nextStep() {
+      currentStep++;
+      if (currentStep >= lessons.length) {
+        return;
+      }
+
+      updateProgress();
+
+      const lesson = lessons[currentStep];
+      if (lesson.type === 'note' || lesson.type === 'practice') {
+        renderNoteLesson(lesson);
+      } else if (lesson.type === 'completion') {
+        renderCompletion();
+      }
+    }
+
+    // Wait for page to load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initialize first lesson
+      updateProgress();
+      renderNoteLesson(lessons[0]);
+    });
+  </script>
+</Layout>

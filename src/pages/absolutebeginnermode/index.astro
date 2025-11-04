@@ -1,0 +1,193 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Welcome to Trumpet IQ">
+  <div class="welcome-page">
+    <div class="welcome-container">
+      <h1 class="welcome-title">Welcome to Trumpet IQ</h1>
+      <p class="welcome-subtitle">Let's find the right starting point for you</p>
+      
+      <div class="options-container">
+        <button class="option-card beginner" id="beginnerBtn">
+          <div class="option-icon">🎺</div>
+          <h2 class="option-title">I'm Just Learning to Read Music</h2>
+          <p class="option-description">
+            Start from the very beginning with guided lessons on reading notes and trumpet basics
+          </p>
+          <div class="option-badge">Absolute Beginner</div>
+        </button>
+
+        <button class="option-card experienced" id="experiencedBtn">
+          <div class="option-icon">🎵</div>
+          <h2 class="option-title">I Can Read Music Already</h2>
+          <p class="option-description">
+            Jump into fingering practice and start improving your sight-reading speed
+          </p>
+          <div class="option-badge">Ready to Practice</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .welcome-page {
+      min-height: 100vh;
+      width: 100%;
+      padding: max(2rem, env(safe-area-inset-top)) 1rem max(2rem, env(safe-area-inset-bottom));
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .welcome-container {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .welcome-title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .welcome-subtitle {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 3rem;
+    }
+
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .option-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .option-card:active {
+      transform: translateY(-2px);
+    }
+
+    .option-card.beginner {
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .option-card.beginner:hover {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.8);
+    }
+
+    .option-card.experienced {
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .option-card.experienced:hover {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.8);
+    }
+
+    .option-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .option-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .option-description {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 1rem;
+      line-height: 1.5;
+    }
+
+    .option-badge {
+      display: inline-block;
+      padding: 0.375rem 0.875rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .option-card.beginner .option-badge {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .option-card.experienced .option-badge {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+
+    @media (max-width: 640px) {
+      .welcome-title {
+        font-size: 1.75rem;
+      }
+
+      .option-card {
+        padding: 1.5rem;
+      }
+
+      .option-icon {
+        font-size: 2.5rem;
+      }
+
+      .option-title {
+        font-size: 1.125rem;
+      }
+    }
+  </style>
+
+  <script>
+    const beginnerBtn = document.getElementById('beginnerBtn');
+    const experiencedBtn = document.getElementById('experiencedBtn');
+
+    beginnerBtn?.addEventListener('click', () => {
+      // Save choice and go to introduction
+      localStorage.setItem('learning-mode', 'absolute-beginner');
+      window.location.href = '/absolutebeginnermode/intro';
+    });
+
+    experiencedBtn?.addEventListener('click', () => {
+      // Save choice and return to main app
+      localStorage.setItem('learning-mode', 'experienced');
+      window.location.href = '/';
+    });
+  </script>
+</Layout>

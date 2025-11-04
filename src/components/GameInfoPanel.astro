@@ -94,6 +94,7 @@ const showStreak = mode === 'speed';
       const detail = e.detail || {};
       const noteCount = typeof detail.noteCount === 'number' ? detail.noteCount : 0;
       const correctCount = typeof detail.correctCount === 'number' ? detail.correctCount : 0;
+      const mode = detail.mode || '';
       
       // Update notes counter (learning mode)
       if (panelNotes) {
@@ -101,12 +102,19 @@ const showStreak = mode === 'speed';
         panelNotes.textContent = `${displayCount}/20`;
       }
       
-      // Update score percentage
-      if (noteCount === 0) {
-        panelScore.textContent = '0%';
+      // Update score display
+      // For Marathon and Speed modes, show score (e.g., "15/20")
+      // For Learning mode, show percentage
+      if (mode === 'marathon' || mode === 'speed') {
+        panelScore.textContent = `${correctCount}/${noteCount + 1}`;
       } else {
-        const pct = Math.round((correctCount / (noteCount + 1)) * 100);
-        panelScore.textContent = `${pct}%`;
+        // Learning mode - show percentage
+        if (noteCount === 0) {
+          panelScore.textContent = '0%';
+        } else {
+          const pct = Math.round((correctCount / (noteCount + 1)) * 100);
+          panelScore.textContent = `${pct}%`;
+        }
       }
     }
 
@@ -197,7 +205,7 @@ const showStreak = mode === 'speed';
     width: 100%;
     max-width: 304px;
     margin: 0 auto 16px auto;
-    margin-top: calc(env(safe-area-inset-top, 0px) + 50px);
+    margin-top: calc(env(safe-area-inset-top, 0px) + 10px);
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.3) 100%);
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: 100px;

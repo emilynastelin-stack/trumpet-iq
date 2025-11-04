@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proficiency Calculator Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #0f172a;
+      color: white;
+    }
+    .test-section {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    h2 {
+      color: #10b981;
+      margin-top: 0;
+    }
+    .result {
+      background: rgba(16, 185, 129, 0.2);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: monospace;
+    }
+    .band {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+    .band-1 { background: #ef4444; }
+    .band-2 { background: #f59e0b; }
+    .band-3 { background: #3b82f6; }
+    .band-4 { background: #8b5cf6; }
+    .band-5 { background: #10b981; }
+    button {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #059669;
+    }
+    input, select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      margin: 5px;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .metric {
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .metric-label {
+      font-size: 0.85em;
+      opacity: 0.7;
+      margin-bottom: 5px;
+    }
+    .metric-value {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 CEFR-Inspired Proficiency Calculator Test</h1>
+  
+  <div class="test-section">
+    <h2>Simulate a Game Session</h2>
+    <div style="margin: 15px 0;">
+      <label>Correct: <input type="number" id="correct" value="17" min="0" max="20"></label>
+      <label>Total: <input type="number" id="total" value="20" min="1" max="50"></label>
+      <label>Avg Speed (seconds): <input type="number" id="speed" value="1.5" step="0.1" min="0.5" max="5"></label>
+      <label>Days Since Last Practice: <input type="number" id="days" value="0" min="0" max="30"></label>
+    </div>
+    <button onclick="simulateSession()">Simulate Session</button>
+    <button onclick="resetProficiency()">Reset Proficiency</button>
+    <div id="sessionResult" class="result" style="display: none;"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Current Proficiency</h2>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Proficiency Score</div>
+        <div class="metric-value" id="profScore">-</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Band</div>
+        <div class="metric-value" id="profBand">-</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Total Sessions</div>
+        <div class="metric-value" id="totalSessions">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Notes Covered</div>
+        <div class="metric-value" id="notesCovered">0</div>
+      </div>
+    </div>
+    <button onclick="loadCurrent()">Refresh</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Session History</h2>
+    <div id="historyList"></div>
+  </div>
+
+  <script type="module">
+    import { ProficiencyCalculator } from '/scripts/ProficiencyCalculator.js';
+    import { UserProficiency } from '/scripts/UserProficiency.js';
+    import { getOrCreateUser } from '/utils/simple-auth.js';
+
+    const user = getOrCreateUser();
+    window.currentUserId = user.uid;
+
+    window.simulateSession = function() {
+      const correct = parseInt(document.getElementById('correct').value);
+      const total = parseInt(document.getElementById('total').value);
+      const avgSpeed = parseFloat(document.getElementById('speed').value);
+      const daysSince = parseInt(document.getElementById('days').value);
+
+      // Generate some fake notes practiced
+      const notesPracticed = [];
+      const possibleNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+      for (let i = 0; i < Math.min(correct, 7); i++) {
+        notesPracticed.push(possibleNotes[i] + '4');
+      }
+
+      // If days since > 0, we need to manually adjust last practice date
+      if (daysSince > 0) {
+        const userData = UserProficiency.getUserData(window.currentUserId);
+        const newDate = new Date();
+        newDate.setDate(newDate.getDate() - daysSince);
+        userData.lastPractice = newDate.toISOString();
+        UserProficiency.saveUserData(window.currentUserId, userData);
+      }
+
+      const result = UserProficiency.recordSession(window.currentUserId, {
+        score: correct,
+        total: total,
+        avgSpeed: avgSpeed,
+        notesPracticed: notesPracticed,
+        mode: 'learning',
+        difficulty: 'basic',
+        instrument: 'Bb',
+        key: 'Bb'
+      });
+
+      const resultDiv = document.getElementById('sessionResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `
+        <strong>Session Recorded!</strong><br>
+        Proficiency: ${result.proficiencyDisplay}/100<br>
+        Band: <span class="band band-${result.band.level}">${result.band.name}</span><br>
+        <br>
+        <strong>Metrics:</strong><br>
+        • Accuracy: ${Math.round(result.metrics.accuracy * 100)}%<br>
+        • Speed: ${result.metrics.avgSpeed}s per note → ${Math.round(result.metrics.speed * 100)}% fluency<br>
+        • Coverage: ${Math.round(result.metrics.coverage * 100)}%<br>
+        • Consistency: ${Math.round(result.metrics.consistency * 100)}%
+      `;
+
+      loadCurrent();
+    };
+
+    window.resetProficiency = function() {
+      if (confirm('Reset all proficiency data?')) {
+        localStorage.removeItem(`proficiency_${window.currentUserId}`);
+        loadCurrent();
+        document.getElementById('sessionResult').style.display = 'none';
+      }
+    };
+
+    window.loadCurrent = function() {
+      const profInfo = UserProficiency.getCurrentProficiency(window.currentUserId);
+      
+      document.getElementById('profScore').textContent = profInfo.proficiencyDisplay;
+      document.getElementById('profBand').innerHTML = `<span class="band band-${profInfo.band.level}">${profInfo.band.name}</span>`;
+      document.getElementById('totalSessions').textContent = profInfo.totalSessions;
+      document.getElementById('notesCovered').textContent = profInfo.notesCovered;
+
+      // Show history
+      const trend = UserProficiency.getProficiencyTrend(window.currentUserId, 30);
+      const historyDiv = document.getElementById('historyList');
+      if (trend.length === 0) {
+        historyDiv.innerHTML = '<em style="opacity: 0.5;">No sessions yet</em>';
+      } else {
+        historyDiv.innerHTML = trend.map(s => {
+          const date = new Date(s.date).toLocaleString();
+          return `<div class="result">${date} - Proficiency: ${s.proficiency}, Accuracy: ${s.accuracy}%, Mode: ${s.mode}</div>`;
+        }).join('');
+      }
+    };
+
+    // Load on page load
+    loadCurrent();
+  </script>
+</body>
+</html>

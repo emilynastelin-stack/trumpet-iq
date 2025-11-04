@@ -16,14 +16,24 @@ const { showTransposition = false } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     
     <!-- iOS PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- View Transitions for smooth page changes -->
+    <meta name="view-transition" content="same-origin" />
     
     <title>Astro Music Game</title>
 
     <!-- Tailwind CSS -->
   <link rel="stylesheet" href="/global.css" />
-  </head>  <body class="min-h-screen flex flex-col">
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- Loading overlay to prevent white flashes -->
+    <div id="page-loader" class="page-loader">
+      <div class="loader-spinner"></div>
+    </div>
+    
     <div class="background-gradient"></div>
     <div class="floating-orbs">
       <div class="orb orb-1"></div>
@@ -31,39 +41,391 @@ const { showTransposition = false } = Astro.props;
       <div class="orb orb-3"></div>
     </div>
     <slot />
-    <TranspositionPanel />
+    {showTransposition && (<TranspositionPanel />)}
     <UserSettings />
     <Footer showTransposition={showTransposition} />
-  <script type="module" src="/scripts/transposition-panel.js"></script>
-  <script is:inline>
+  {showTransposition && (<script type="module" src="/scripts/transposition-panel.js"></script>)}
+  {showTransposition && (<script is:inline>
     // Initialize transposition UI state on page load
     (function() {
       function initTranspositionUI() {
         const isEnabled = localStorage.getItem('transposition-enabled') === 'true';
         const transpositionBtn = document.getElementById('transposition-toggle');
-        
         // Only manage button visibility - TranspositionControls handles locked state internally
         if (transpositionBtn) {
           transpositionBtn.style.display = isEnabled ? '' : 'none';
         }
       }
-      
       // Run immediately if DOM is ready
       if (document.readyState !== 'loading') {
         initTranspositionUI();
       }
-      
       // Also run on DOMContentLoaded
       document.addEventListener('DOMContentLoaded', initTranspositionUI);
-      
       // Run after a delay to catch any dynamically added elements
       setTimeout(initTranspositionUI, 200);
+      // React to settings changes while the page is open
+      window.addEventListener('transposition:enabled', (ev) => {
+        const transpositionBtn = document.getElementById('transposition-toggle');
+        if (!transpositionBtn) return;
+        try {
+          const enabled = !!(ev && ev.detail && ev.detail.enabled);
+          transpositionBtn.style.display = enabled ? '' : 'none';
+        } catch (_) {}
+      });
+      // If transposition activity is detected, ensure button is visible
+      const ensureVisible = () => {
+        const transpositionBtn = document.getElementById('transposition-toggle');
+        if (!transpositionBtn) return;
+        if (localStorage.getItem('transposition-enabled') === 'true') {
+          transpositionBtn.style.display = '';
+        }
+      };
+      window.addEventListener('transposition:change', ensureVisible);
+      window.addEventListener('transposition:sync', ensureVisible);
+    })();
+  </script>)}
+  <script is:inline>
+    // Fix absolute /-prefixed navigation for Capacitor/WKWebView by rewriting to root-based URLs.
+    (function () {
+      function isExternal(h) {
+        return /^(https?:|mailto:|tel:|#|javascript:)/.test(h);
+      }
+      function getAppRoot() {
+        const href = window.location.href || '';
+        if (/^capacitor:\/\//i.test(href)) return 'capacitor://localhost/';
+        if (/^https?:\/\//i.test(href)) return (window.location.origin || '').replace(/\/$/, '') + '/';
+        const m = href.match(/^(.*?\/public\/)/);
+        if (m && m[1]) return m[1];
+        return '/';
+      }
+      function buildRelativeUrlFromRootHref(href) {
+        var base = getAppRoot();
+        
+        // Special case: root path
+        if (href === '/') {
+          console.log('[nav] Root path detected, returning base + index.html');
+          return base + 'index.html';
+        }
+        
+        var raw = href.slice(1);
+        var hash = '';
+        var hashIndex = raw.indexOf('#');
+        if (hashIndex !== -1) { hash = raw.slice(hashIndex); raw = raw.slice(0, hashIndex); }
+        var search = '';
+        var qIndex = raw.indexOf('?');
+        var pathname = raw;
+        if (qIndex !== -1) { search = raw.slice(qIndex); pathname = raw.slice(0, qIndex); }
+        
+        // Handle empty pathname
+        if (pathname === '' || pathname === '/') {
+          pathname = 'index.html';
+        } else if (!pathname.includes('.') && !pathname.endsWith('/')) {
+          pathname = pathname + '/index.html';
+        } else if (pathname.endsWith('/')) {
+          pathname = pathname + 'index.html';
+        }
+        
+        return base + pathname + search + hash;
+      }
+      document.addEventListener('click', function (e) {
+        try {
+          var a = e.target && e.target.closest ? e.target.closest('a') : null;
+          if (!a) return;
+          var href = a.getAttribute('href');
+          console.log('[nav] Click detected on link:', href, 'Element:', a);
+          if (!href || isExternal(href)) {
+            console.log('[nav] Skipping - no href or external link');
+            return;
+          }
+          if (href.startsWith('/')) {
+            console.log('[nav] Internal link detected, preventing default and starting navigation');
+            e.preventDefault();
+            
+            // Show loader during navigation
+            var loader = document.getElementById('page-loader');
+            if (loader) {
+              loader.classList.remove('hidden');
+              console.log('[nav] Loader shown');
+              
+              // Safety timeout - always hide loader after 3 seconds
+              setTimeout(function() {
+                console.log('[nav] Safety timeout - hiding loader');
+                loader.classList.add('hidden');
+                document.body.classList.remove('navigating');
+              }, 3000);
+            }
+            
+            // Mark body as navigating to hide overlays
+            document.body.classList.add('navigating');
+            
+            // Add swoop-out animation to main content
+            var main = document.querySelector('main');
+            console.log('[nav] Found main element:', !!main);
+            
+            if (!main) {
+              console.log('[nav] No main element found, using standard navigation');
+              // No main element, just do standard navigation with loader
+              var newUrl = buildRelativeUrlFromRootHref(href);
+              console.log('[nav] Navigating to:', newUrl);
+              window.location.href = newUrl;
+              return;
+            }
+            
+            if (main) {
+              main.style.animation = 'swoopOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards';
+              
+              // Wait for animation, then fetch and replace content
+              setTimeout(function() {
+                var newUrl = buildRelativeUrlFromRootHref(href);
+                console.log('[nav] Navigating from', href, 'to', newUrl);
+                
+                // Fetch the new page
+                fetch(newUrl)
+                  .then(function(response) { 
+                    console.log('[nav] Fetch response:', response.status, response.url);
+                    return response.text(); 
+                  })
+                  .then(function(html) {
+                    // Parse the HTML
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var newMain = doc.querySelector('main');
+                    console.log('[nav] Found new main:', !!newMain);
+                    
+                    if (newMain && main) {
+                      // Check for new stylesheets and add them if needed
+                      var newStylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
+                      var existingHrefs = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(function(link) {
+                        return link.href;
+                      });
+                      
+                      newStylesheets.forEach(function(stylesheet) {
+                        if (!existingHrefs.includes(stylesheet.href)) {
+                          console.log('[nav] Loading new stylesheet:', stylesheet.href);
+                          var newLink = document.createElement('link');
+                          newLink.rel = 'stylesheet';
+                          newLink.href = stylesheet.href;
+                          document.head.appendChild(newLink);
+                        }
+                      });
+                      
+                      // Replace entire main element to preserve all attributes and structure
+                      var parent = main.parentNode;
+                      var clonedMain = newMain.cloneNode(true);
+                      parent.replaceChild(clonedMain, main);
+                      main = clonedMain;
+                      
+                      // Update title
+                      var newTitle = doc.querySelector('title');
+                      if (newTitle) document.title = newTitle.textContent;
+                      
+                      // Update URL without reload
+                      history.pushState({}, '', newUrl);
+                      
+                      // Remove navigating class and trigger swoop-in
+                      document.body.classList.remove('navigating');
+                      main.style.animation = 'swoopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+                      
+                      // Hide loader after navigation (with multiple fallbacks)
+                      if (loader) {
+                        loader.classList.add('hidden');
+                      }
+                      
+                      // Trigger DOMContentLoaded for the new page content
+                      setTimeout(function() {
+                        var event = new Event('DOMContentLoaded', { bubbles: true, cancelable: false });
+                        document.dispatchEvent(event);
+                      }, 50);
+                      
+                      // Execute any inline scripts in the new content
+                      var scripts = main.querySelectorAll('script');
+                      scripts.forEach(function(oldScript) {
+                        var scriptType = oldScript.getAttribute('type');
+                        var scriptSrc = oldScript.getAttribute('src') || '';
+                        
+                        // Skip astro dev toolbar scripts to avoid re-registration errors
+                        if (scriptSrc.includes('astro') || scriptSrc.includes('vite')) {
+                          return;
+                        }
+                        
+                        // Execute all other scripts (including type="module")
+                        var newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(function(attr) {
+                          newScript.setAttribute(attr.name, attr.value);
+                        });
+                        if (oldScript.src) {
+                          newScript.src = oldScript.src;
+                        } else {
+                          newScript.textContent = oldScript.textContent;
+                        }
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                      });
+                    } else {
+                      console.log('[nav] Main element missing, falling back to full page load');
+                      // Fallback to full page load if parsing fails
+                      window.location.href = newUrl;
+                    }
+                  })
+                  .catch(function(err) {
+                    console.error('[nav] Navigation error:', err);
+                    // Fallback to full page load on error
+                    window.location.href = newUrl;
+                  });
+              }, 250);
+            } else {
+              console.log('[nav] No main element found, falling back to full page load');
+              // No main element, just do a regular navigation
+              window.location.href = buildRelativeUrlFromRootHref(href);
+            }
+          }
+        } catch (err) {
+          console.warn('[nav] nav-rewrite error', err);
+        }
+      }, false);
+    })();
+  </script>
+  <script is:inline>
+    // Remove navigating class on page load to show content
+    (function() {
+      // Remove immediately
+      document.body.classList.remove('navigating');
+      
+      // Also remove on DOMContentLoaded
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.remove('navigating');
+      });
+    })();
+  </script>
+  <script is:inline>
+    // Hide page loader after page loads
+    (function() {
+      function hideLoader() {
+        var loader = document.getElementById('page-loader');
+        if (loader) {
+          loader.classList.add('hidden');
+          console.log('[loader] Hidden');
+        }
+      }
+      
+      // Maximum timeout - ALWAYS hide after 2 seconds no matter what
+      setTimeout(function() {
+        console.log('[loader] Maximum timeout reached, forcing hide');
+        hideLoader();
+      }, 2000);
+      
+      // Hide immediately if already loaded
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(hideLoader, 100);
+      }
+      
+      // Also hide on DOMContentLoaded
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(hideLoader, 100);
+      });
+      
+      // Fallback - hide after window load
+      window.addEventListener('load', function() {
+        setTimeout(hideLoader, 100);
+      });
+    })();
+  </script>
+  <script is:inline>
+    // Footer touch feedback only - let global nav handler do the navigation
+    (function initFooter() {
+      console.log('[footer] Initializing footer touch feedback');
+      
+      // Mark if already initialized to prevent duplicate listeners
+      if (window.footerInitialized) {
+        console.log('[footer] Already initialized');
+        return;
+      }
+      window.footerInitialized = true;
+      
+      // Wait for footer to be in DOM
+      function attachFooterListeners() {
+        var footer = document.querySelector('.footer');
+        if (!footer) {
+          console.log('[footer] Footer not found, retrying...');
+          setTimeout(attachFooterListeners, 100);
+          return;
+        }
+        
+        console.log('[footer] Footer found, attaching touch feedback listeners');
+        
+        // Track touch position to detect if it's a tap vs scroll
+        var touchStartY = 0;
+        var touchStartX = 0;
+        
+        footer.addEventListener('touchstart', function(e) {
+          var btn = e.target && e.target.closest ? e.target.closest('.footer-btn') : null;
+          if (btn) {
+            btn.classList.add('touching');
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+            console.log('[footer] Touch started on button');
+          }
+        }, { passive: true });
+        
+        footer.addEventListener('touchend', function(e) {
+          var btn = e.target && e.target.closest ? e.target.closest('.footer-btn') : null;
+          if (btn) {
+            btn.classList.remove('touching');
+            
+            // Only trigger navigation if it wasn't a scroll/swipe
+            var touchEndY = e.changedTouches[0].clientY;
+            var touchEndX = e.changedTouches[0].clientX;
+            var deltaY = Math.abs(touchEndY - touchStartY);
+            var deltaX = Math.abs(touchEndX - touchStartX);
+            
+            if (deltaY < 10 && deltaX < 10) {
+              console.log('[footer] Touch ended on button, dispatching click');
+              // Dispatch a synthetic click event that will be caught by global handler
+              var clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+              });
+              btn.dispatchEvent(clickEvent);
+            } else {
+              console.log('[footer] Touch moved too much (scroll/swipe), ignoring');
+            }
+          }
+        }, { passive: true });
+        
+        footer.addEventListener('touchcancel', function(e) {
+          var btn = e.target && e.target.closest ? e.target.closest('.footer-btn') : null;
+          if (btn) {
+            btn.classList.remove('touching');
+          }
+        }, { passive: true });
+      }
+      
+      // Start trying to attach listeners
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachFooterListeners);
+      } else {
+        attachFooterListeners();
+      }
     })();
   </script>
   </body>
 </html>
 
 <style>
+  /* Prevent white flash on page load */
+  html {
+    background: linear-gradient(135deg, 
+      #c4421a 0%, 
+      #ff8c00 12%, 
+      #ffa500 20%, 
+      #182134 35%, 
+      #374661 50%, 
+      #12908e 75%, 
+      #16594a 100%);
+    background-attachment: fixed;
+  }
+
   body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -71,13 +433,100 @@ const { showTransposition = false } = Astro.props;
     position: relative;
     overflow-x: hidden;
     /* iOS safe area insets */
-    padding-top: env(safe-area-inset-top);
+    padding-top: 0;
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
     /* Optimize touch interactions */
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    /* Prevent white flash - keep background always visible */
+    background: transparent;
+  }
+
+  /* Loading overlay to prevent white flash during navigation */
+  .page-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    visibility: visible;
+  }
+
+  .page-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Spinner animation */
+  .loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Page content animations - swoop in and out */
+  main {
+    animation: swoopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes swoopIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes swoopOut {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.98);
+    }
+  }
+
+  /* Hide overlays during page navigation */
+  body.navigating #begingame-overlay,
+  body.navigating #endgame-overlay,
+  body.navigating #pause-overlay,
+  body.navigating .transposition-overlay {
+    display: none !important;
+    opacity: 0 !important;
+  }
+
+  @keyframes slideInFade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   /* Global touch optimization for all buttons and interactive elements */
@@ -86,6 +535,11 @@ const { showTransposition = false } = Astro.props;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  /* Touch feedback for footer buttons */
+  .footer-btn.touching {
+    transform: translateX(-50%) scale(0.95) !important;
   }
 
   /* Background gradient animation - optimized for mobile */
@@ -97,13 +551,17 @@ const { showTransposition = false } = Astro.props;
   height: 100%;
   background: linear-gradient(135deg, 
     #c4421a 0%, 
-    #182134 25%, 
+    #ff8c00 12%, 
+    #ffa500 20%, 
+    #182134 35%, 
     #374661 50%, 
     #12908e 75%, 
     #16594a 100%);
   background-size: 400% 400%;
   animation: gradientFlow 20s ease infinite;
   z-index: -2;
+  will-change: background-position;
+  backface-visibility: hidden;
 }
 
 @keyframes gradientFlow {
@@ -120,8 +578,10 @@ const { showTransposition = false } = Astro.props;
     /* More dramatic diagonal for mobile */
     background: linear-gradient(160deg, 
       #c4421a 0%, 
-      #182134 30%, 
-      #12908e 60%, 
+      #ff8c00 15%, 
+      #ffa500 25%, 
+      #182134 40%, 
+      #12908e 70%, 
       #16594a 100%);
     background-size: 300% 300%;
     animation: gradientFlowMobile 15s ease-in-out infinite;
@@ -162,7 +622,9 @@ const { showTransposition = false } = Astro.props;
   .background-gradient {
     background: linear-gradient(170deg, 
       #c4421a 0%, 
-      #12908e 50%, 
+      #ff8c00 20%, 
+      #ffa500 30%, 
+      #12908e 60%, 
       #182134 100%);
     background-size: 250% 250%;
     animation: gradientFlowSmall 12s ease-in-out infinite;
@@ -186,6 +648,8 @@ const { showTransposition = false } = Astro.props;
     overflow: hidden;
     z-index: -1;
     pointer-events: none;
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   .orb {

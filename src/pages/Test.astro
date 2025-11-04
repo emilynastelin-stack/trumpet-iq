@@ -1,25 +1,1078 @@
 ---
+import Layout from "../layouts/Layout.astro";
 ---
 
-<h1>Test Page</h1>
-<div id="test-result">Testing anonymous sign-in...</div>
+<Layout title="Your Progress">
+  <div class="progress-page">
 
-<script type="module">
-	import { renderView } from '/scripts/progress.js';
-	import { firebaseReady } from '/utils/firebase.js';
+    <!-- HERO STATS -->
+    <div class="hero-section">
+      <div class="greeting">
+        <h1>My Progress</h1>
+        <p>You're on a <strong>0-day streak</strong></p>
+      </div>
+      
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-content">
+            <div class="stat-value">0%</div>
+            <div class="stat-label">Accuracy</div>
+          </div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-content">
+            <div class="stat-value">0min</div>
+            <div class="stat-label">Avg Session</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-	async function testAnonymousSignIn() {
-		try {
-			const { auth, signInAnonymously } = await firebaseReady;
-			const userCredential = await signInAnonymously();
-			const user = userCredential.user;
-			document.getElementById('test-result').textContent = `Success! Signed in anonymously as UID: ${user.uid}`;
-			// Optionally, call renderView or other progress.js logic here
-			renderView && renderView();
-		} catch (error) {
-			document.getElementById('test-result').textContent = `Failed: ${error.code || 'Unknown'} - ${error.message || error}`;
-		}
-	}
+    <!-- ACTIVITY CHART -->
+    <section class="glass-panel chart-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Activity</h2>
+        <div class="tab-pills">
+          <button class="pill-btn active" data-view="daily">Week</button>
+          <button class="pill-btn" data-view="weekly">Month</button>
+          <button class="pill-btn" data-view="progress">Year</button>
+        </div>
+      </div>
 
-	testAnonymousSignIn();
-</script>
+      <div class="chart-container">
+        <div class="bar-graph" id="barGraph"></div>
+      </div>
+      <div class="graph-labels" id="graphLabels"></div>
+    </section>
+
+    <!-- TODAY'S SUMMARY -->
+    <section class="glass-panel summary-panel">
+      <h2 class="panel-title">Today's Summary</h2>
+      
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-icon green">✓</div>
+          <div class="summary-info">
+            <div class="summary-value">0</div>
+            <div class="summary-label">Correct Notes</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon red">✗</div>
+          <div class="summary-info">
+            <div class="summary-value">0</div>
+            <div class="summary-label">Mistakes</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon blue">🎵</div>
+          <div class="summary-info">
+            <div class="summary-value">0</div>
+            <div class="summary-label">Sessions</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon orange">⚡</div>
+          <div class="summary-info">
+            <div class="summary-value">0s</div>
+            <div class="summary-label">Avg Speed</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSPOSITION MASTERY -->
+    <section class="glass-panel mastery-panel">
+      <h2 class="panel-title">Transposition Mastery</h2>
+      <p class="panel-subtitle">Track your proficiency across instruments and keys</p>
+
+      <!-- Locked Message (shown in Beginner Mode) -->
+      <div class="mastery-locked-message">
+        <div class="lock-icon-large">🔒</div>
+        <h4 class="lock-title">Transposition Locked</h4>
+        <p class="lock-description">
+          Transposition tracking is only available in <strong>Advanced Mode</strong>.
+        </p>
+        <p class="lock-instruction">
+          Open <strong>Settings</strong> and turn off <strong>Beginner Mode</strong> to unlock.
+        </p>
+      </div>
+
+      <!-- Transposition Content (shown in Advanced Mode) -->
+      <div class="mastery-content">
+      <div class="mastery-tabs">
+        <button class="mastery-tab active" data-instrument="c">C Trumpet</button>
+        <button class="mastery-tab" data-instrument="bb">Bb Trumpet</button>
+        <button class="mastery-tab" data-instrument="d">D Trumpet</button>
+        <button class="mastery-tab" data-instrument="eb">Eb Trumpet</button>
+      </div>
+
+      <div class="keys-container" id="keysContainer">
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">A Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">Bb Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">H Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card disabled">
+          <div class="key-header">
+            <span class="key-name">C Major</span>
+            <span class="key-percentage">N/A</span>
+          </div>
+          <div class="key-note">Native key - no transposition needed</div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">D Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">Eb Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">E Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">F Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+
+        <div class="key-card">
+          <div class="key-header">
+            <span class="key-name">G Major</span>
+            <span class="key-percentage">0%</span>
+          </div>
+          <div class="key-progress-bar">
+            <div class="key-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="key-stats">
+            <span>0 attempts</span>
+            <span>0 correct</span>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script type="module">
+  import { renderView } from "/scripts/progress.js";
+  import { firebaseReady } from '/utils/firebase.js';
+  import { getOrCreateUser } from '/utils/simple-auth.js';
+
+    // Use simple local auth instead of Firebase Auth (which hangs in iOS WebView)
+    const currentUser = getOrCreateUser();
+    console.log('✅ Progress page: User authenticated:', currentUser.uid);
+
+    // Check transposition mode on page load
+    function updateMasteryVisibility() {
+      const isEnabled = localStorage.getItem('transposition-enabled') === 'true';
+      const lockedMessage = document.querySelector('.mastery-locked-message');
+      const masteryContent = document.querySelector('.mastery-content');
+      
+      if (lockedMessage && masteryContent) {
+        if (isEnabled) {
+          // Advanced Mode - show mastery content
+          lockedMessage.style.display = 'none';
+          masteryContent.style.display = 'block';
+        } else {
+          // Beginner Mode - show locked message
+          lockedMessage.style.display = 'flex';
+          masteryContent.style.display = 'none';
+        }
+      }
+    }
+
+    // Listen for mode changes
+    window.addEventListener('transposition:enabled', () => {
+      updateMasteryVisibility();
+    });
+
+    // Check on page load
+    updateMasteryVisibility();
+
+    // Load progress immediately with local user
+    loadUserProgress(currentUser.uid);
+
+    // Reload progress data when page becomes visible (e.g., after navigating back)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        console.log('Page visible again, reloading progress...');
+        loadUserProgress(currentUser.uid);
+      }
+    });
+
+    // Also listen for DOMContentLoaded to reload after client-side navigation
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded - reloading progress...');
+      loadUserProgress(currentUser.uid);
+    });
+
+    async function loadUserProgress(uid) {
+      try {
+        console.log('📊 Loading progress for user:', uid);
+        const { db, collection, getDocs, query, where, orderBy } = await firebaseReady;
+        
+        const scoresRef = collection(db, 'scores');
+        console.log('📊 Scores collection reference created');
+        
+        // Try simple query first (no orderBy) to see if compound index is the issue
+        const q = query(scoresRef, where('userId', '==', uid));
+        console.log('📊 Query created with userId (no orderBy):', uid);
+        console.log('📊 About to execute getDocs...');
+        
+        const snapshot = await getDocs(q);
+        console.log('📊 ✅ getDocs completed!');
+        console.log('📊 Query executed, empty?', snapshot.empty, 'size:', snapshot.size);
+        
+        if (!snapshot.empty) {
+          const scores = [];
+          snapshot.forEach(doc => {
+            scores.push({ id: doc.id, ...doc.data() });
+          });
+          
+          console.log('✅ Loaded', scores.length, 'user scores:', scores);
+          console.log('📊 First score:', scores[0]);
+          
+          const stats = calculateStats(scores);
+          console.log('📊 Calculated stats:', stats);
+          updateStats(stats);
+          updateActivity(scores);
+          updateMastery(scores);
+        } else {
+          console.warn('⚠️ No scores found for userId:', uid, '- keeping default 0 values');
+        }
+      } catch (err) {
+        console.error('❌ Error loading user progress:', err);
+        console.error('❌ Error details:', err.message, err.code);
+      }
+    }
+
+    function calculateStats(scores) {
+      if (!scores || scores.length === 0) {
+        return { accuracy: 0, avgSession: 0, correctNotes: 0, mistakes: 0, sessions: 0, avgSpeed: 0 };
+      }
+
+      const totalScore = scores.reduce((sum, s) => sum + (s.score || 0), 0);
+      const totalNotes = scores.reduce((sum, s) => sum + (s.total || 0), 0);
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayScores = scores.filter(s => {
+        const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
+        return scoreDate >= today;
+      });
+      
+      const todayCorrect = todayScores.reduce((sum, s) => sum + (s.score || 0), 0);
+      const todayMistakes = todayScores.reduce((sum, s) => sum + ((s.total || 0) - (s.score || 0)), 0);
+      
+      return {
+        accuracy: totalNotes > 0 ? Math.round((totalScore / totalNotes) * 100) : 0,
+        avgSession: scores.length > 0 ? Math.round((totalNotes / scores.length) * 0.5) : 0,
+        correctNotes: todayCorrect,
+        mistakes: todayMistakes,
+        sessions: todayScores.length,
+        avgSpeed: 1.8
+      };
+    }
+
+    function updateStats(data) {
+      const heroStats = document.querySelectorAll('.hero-stat');
+      if (heroStats[0]) heroStats[0].querySelector('.stat-value').textContent = `${data.accuracy}%`;
+      if (heroStats[1]) heroStats[1].querySelector('.stat-value').textContent = `${data.avgSession}min`;
+
+      const summaryCards = document.querySelectorAll('.summary-card');
+      if (summaryCards[0]) summaryCards[0].querySelector('.summary-value').textContent = data.correctNotes;
+      if (summaryCards[1]) summaryCards[1].querySelector('.summary-value').textContent = data.mistakes;
+      if (summaryCards[2]) summaryCards[2].querySelector('.summary-value').textContent = data.sessions;
+      if (summaryCards[3]) summaryCards[3].querySelector('.summary-value').textContent = `${data.avgSpeed}s`;
+    }
+
+    function updateActivity(scores) {
+      const activityByDate = {};
+      
+      console.log('updateActivity called with scores:', scores);
+      
+      scores.forEach(score => {
+        const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
+        const dateKey = scoreDate.toISOString().split('T')[0];
+        
+        console.log('Processing score:', { date: dateKey, proficiencyScore: score.proficiencyScore });
+        
+        if (!activityByDate[dateKey]) {
+          activityByDate[dateKey] = { count: 0, totalProficiency: 0 };
+        }
+        activityByDate[dateKey].count++;
+        activityByDate[dateKey].totalProficiency += score.proficiencyScore || 0;
+      });
+      
+      console.log('Activity by date:', activityByDate);
+      
+      const today = new Date();
+      const dailyLabels = [];
+      const dailyValues = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split('T')[0];
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        
+        dailyLabels.push(dayName);
+        const dayData = activityByDate[dateKey];
+        // Calculate average proficiency for the day
+        const avgProficiency = dayData ? Math.round(dayData.totalProficiency / dayData.count) : 0;
+        dailyValues.push(avgProficiency);
+        console.log(`Day ${dayName} (${dateKey}): ${avgProficiency} proficiency (${dayData?.count || 0} sessions)`);
+      }
+      
+      console.log('Daily values for chart:', dailyValues);
+      
+      window.views = {
+        daily: { labels: dailyLabels, values: dailyValues },
+        weekly: { labels: ["W1", "W2", "W3", "W4"], values: [60, 75, 90, 80] },
+        progress: { labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], values: [45, 50, 55, 58, 62, 68, 72, 75, 78, 82, 85, 88] }
+      };
+      
+      console.log('Rendering daily view with data:', window.views.daily);
+      renderView.call(window, "daily");
+    }
+
+    function updateMastery(scores) {
+      const masteryData = {};
+      
+      scores.forEach(score => {
+        const instrument = score.instrument || 'Bb';
+        const key = score.key || 'Bb';
+        
+        if (!masteryData[instrument]) {
+          masteryData[instrument] = {};
+        }
+        
+        if (!masteryData[instrument][key]) {
+          masteryData[instrument][key] = { attempts: 0, totalProficiency: 0 };
+        }
+        
+        masteryData[instrument][key].totalProficiency += score.proficiencyScore || 0;
+        masteryData[instrument][key].attempts++;
+      });
+      
+      console.log('Mastery data:', masteryData);
+      window.masteryData = masteryData;
+      
+      // Populate current instrument view (C trumpet by default)
+      populateMasteryCards('C');
+    }
+    
+    function populateMasteryCards(instrumentName) {
+      const masteryData = window.masteryData || {};
+      const instrumentData = masteryData[instrumentName] || {};
+      
+      // Get all key cards
+      const allKeyCards = document.querySelectorAll('#keysContainer .key-card');
+      const keyNames = ['A', 'Bb', 'H', 'C', 'D', 'Eb', 'E', 'F', 'G'];
+      
+      allKeyCards.forEach((card, index) => {
+        const keyName = keyNames[index];
+        const isNative = instrumentName === keyName;
+        
+        const keyNameSpan = card.querySelector('.key-name');
+        const percentageSpan = card.querySelector('.key-percentage');
+        const progressBar = card.querySelector('.key-progress-bar');
+        const fillDiv = card.querySelector('.key-progress-fill');
+        const statsDiv = card.querySelector('.key-stats');
+        const statsSpans = card.querySelectorAll('.key-stats span');
+        const noteDiv = card.querySelector('.key-note');
+        
+        if (isNative) {
+          // This is the native key - show disabled state
+          card.className = 'key-card disabled';
+          
+          if (keyNameSpan) keyNameSpan.textContent = `${keyName} Major`;
+          if (percentageSpan) {
+            percentageSpan.textContent = 'N/A';
+            percentageSpan.className = 'key-percentage';
+          }
+          
+          // Hide progress bar and stats
+          if (progressBar) progressBar.style.display = 'none';
+          if (statsDiv) statsDiv.style.display = 'none';
+          
+          // Show/create note div
+          if (!noteDiv) {
+            const newNoteDiv = document.createElement('div');
+            newNoteDiv.className = 'key-note';
+            newNoteDiv.textContent = 'Native key - no transposition needed';
+            card.appendChild(newNoteDiv);
+          } else {
+            noteDiv.textContent = 'Native key - no transposition needed';
+            noteDiv.style.display = '';
+          }
+        } else {
+          // Regular key card - show progress bar
+          card.className = 'key-card';
+          const keyData = instrumentData[keyName];
+          
+          if (keyNameSpan) keyNameSpan.textContent = `${keyName} Major`;
+          
+          // Show progress bar and stats, hide note
+          if (progressBar) progressBar.style.display = '';
+          if (statsDiv) statsDiv.style.display = '';
+          if (noteDiv) noteDiv.style.display = 'none';
+          
+          if (keyData && keyData.attempts > 0) {
+            // Calculate average proficiency for this instrument/key combination
+            const avgProficiency = Math.round(keyData.totalProficiency / keyData.attempts);
+            const level = avgProficiency >= 75 ? 'high' : avgProficiency >= 50 ? 'medium' : 'low';
+            
+            if (percentageSpan) {
+              percentageSpan.textContent = `${avgProficiency}`;
+              percentageSpan.className = `key-percentage ${level}`;
+            }
+            
+            if (fillDiv) {
+              // Cap at 100 for display purposes
+              const displayWidth = Math.min(avgProficiency, 100);
+              fillDiv.style.width = `${displayWidth}%`;
+              fillDiv.className = `key-progress-fill ${level}`;
+            }
+            
+            if (statsSpans[0]) statsSpans[0].textContent = `${keyData.attempts} sessions`;
+            if (statsSpans[1]) statsSpans[1].textContent = `${avgProficiency} proficiency`;
+          } else {
+            // Reset to 0 if no data
+            if (percentageSpan) {
+              percentageSpan.textContent = '0';
+              percentageSpan.className = 'key-percentage';
+            }
+            if (fillDiv) {
+              fillDiv.style.width = '0%';
+              fillDiv.className = 'key-progress-fill';
+            }
+            if (statsSpans[0]) statsSpans[0].textContent = '0 sessions';
+            if (statsSpans[1]) statsSpans[1].textContent = '0 proficiency';
+          }
+        }
+      });
+    }
+
+    // Initialize default views only if not already set
+    if (!window.views) {
+      const views = {
+        daily: { labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], values: [0, 0, 0, 0, 0, 0, 0] },
+        weekly: { labels: ["W1", "W2", "W3", "W4"], values: [0, 0, 0, 0] },
+        progress: { labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
+      };
+      window.views = views;
+      
+      const barGraph = document.getElementById("barGraph");
+      const graphLabels = document.getElementById("graphLabels");
+
+      renderView.call(window, "daily");
+    }
+
+    document.querySelectorAll(".pill-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".pill-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderView.call(window, btn.dataset.view);
+      });
+    });
+
+    document.querySelectorAll(".mastery-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".mastery-tab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        
+        const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
+        const instrument = instrumentMap[tab.dataset.instrument];
+        if (instrument) {
+          populateMasteryCards(instrument);
+        }
+      });
+    });
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .progress-page {
+      min-height: 100vh;
+      width: 100%;
+      padding: 1rem 1rem 5rem;
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-x: hidden;
+    }
+
+    .hero-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .greeting h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .greeting p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.875rem;
+      margin: 0.25rem 0 0;
+    }
+
+    .greeting strong {
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.625rem;
+    }
+
+    .hero-stat {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .hero-stat .stat-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .hero-stat .stat-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .panel-title {
+      font-weight: 800;
+      font-size: 1.125rem;
+      margin: 0;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .panel-subtitle {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+      margin: 0.5rem 0 1.25rem;
+    }
+
+    /* Mastery Locked Message */
+    .mastery-locked-message {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .lock-icon-large {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.8;
+    }
+
+    .lock-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .lock-description {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0 0 0.375rem 0;
+      line-height: 1.5;
+    }
+
+    .lock-description strong {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .lock-instruction {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0 0 1.125rem 0;
+      line-height: 1.5;
+    }
+
+    .lock-instruction strong {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+
+    .lock-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.625rem 1.25rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .lock-home-btn:hover {
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .lock-home-btn:active {
+      transform: scale(0.98);
+    }
+
+    .mastery-content {
+      display: block;
+    }
+
+    .tab-pills {
+      display: flex;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 0.2rem;
+      gap: 0.2rem;
+    }
+
+    .pill-btn {
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .pill-btn.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .chart-container {
+      position: relative;
+      margin-bottom: 0.625rem;
+    }
+
+    .bar-graph {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.4rem;
+      height: 140px;
+      overflow-x: auto;
+      padding: 0 0.25rem;
+    }
+
+    .bar-wrapper {
+      flex: 0 0 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: visible;
+    }
+
+    .bar {
+      width: 100%;
+      min-height: 8px;
+      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+      border-radius: 6px 6px 3px 3px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: height 0.5s ease;
+    }
+
+    .bar-tooltip {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #10b981;
+      margin-bottom: 0.375rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .graph-labels {
+      display: flex;
+      justify-content: flex-start;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0 0.25rem;
+      font-weight: 600;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.625rem;
+    }
+
+    .summary-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .summary-icon.green {
+      background: rgba(16, 185, 129, 0.2);
+    }
+
+    .summary-icon.red {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .summary-icon.blue {
+      background: rgba(59, 130, 246, 0.2);
+    }
+
+    .summary-icon.orange {
+      background: rgba(251, 146, 60, 0.2);
+    }
+
+    .summary-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .summary-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .mastery-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .mastery-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mastery-tab {
+      padding: 0.5rem 0.875rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .mastery-tab.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .keys-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+
+    .key-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .key-card:active:not(.disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(0.98);
+    }
+
+    .key-card.disabled {
+      opacity: 0.5;
+    }
+
+    .key-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.625rem;
+    }
+
+    .key-name {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .key-percentage {
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .key-percentage.low {
+      color: #ef4444;
+    }
+
+    .key-percentage.medium {
+      color: #f59e0b;
+    }
+
+    .key-percentage.high {
+      color: #10b981;
+    }
+
+    .key-progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .key-progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .key-progress-fill.low {
+      background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .key-progress-fill.medium {
+      background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .key-progress-fill.high {
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    }
+
+    .key-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+    }
+
+    .key-note {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+    }
+
+    @supports (padding: max(0px)) {
+      .progress-page {
+        padding-bottom: max(5rem, env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (max-width: 375px) {
+      .progress-page {
+        padding: 0.875rem 0.875rem 4.5rem;
+      }
+
+      .greeting h1 {
+        font-size: 1.375rem;
+      }
+
+      .hero-stat {
+        padding: 0.875rem;
+      }
+
+      .glass-panel {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .progress-page {
+        padding: 0.75rem 0.75rem 4.5rem;
+      }
+
+      .hero-stat .stat-value {
+        font-size: 1.25rem;
+      }
+
+      .summary-value {
+        font-size: 1.125rem;
+      }
+    }
+  </style>
+</Layout>

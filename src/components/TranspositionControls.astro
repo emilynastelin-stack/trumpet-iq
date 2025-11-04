@@ -146,21 +146,73 @@ const randomizeId = `randomize-${id}`;
       }, 150);
     });
 
-    // Instrument change
+    // Instrument change - use both 'change' and 'input' for better iOS support
+    instrumentEl.addEventListener('focus', () => {
+      console.log(`[transposition-controls-${controlId}] Instrument selector focused`);
+    });
+    
+    instrumentEl.addEventListener('blur', () => {
+      console.log(`[transposition-controls-${controlId}] Instrument selector blurred, value:`, instrumentEl.value);
+    });
+    
     instrumentEl.addEventListener('change', () => {
+      console.log(`[transposition-controls-${controlId}] Instrument changed via change event:`, instrumentEl.value);
       updateState();
     });
+    
+    instrumentEl.addEventListener('input', () => {
+      console.log(`[transposition-controls-${controlId}] Instrument changed via input event:`, instrumentEl.value);
+      updateState();
+    });
+    
+    // Handle touch events - try to manually trigger focus/click
+    let selectTouchStartY = 0;
+    let selectTouchStartX = 0;
+    
+    instrumentEl.addEventListener('touchstart', (e) => {
+      console.log(`[transposition-controls-${controlId}] Instrument selector touched`);
+      selectTouchStartY = e.touches[0].clientY;
+      selectTouchStartX = e.touches[0].clientX;
+    }, { passive: false });
+    
+    instrumentEl.addEventListener('touchend', (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const deltaY = Math.abs(touchEndY - selectTouchStartY);
+      const deltaX = Math.abs(touchEndX - selectTouchStartX);
+      
+      if (deltaY < 10 && deltaX < 10) {
+        console.log(`[transposition-controls-${controlId}] Instrument selector tapped, attempting to open`);
+        // Try to programmatically focus the element to open the picker
+        instrumentEl.focus();
+        instrumentEl.click();
+        
+        // iOS sometimes needs a delay
+        setTimeout(() => {
+          instrumentEl.focus();
+        }, 50);
+      }
+    }, { passive: false });
 
     // Randomize
     if (randomizeEl) {
-      randomizeEl.addEventListener('click', async () => {
-        if (isAnimating) return;
+      console.log(`[transposition-controls-${controlId}] Randomize button found, attaching handler`);
+      
+      // Function to handle randomize action
+      async function doRandomize() {
+        console.log(`[transposition-controls-${controlId}] Randomize triggered`);
+        if (isAnimating) {
+          console.log(`[transposition-controls-${controlId}] Already animating, ignoring`);
+          return;
+        }
         
         isAnimating = true;
         randomizeEl.classList.add('spinning');
         
         const randInstrument = instruments[Math.floor(Math.random() * instruments.length)];
         const randKey = keys[Math.floor(Math.random() * keys.length)];
+        
+        console.log(`[transposition-controls-${controlId}] Randomizing to:`, { randInstrument, randKey });
         
         await Promise.all([
           animateInstrumentSpin(randInstrument),
@@ -171,12 +223,43 @@ const randomizeId = `randomize-${id}`;
         isAnimating = false;
         
         updateState();
+      }
+      
+      // Handle touch events for iOS
+      let touchStartY = 0;
+      let touchStartX = 0;
+      
+      randomizeEl.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+        console.log(`[transposition-controls-${controlId}] Randomize button touched`);
+      }, { passive: true });
+      
+      randomizeEl.addEventListener('touchend', (e) => {
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchEndX = e.changedTouches[0].clientX;
+        const deltaY = Math.abs(touchEndY - touchStartY);
+        const deltaX = Math.abs(touchEndX - touchStartX);
+        
+        if (deltaY < 10 && deltaX < 10) {
+          console.log(`[transposition-controls-${controlId}] Randomize button tapped`);
+          doRandomize();
+        }
+      }, { passive: true });
+      
+      // Also keep click handler for desktop
+      randomizeEl.addEventListener('click', async (e) => {
+        console.log(`[transposition-controls-${controlId}] Randomize button clicked`);
+        doRandomize();
       });
+    } else {
+      console.warn(`[transposition-controls-${controlId}] Randomize button not found!`);
     }
 
     // Reset
     if (resetEl) {
-      resetEl.addEventListener('click', () => {
+      function doReset() {
+        console.log(`[transposition-controls-${controlId}] Reset triggered`);
         // Reset to Bb trumpet in Bb
         instrumentEl.value = 'Bb';
         const targetItem = Array.from(items).find(i => i.dataset.key === 'Bb');
@@ -186,6 +269,31 @@ const randomizeId = `randomize-${id}`;
           centerItem(targetItem);
         }
         updateState();
+      }
+      
+      // Handle touch events for iOS
+      let touchStartY = 0;
+      let touchStartX = 0;
+      
+      resetEl.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      resetEl.addEventListener('touchend', (e) => {
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchEndX = e.changedTouches[0].clientX;
+        const deltaY = Math.abs(touchEndY - touchStartY);
+        const deltaX = Math.abs(touchEndX - touchStartX);
+        
+        if (deltaY < 10 && deltaX < 10) {
+          doReset();
+        }
+      }, { passive: true });
+      
+      // Also keep click handler for desktop
+      resetEl.addEventListener('click', () => {
+        doReset();
       });
     }
 
@@ -482,7 +590,10 @@ const randomizeId = `randomize-${id}`;
 
   /* Controls Content */
   .controls-content {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    position: relative;
   }
 
   .header {
@@ -504,6 +615,19 @@ const randomizeId = `randomize-${id}`;
 
   .control-group {
     margin-bottom: 18px;
+    pointer-events: auto;
+    position: relative;
+    order: 2;
+  }
+
+  /* Instrument selector goes first (top) */
+  .control-group:first-of-type {
+    order: 1;
+  }
+
+  /* Buttons go last (bottom) */
+  .control-group.button-row {
+    order: 3;
   }
 
   .control-group:last-child {
@@ -533,12 +657,23 @@ const randomizeId = `randomize-${id}`;
     color: #1e293b;
     cursor: pointer;
     transition: all 0.2s ease;
+    /* Use menulist appearance on iOS to ensure native picker works */
+    -webkit-appearance: menulist;
+    -moz-appearance: none;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 16px center;
     padding-right: 44px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    -webkit-tap-highlight-color: rgba(18, 144, 142, 0.3);
+    touch-action: manipulation;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    /* Ensure iOS can interact with it */
+    -webkit-user-select: auto;
+    user-select: auto;
   }
 
   .instrument-select:hover {

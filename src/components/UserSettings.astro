@@ -237,7 +237,7 @@
     position: fixed;
     inset: 0;
     z-index: 999999;
-    display: flex;
+    display: none;
     align-items: flex-end;
     justify-content: center;
     pointer-events: none;
@@ -246,6 +246,7 @@
   }
 
   .usersettings-overlay.active {
+    display: flex;
     pointer-events: auto;
     opacity: 1;
   }
@@ -557,7 +558,7 @@
     position: fixed;
     inset: 0;
     z-index: 9999999;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     pointer-events: none;
@@ -567,6 +568,7 @@
   }
 
   .warning-modal.active {
+    display: flex;
     pointer-events: auto;
     opacity: 1;
   }

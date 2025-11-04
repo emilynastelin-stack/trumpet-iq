@@ -1,0 +1,217 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Welcome to Your Journey">
+  <div class="intro-page">
+    <div class="intro-container">
+      <div class="intro-header">
+        <h1 class="intro-title">🎺 Let's Start Your Musical Journey!</h1>
+        <p class="intro-subtitle">You're about to learn something amazing</p>
+      </div>
+
+      <div class="intro-content">
+        <div class="intro-section">
+          <div class="section-icon">📚</div>
+          <h2>Learn Step by Step</h2>
+          <p>We'll guide you through reading music notation, one note at a time. No rushing, no pressure.</p>
+        </div>
+
+        <div class="intro-section">
+          <div class="section-icon">🎯</div>
+          <h2>Build Your Skills</h2>
+          <p>Like Duolingo for trumpet! Complete small lessons, earn rewards, and watch your progress grow.</p>
+        </div>
+
+        <div class="intro-section">
+          <div class="section-icon">🌟</div>
+          <h2>Practice Makes Progress</h2>
+          <p>Every lesson is designed to be short and achievable. Just a few minutes a day will make a huge difference!</p>
+        </div>
+      </div>
+
+      <div class="intro-footer">
+        <p class="footer-text">Ready to begin?</p>
+        <button class="begin-btn" id="beginBtn">
+          Start My First Lesson
+          <span class="btn-arrow">→</span>
+        </button>
+        <a href="/" class="back-link">← Go back</a>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .intro-page {
+      min-height: 100vh;
+      width: 100%;
+      padding: max(2rem, env(safe-area-inset-top)) 1.5rem max(2rem, env(safe-area-inset-bottom));
+      background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .intro-container {
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .intro-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .intro-title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 0.75rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .intro-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+    }
+
+    .intro-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .intro-section {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .intro-section:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .intro-section h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .intro-section p {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .intro-footer {
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 1.5rem;
+    }
+
+    .begin-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.125rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    .begin-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
+    }
+
+    .begin-btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-arrow {
+      font-size: 1.25rem;
+      transition: transform 0.3s ease;
+    }
+
+    .begin-btn:hover .btn-arrow {
+      transform: translateX(4px);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 640px) {
+      .intro-title {
+        font-size: 1.75rem;
+      }
+
+      .intro-section {
+        padding: 1.5rem;
+      }
+
+      .section-icon {
+        font-size: 2.5rem;
+      }
+
+      .intro-section h2 {
+        font-size: 1.25rem;
+      }
+
+      .begin-btn {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+      }
+    }
+  </style>
+
+  <script>
+    const beginBtn = document.getElementById('beginBtn');
+
+    beginBtn?.addEventListener('click', () => {
+      window.location.href = '/absolutebeginnermode/lessonindex';
+    });
+  </script>
+</Layout>

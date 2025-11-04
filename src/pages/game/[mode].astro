@@ -33,7 +33,7 @@ const initialImage = Array.isArray(selectedLevel) && selectedLevel.length > 0 ? 
 ---
 
 <Layout title={`Play ${mode.charAt(0).toUpperCase() + mode.slice(1)} - ${level.charAt(0).toUpperCase() + level.slice(1)}`} showTransposition={true}>
-  <div class="game-component flex flex-col items-center min-h-screen pt-2 pb-4 px-4">
+  <div class="game-component flex flex-col items-center min-h-screen pb-4 px-4" style="padding-top: 10px;">
   <EndGameOverlay />
   <BeginGameOverlay mode={mode} visible={true} />
   <PauseOverlay />
@@ -74,20 +74,61 @@ const initialImage = Array.isArray(selectedLevel) && selectedLevel.length > 0 ? 
 <div id="game-data" data-mode={mode} data-level={level} style="display:none"></div>
 
 <script type="module">
-  // Sign in anonymously when game loads
-  import { firebaseReady } from '/utils/firebase.js';
-
-  firebaseReady.then(({ auth, signInAnonymously }) => {
-    if (!auth.currentUser) {
-      signInAnonymously()
-        .then(() => {
-          console.log('Signed in anonymously');
-        })
-        .catch((error) => {
-          console.error('Error signing in:', error);
-        });
+  // WORKAROUND: Firebase Auth hangs in iOS WebView, use simple local auth instead
+  import { getOrCreateUser } from '/utils/simple-auth.js';
+  
+  console.log('� Game page: Using simple local authentication...');
+  const user = getOrCreateUser();
+  console.log('✅ User authenticated:', user.uid);
+  console.log('✅ Is anonymous:', user.isAnonymous);
+  
+  // Store user globally for gameLogic to access
+  window.TRUMPET_IQ_USER = user;
+  
+  // Timeout detector for Firebase initialization
+  setTimeout(() => {
+    console.warn('⏰ 10 seconds passed, checking if Firebase auth completed...');
+    firebaseReady.then(({ auth }) => {
+      if (auth.currentUser) {
+        console.log('✅ Auth completed successfully, user:', auth.currentUser.uid);
+      } else {
+        console.error('❌ Auth did NOT complete after 10 seconds - currentUser is still null');
+        console.error('❌ This suggests Firebase auth is failing silently or hanging');
+      }
+    }).catch(e => console.error('❌ Firebase still not ready after 10s:', e));
+  }, 10000);
+  
+  // Diagnostic: Check WebView storage capabilities
+  console.log('📊 WebView Storage Diagnostics:');
+  console.log('  - localStorage available:', typeof localStorage !== 'undefined');
+  console.log('  - sessionStorage available:', typeof sessionStorage !== 'undefined');
+  console.log('  - indexedDB available:', typeof indexedDB !== 'undefined');
+  
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      console.log('  - localStorage is writable: ✅');
+    } catch (e) {
+      console.error('  - localStorage is NOT writable: ❌', e);
     }
-  });
+  }
+  
+  if (typeof indexedDB !== 'undefined') {
+    try {
+      const request = indexedDB.open('test-db', 1);
+      request.onsuccess = () => {
+        console.log('  - IndexedDB is accessible: ✅');
+        indexedDB.deleteDatabase('test-db');
+      };
+      request.onerror = (e) => {
+        console.error('  - IndexedDB is NOT accessible: ❌', e);
+      };
+    } catch (e) {
+      console.error('  - IndexedDB error: ❌', e);
+    }
+  }
+  
   function updateGamePadBottom() {
     const gamepad = document.getElementById('gamepad');
     const controlsWrap = document.querySelector('.game-controls-wrap');
@@ -786,10 +827,10 @@ console.log('💡 Run window.testTransposition() to test events manually');
     letter-spacing: 0.5px;
   }
   
-  /* iOS safe area support */
+  /* iOS safe area insets */
   @supports (padding: max(0px)) {
     .game-component {
-      padding-top: max(0.5rem, env(safe-area-inset-top));
+      padding-top: max(10px, env(safe-area-inset-top));
       padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
   }

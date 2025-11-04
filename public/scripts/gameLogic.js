@@ -1,14 +1,39 @@
 // gameLogic.js
 import { levels } from '/data/levels.js';
 import { getFingering } from '/utils/getFingerings.js';
-import { firebaseReady } from '/utils/firebase.js';
+import { getCurrentUser } from '/utils/simple-auth.js';
+import { saveScore } from '/utils/firestore-rest.js';
 import { ScoringManager } from './ScoringManager.js';
+import { TranspositionProficiency } from './TranspositionProficiency.js';
 
 /**
  * Initialize the game with dynamic fingerings.
  * @param {{
- *   instrument: string,
- *   key: string,
+ *   instrument: stri              const scoreData = {
+                userId: userId,
+                mode: mode,
+                level: difficulty,
+                score: correctCount,
+                total: noteCount,
+                percentage: Math.round((correctCount / noteCount) * 100),
+                displayScore: scores.displayScore,
+                proficiencyScore: scores.proficiencyScore,
+                stars: scores.stars,
+                instrument: instrument,
+                key: key,
+                timestamp: new Date(),
+                completed: true
+              };
+              console.log('💾 Saving score to Firebase (Learning late-press):', scoreData);
+              console.log('🔑 User ID:', userId);
+              addDoc(collection(db, 'scores'), scoreData).then((docRef) => {
+                console.log('✅ Score saved successfully with ID:', docRef.id);
+              }).catch((error) => {
+                console.error('❌ Error saving score:', error);
+              });
+            }).catch((error) => {
+              console.error('❌ Firebase not ready:', error);
+            });g,
  *   difficulty: 'basic'|'beginner'|'intermediate'|'advanced',
  *   container?: HTMLElement,
  *   mode?: string,
@@ -26,6 +51,11 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
     totalQuestions: 20,
     intervalSpeed: speedTimeout
   });
+  
+  // Track timing for proficiency calculation
+  let noteTimes = []; // Array of times taken per note (in seconds)
+  let noteStartTime = null; // Timestamp when current note was shown
+  const notesPracticed = new Set(); // Track unique notes for coverage
   
   // Pause/resume event listeners
   window.addEventListener('game:pause', () => {
@@ -110,6 +140,12 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
     noteCount++;
     // Reset per-note wrong marker when we move to the next note
     noteWasMarkedWrong = false;
+    // Start timing for this note
+    noteStartTime = Date.now();
+    // Track which note is being practiced
+    if (noteData.note) {
+      notesPracticed.add(noteData.note);
+    }
     // Dispatch a progress event for debugging: how many notes have been shown.
     // For UI/display purposes we report a zero-based index so the first note
     // appears as "0" rather than "1". Keep internal `noteCount` (used for
@@ -119,7 +155,8 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       detail: { 
         noteCount: displayNoteCount, 
         correctCount,
-        lives: mode === 'marathon' ? lives : undefined 
+        lives: mode === 'marathon' ? lives : undefined,
+        mode: mode
       }, 
       bubbles: true, 
       composed: true 
@@ -209,6 +246,11 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       if (!noteWasMarkedWrong) {
         correctCount++;
         scorer.markCorrect();
+        // Record time taken for this note (for proficiency calculation)
+        if (noteStartTime) {
+          const timeElapsed = (Date.now() - noteStartTime) / 1000; // Convert to seconds
+          noteTimes.push(timeElapsed);
+        }
       }
       // If this was the final learning note, end the game now so the
       // player's point for this note is included in the final score.
@@ -216,33 +258,59 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
         ended = true;
         // Get scores from scorer
         const scores = scorer.getScores();
-        // Save to Firebase
-        firebaseReady.then(({ db, auth, collection, addDoc }) => {
-          const user = auth.currentUser;
-          const userId = user ? user.uid : 'anonymous';
+        // Save via REST API (works in iOS WebView)
+        const user = getCurrentUser();
+        if (!user) {
+          console.error('❌ No authenticated user when trying to save score');
+        } else {
+          // Calculate average speed for proficiency
+          const avgSpeed = noteTimes.length > 0 
+            ? noteTimes.reduce((sum, t) => sum + t, 0) / noteTimes.length 
+            : 2.0;
+          
+          // Update transposition proficiency (each instrument/key combo tracked separately)
+          const proficiencyUpdate = TranspositionProficiency.recordSession(
+            user.uid,
+            instrument,
+            key,
+            {
+              score: correctCount,
+              total: noteCount,
+              avgSpeed: avgSpeed,
+              notesPracticed: Array.from(notesPracticed),
+              mode: mode,
+              difficulty: difficulty
+            }
+          );
+          
           const scoreData = {
-            userId: userId,
+            userId: user.uid,
             mode: mode,
             level: difficulty,
             score: correctCount,
             total: noteCount,
             percentage: Math.round((correctCount / noteCount) * 100),
             displayScore: scores.displayScore,
-            proficiencyScore: scores.proficiencyScore,
+            proficiencyScore: proficiencyUpdate.proficiencyDisplay, // Use CEFR-based proficiency (0-100)
             stars: scores.stars,
             instrument: instrument,
             key: key,
             timestamp: new Date(),
-            completed: true
+            completed: true,
+            avgSpeed: avgSpeed, // Store for analysis
+            notesCovered: notesPracticed.size
           };
-          console.log('💾 Saving score to Firebase:', scoreData);
-          addDoc(collection(db, 'scores'), scoreData).then(() => {
-            console.log('✅ Score saved successfully');
+          console.log('💾 Saving score (Learning mode):', scoreData);
+          console.log('🔑 User ID:', scoreData.userId);
+          console.log('🎯 Proficiency:', proficiencyUpdate);
+          
+          saveScore(scoreData).then((result) => {
+            console.log('✅ Score saved successfully!', result);
           }).catch((error) => {
             console.error('❌ Error saving score:', error);
           });
-        });
-        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: scores.displayScore, stars: scores.stars }, bubbles: true, composed: true });
+        }
+        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: scores.displayScore, stars: scores.stars, mode }, bubbles: true, composed: true });
         try { container.dispatchEvent(endEv); } catch (err) {}
         try { window.dispatchEvent(endEv); } catch (err) {}
       } else {
@@ -287,31 +355,58 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             ended = true;
             // Get scores from scorer
             const scores = scorer.getScores();
-            // Save to Firebase
-            firebaseReady.then(({ db, auth, collection, addDoc }) => {
-              const user = auth.currentUser;
-              const userId = user ? user.uid : 'anonymous';
-              addDoc(collection(db, 'scores'), {
-                userId: userId,
+            // Save via REST API
+            const user = getCurrentUser();
+            if (!user) {
+              console.error('❌ No authenticated user when trying to save score (Learning final)');
+            } else {
+              // Calculate average speed for proficiency
+              const avgSpeed = noteTimes.length > 0 
+                ? noteTimes.reduce((sum, t) => sum + t, 0) / noteTimes.length 
+                : 2.0;
+              
+              // Update transposition proficiency (each instrument/key combo tracked separately)
+              const proficiencyUpdate = TranspositionProficiency.recordSession(
+                user.uid,
+                instrument,
+                key,
+                {
+                  score: correctCount,
+                  total: noteCount,
+                  avgSpeed: avgSpeed,
+                  notesPracticed: Array.from(notesPracticed),
+                  mode: mode,
+                  difficulty: difficulty
+                }
+              );
+              
+              const scoreData = {
+                userId: user.uid,
                 mode: mode,
                 level: difficulty,
                 score: correctCount,
                 total: noteCount,
                 percentage: Math.round((correctCount / noteCount) * 100),
                 displayScore: scores.displayScore,
-                proficiencyScore: scores.proficiencyScore,
+                proficiencyScore: proficiencyUpdate.proficiencyDisplay,
                 stars: scores.stars,
                 instrument: instrument,
                 key: key,
                 timestamp: new Date(),
-                completed: true
-              }).then(() => {
-                console.log('Score saved to Firebase');
+                completed: true,
+                avgSpeed: avgSpeed,
+                notesCovered: notesPracticed.size
+              };
+              console.log('💾 Saving score (Learning final):', scoreData);
+              console.log('🎯 Proficiency:', proficiencyUpdate);
+              
+              saveScore(scoreData).then((result) => {
+                console.log('✅ Score saved successfully!', result);
               }).catch((error) => {
-                console.error('Error saving score:', error);
+                console.error('❌ Error saving score:', error);
               });
-            });
-            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: scores.displayScore, stars: scores.stars }, bubbles: true, composed: true });
+            }
+            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: scores.displayScore, stars: scores.stars, mode }, bubbles: true, composed: true });
             try { container.dispatchEvent(endEv); } catch (err) {}
             try { window.dispatchEvent(endEv); } catch (err) {}
           } else {
@@ -346,30 +441,61 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
               ended = true;
               // Get scores from scorer
               const scores = scorer.getScores();
-              // Save to Firebase
-              firebaseReady.then(({ db, auth, collection, addDoc }) => {
-                const user = auth.currentUser;
-                const userId = user ? user.uid : 'anonymous';
-                addDoc(collection(db, 'scores'), {
-                  userId: userId,
+              // Save via REST API
+              const user = getCurrentUser();
+              if (!user) {
+                console.error('❌ No authenticated user when trying to save score (Marathon game over)');
+              } else {
+                // Calculate average speed for proficiency
+                const avgSpeed = noteTimes.length > 0 
+                  ? noteTimes.reduce((sum, t) => sum + t, 0) / noteTimes.length 
+                  : 2.0;
+                
+                // Update transposition proficiency (each instrument/key combo tracked separately)
+                const proficiencyUpdate = TranspositionProficiency.recordSession(
+                  user.uid,
+                  instrument,
+                  key,
+                  {
+                    score: correctCount,
+                    total: noteCount,
+                    avgSpeed: avgSpeed,
+                    notesPracticed: Array.from(notesPracticed),
+                    mode: 'marathon',
+                    difficulty: difficulty
+                  }
+                );
+                
+                const scoreData = {
+                  userId: user.uid,
                   mode: 'marathon',
                   level: difficulty,
                   score: correctCount,
                   total: noteCount,
                   percentage: Math.round((correctCount / noteCount) * 100),
                   displayScore: scores.displayScore,
-                  proficiencyScore: scores.proficiencyScore,
+                  proficiencyScore: proficiencyUpdate.proficiencyDisplay,
                   stars: scores.stars,
                   instrument: instrument,
                   key: key,
                   livesLost: 3 - lives,
                   timestamp: new Date(),
                   completed: false,
-                  endReason: 'lives'
+                  endReason: 'lives',
+                  avgSpeed: avgSpeed,
+                  notesCovered: notesPracticed.size
+                };
+                console.log('💾 Saving score (Marathon game over):', scoreData);
+                console.log('🎯 Proficiency:', proficiencyUpdate);
+                
+                saveScore(scoreData).then((result) => {
+                  console.log('✅ Score saved successfully!', result);
+                }).catch((error) => {
+                  console.error('❌ Error saving score:', error);
                 });
-              });
+              }
               const endEv = new CustomEvent('game:end', { 
-                detail: { score: correctCount, total: noteCount, reason: 'lives', accuracy: scores.displayScore, stars: scores.stars }, 
+                detail: { score: correctCount, total: noteCount, reason: 'lives', accuracy: scores.displayScore, stars: scores.stars, mode }, 
                 bubbles: true, 
                 composed: true 
               });
@@ -391,7 +517,8 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           // final wrong attempt is included in the totals.
           if (mode === 'learning' && !ended && noteCount >= 20) {
             ended = true;
-            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount }, bubbles: true, composed: true });
+            const scores = scorer.getScores();
+            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: scores.displayScore, stars: scores.stars, mode }, bubbles: true, composed: true });
             try { container.dispatchEvent(endEv); } catch (err) {}
             try { window.dispatchEvent(endEv); } catch (err) {}
             return; // stop further processing for this timer
@@ -657,33 +784,57 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       ended = true;
       // Get scores from scorer
       const scores = scorer.getScores();
-      // Save speed mode score to Firebase
-      firebaseReady.then(({ db, auth, collection, addDoc }) => {
-        const user = auth.currentUser;
-        const userId = user ? user.uid : 'anonymous';
+      // Save speed mode score via REST API
+      const user = getCurrentUser();
+      if (user) {
+        // Calculate average speed for proficiency
+        const avgSpeed = noteTimes.length > 0 
+          ? noteTimes.reduce((sum, t) => sum + t, 0) / noteTimes.length 
+          : 1.5; // Speed mode typically faster
+        
+        // Update transposition proficiency (each instrument/key combo tracked separately)
+        const proficiencyUpdate = TranspositionProficiency.recordSession(
+          user.uid,
+          instrument,
+          key,
+          {
+            score: correctCount,
+            total: noteCount,
+            avgSpeed: avgSpeed,
+            notesPracticed: Array.from(notesPracticed),
+            mode: 'speed',
+            difficulty: difficulty
+          }
+        );
+        
         const scoreData = {
-          userId: userId,
+          userId: user.uid,
           mode: 'speed',
           level: difficulty,
           score: correctCount,
           total: noteCount,
           percentage: noteCount > 0 ? Math.round((correctCount / noteCount) * 100) : 0,
           displayScore: scores.displayScore,
-          proficiencyScore: scores.proficiencyScore,
+          proficiencyScore: proficiencyUpdate.proficiencyDisplay,
           stars: scores.stars,
           instrument: instrument,
           key: key,
           timestamp: new Date(),
           completed: true,
-          endReason: 'timeout'
+          endReason: 'timeout',
+          avgSpeed: avgSpeed,
+          notesCovered: notesPracticed.size
         };
-        console.log('💾 Saving speed mode score to Firebase:', scoreData);
-        addDoc(collection(db, 'scores'), scoreData).then(() => {
+        console.log('💾 Saving speed mode score via REST API:', scoreData);
+        console.log('🎯 Proficiency:', proficiencyUpdate);
+        saveScore(scoreData).then(() => {
           console.log('✅ Speed mode score saved successfully');
-        }).catch((error) => {
+        }).catch(error => {
           console.error('❌ Error saving speed mode score:', error);
         });
-      });
+      } else {
+        console.error('❌ No user when trying to save speed mode score');
+      }
       // Dispatch event with scores for EndGameOverlay
       const endEv = new CustomEvent('game:end', { 
         detail: { 
@@ -691,7 +842,8 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           total: noteCount, 
           reason: 'timeout',
           accuracy: scores.displayScore,
-          stars: scores.stars
+          stars: scores.stars,
+          mode
         }, 
         bubbles: true, 
         composed: true 

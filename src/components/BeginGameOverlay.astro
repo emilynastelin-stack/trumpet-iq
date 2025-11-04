@@ -73,6 +73,11 @@ const { mode, visible = true } = Astro.props;
     const overlay = document.getElementById('begingame-overlay');
     let selectedSpeed = 2000; // Default: Medium (2s)
     
+    // Show overlay immediately when page loads
+    if (overlay && overlay.getAttribute('data-visible') !== 'false') {
+      overlay.classList.add('show');
+    }
+    
     // Speed selector logic
     const speedOptions = document.querySelectorAll('.speed-option');
     speedOptions.forEach(option => {
@@ -136,17 +141,22 @@ const { mode, visible = true } = Astro.props;
     height: 100%;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(12px);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     padding: 20px;
-    opacity: 1;
+    opacity: 0;
     transition: opacity 0.3s ease;
   }
 
+  .overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+
   .overlay[data-visible="false"] {
-    display: none;
+    display: none !important;
   }
 
   .overlay-box {

@@ -5,6 +5,14 @@ import Layout from "../layouts/Layout.astro";
 <Layout title="Your Progress">
   <div class="progress-page">
 
+    <!-- DEBUG BUTTON -->
+    <button id="debugBtn" style="position: fixed; top: max(60px, calc(env(safe-area-inset-top) + 10px)); right: 10px; z-index: 9999; padding: 10px 15px; background: #10b981; color: white; border: 2px solid white; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+      🐛 DEBUG
+    </button>
+    <div id="debugInfo" style="position: fixed; top: max(120px, calc(env(safe-area-inset-top) + 70px)); right: 10px; left: 10px; z-index: 9999; padding: 15px; background: rgba(0,0,0,0.95); color: #0f0; border: 2px solid #10b981; border-radius: 12px; font-family: monospace; font-size: 11px; max-height: 50vh; overflow-y: auto; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.7);">
+      Checking...
+    </div>
+
     <!-- HERO STATS -->
     <div class="hero-section">
       <div class="greeting">
@@ -25,6 +33,13 @@ import Layout from "../layouts/Layout.astro";
           <div class="stat-content">
             <div class="stat-value">0min</div>
             <div class="stat-label">Avg Session</div>
+          </div>
+        </div>
+        <div class="hero-stat" id="proficiencyStat">
+          <div class="stat-icon">📈</div>
+          <div class="stat-content">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Proficiency</div>
           </div>
         </div>
       </div>
@@ -240,9 +255,13 @@ import Layout from "../layouts/Layout.astro";
 
   <script type="module">
   import { renderView } from "/scripts/progress.js";
-  import { firebaseReady } from '/utils/firebase.js';
+  import { getOrCreateUser } from '/utils/simple-auth.js';
+  import { getUserScores } from '/utils/firestore-rest.js';
+  import { TranspositionProficiency } from '/scripts/TranspositionProficiency.js';
 
-    let currentUser = null;
+    // Use simple local auth instead of Firebase Auth (which hangs in iOS WebView)
+    const currentUser = getOrCreateUser();
+    console.log('✅ Progress page: User authenticated:', currentUser.uid);
 
     // Check transposition mode on page load
     function updateMasteryVisibility() {
@@ -271,55 +290,62 @@ import Layout from "../layouts/Layout.astro";
     // Check on page load
     updateMasteryVisibility();
 
-    async function initAuth() {
-      try {
-        const { auth, signInAnonymously, onAuthStateChanged } = await firebaseReady;
-        
-        onAuthStateChanged(auth, async (user) => {
-          if (user) {
-            currentUser = user;
-            console.log('Signed in as user:', user.uid);
-            await loadUserProgress(user.uid);
-          } else {
-            try {
-              await signInAnonymously();
-            } catch (error) {
-              console.error("Anonymous sign-in failed:", error);
-            }
-          }
-        });
-      } catch (error) {
-        console.error('Firebase initialization failed:', error);
-      }
-    }
+    // Load progress immediately with local user
+    loadUserProgress(currentUser.uid);
 
-    initAuth();
+    // Reload progress data when page becomes visible (e.g., after navigating back)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        console.log('Page visible again, reloading progress...');
+        loadUserProgress(currentUser.uid);
+      }
+    });
+
+    // Also listen for DOMContentLoaded to reload after client-side navigation
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded - reloading progress...');
+      loadUserProgress(currentUser.uid);
+    });
 
     async function loadUserProgress(uid) {
       try {
-        const { db, collection, getDocs, query, where, orderBy } = await firebaseReady;
+        console.log('📊 Loading progress for user via REST API:', uid);
         
-        const scoresRef = collection(db, 'scores');
-        const q = query(scoresRef, where('userId', '==', uid), orderBy('timestamp', 'desc'));
-        const snapshot = await getDocs(q);
+        // Load default proficiency (Bb trumpet in Bb key - native/default)
+        const proficiencyInfo = TranspositionProficiency.getDefaultProficiency(uid);
+        console.log('🎯 Default proficiency (Bb→Bb):', proficiencyInfo);
         
-        if (!snapshot.empty) {
-          const scores = [];
-          snapshot.forEach(doc => {
-            scores.push({ id: doc.id, ...doc.data() });
-          });
-          
-          console.log('Loaded user scores:', scores);
+        const scores = await getUserScores(uid);
+        console.log('✅ Loaded', scores.length, 'user scores via REST API:', scores);
+        
+        if (scores.length > 0) {
+          console.log('📊 First score:', scores[0]);
           
           const stats = calculateStats(scores);
+          console.log('📊 Calculated stats:', stats);
+          stats.proficiency = proficiencyInfo.proficiencyDisplay;
+          stats.proficiencyBand = proficiencyInfo.band.name;
           updateStats(stats);
           updateActivity(scores);
           updateMastery(scores);
         } else {
-          console.log('No scores found, keeping default 0 values');
+          console.warn('⚠️ No scores found for userId:', uid, '- keeping default 0 values');
+          // Still show proficiency for new users
+          const stats = { 
+            accuracy: 0, 
+            avgSession: 0, 
+            correctNotes: 0, 
+            mistakes: 0, 
+            sessions: 0, 
+            avgSpeed: 0,
+            proficiency: proficiencyInfo.proficiencyDisplay,
+            proficiencyBand: proficiencyInfo.band.name
+          };
+          updateStats(stats);
         }
       } catch (err) {
-        console.error('Error loading user progress:', err);
+        console.error('❌ Error loading user progress:', err);
+        console.error('❌ Error details:', err.message);
       }
     }
 
@@ -334,6 +360,7 @@ import Layout from "../layouts/Layout.astro";
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const todayScores = scores.filter(s => {
+        // Handle both Firestore Timestamp and ISO string formats
         const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
         return scoreDate >= today;
       });
@@ -355,6 +382,13 @@ import Layout from "../layouts/Layout.astro";
       const heroStats = document.querySelectorAll('.hero-stat');
       if (heroStats[0]) heroStats[0].querySelector('.stat-value').textContent = `${data.accuracy}%`;
       if (heroStats[1]) heroStats[1].querySelector('.stat-value').textContent = `${data.avgSession}min`;
+      if (heroStats[2]) {
+        heroStats[2].querySelector('.stat-value').textContent = data.proficiency || 0;
+        // Update label to show proficiency band
+        if (data.proficiencyBand) {
+          heroStats[2].querySelector('.stat-label').textContent = data.proficiencyBand;
+        }
+      }
 
       const summaryCards = document.querySelectorAll('.summary-card');
       if (summaryCards[0]) summaryCards[0].querySelector('.summary-value').textContent = data.correctNotes;
@@ -372,13 +406,12 @@ import Layout from "../layouts/Layout.astro";
         const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
         const dateKey = scoreDate.toISOString().split('T')[0];
         
-        console.log('Processing score:', { date: dateKey, proficiencyScore: score.proficiencyScore });
+        console.log('Processing score:', { date: dateKey });
         
         if (!activityByDate[dateKey]) {
-          activityByDate[dateKey] = { count: 0, totalProficiency: 0 };
+          activityByDate[dateKey] = { count: 0 };
         }
         activityByDate[dateKey].count++;
-        activityByDate[dateKey].totalProficiency += score.proficiencyScore || 0;
       });
       
       console.log('Activity by date:', activityByDate);
@@ -395,18 +428,18 @@ import Layout from "../layouts/Layout.astro";
         
         dailyLabels.push(dayName);
         const dayData = activityByDate[dateKey];
-        // Calculate average proficiency for the day
-        const avgProficiency = dayData ? Math.round(dayData.totalProficiency / dayData.count) : 0;
-        dailyValues.push(avgProficiency);
-        console.log(`Day ${dayName} (${dateKey}): ${avgProficiency} proficiency (${dayData?.count || 0} sessions)`);
+        // Count number of games played that day
+        const gamesPlayed = dayData ? dayData.count : 0;
+        dailyValues.push(gamesPlayed);
+        console.log(`Day ${dayName} (${dateKey}): ${gamesPlayed} games played`);
       }
       
       console.log('Daily values for chart:', dailyValues);
       
       window.views = {
         daily: { labels: dailyLabels, values: dailyValues },
-        weekly: { labels: ["W1", "W2", "W3", "W4"], values: [60, 75, 90, 80] },
-        progress: { labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], values: [45, 50, 55, 58, 62, 68, 72, 75, 78, 82, 85, 88] }
+        weekly: { labels: ["W1", "W2", "W3", "W4"], values: [5, 8, 12, 10] },
+        progress: { labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], values: [10, 15, 18, 22, 25, 30, 35, 38, 42, 45, 50, 55] }
       };
       
       console.log('Rendering daily view with data:', window.views.daily);
@@ -414,26 +447,12 @@ import Layout from "../layouts/Layout.astro";
     }
 
     function updateMastery(scores) {
-      const masteryData = {};
+      // Load all transposition proficiency data (each instrument/key combo tracked separately)
+      const userId = currentUser.uid;
+      const allCombinations = TranspositionProficiency.getAllCombinations(userId);
       
-      scores.forEach(score => {
-        const instrument = score.instrument || 'Bb';
-        const key = score.key || 'Bb';
-        
-        if (!masteryData[instrument]) {
-          masteryData[instrument] = {};
-        }
-        
-        if (!masteryData[instrument][key]) {
-          masteryData[instrument][key] = { attempts: 0, totalProficiency: 0 };
-        }
-        
-        masteryData[instrument][key].totalProficiency += score.proficiencyScore || 0;
-        masteryData[instrument][key].attempts++;
-      });
-      
-      console.log('Mastery data:', masteryData);
-      window.masteryData = masteryData;
+      console.log('📊 All transposition combinations:', allCombinations);
+      window.masteryData = allCombinations;
       
       // Populate current instrument view (C trumpet by default)
       populateMasteryCards('C');
@@ -495,25 +514,25 @@ import Layout from "../layouts/Layout.astro";
           if (statsDiv) statsDiv.style.display = '';
           if (noteDiv) noteDiv.style.display = 'none';
           
-          if (keyData && keyData.attempts > 0) {
-            // Calculate average proficiency for this instrument/key combination
-            const avgProficiency = Math.round(keyData.totalProficiency / keyData.attempts);
-            const level = avgProficiency >= 75 ? 'high' : avgProficiency >= 50 ? 'medium' : 'low';
+          if (keyData && keyData.totalSessions > 0) {
+            // Get proficiency display score (0-100)
+            const proficiency = keyData.proficiencyDisplay;
+            const level = proficiency >= 75 ? 'high' : proficiency >= 50 ? 'medium' : 'low';
             
             if (percentageSpan) {
-              percentageSpan.textContent = `${avgProficiency}`;
+              percentageSpan.textContent = `${proficiency}`;
               percentageSpan.className = `key-percentage ${level}`;
             }
             
             if (fillDiv) {
               // Cap at 100 for display purposes
-              const displayWidth = Math.min(avgProficiency, 100);
+              const displayWidth = Math.min(proficiency, 100);
               fillDiv.style.width = `${displayWidth}%`;
               fillDiv.className = `key-progress-fill ${level}`;
             }
             
-            if (statsSpans[0]) statsSpans[0].textContent = `${keyData.attempts} sessions`;
-            if (statsSpans[1]) statsSpans[1].textContent = `${avgProficiency} proficiency`;
+            if (statsSpans[0]) statsSpans[0].textContent = `${keyData.totalSessions} sessions`;
+            if (statsSpans[1]) statsSpans[1].textContent = `${proficiency} proficiency`;
           } else {
             // Reset to 0 if no data
             if (percentageSpan) {
@@ -576,7 +595,7 @@ import Layout from "../layouts/Layout.astro";
     .progress-page {
       min-height: 100vh;
       width: 100%;
-      padding: 1rem 1rem 5rem;
+      padding: max(1rem, env(safe-area-inset-top)) 1rem 5rem;
       background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
       font-family: "Inter", system-ui, sans-serif;
       display: flex;
@@ -612,8 +631,14 @@ import Layout from "../layouts/Layout.astro";
 
     .hero-stats {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 0.625rem;
+    }
+    
+    @media (max-width: 480px) {
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
     }
 
     .hero-stat {
@@ -1067,4 +1092,54 @@ import Layout from "../layouts/Layout.astro";
       }
     }
   </style>
+
+  <script type="module">
+    import { getCurrentUser } from '/utils/simple-auth.js';
+    import { getUserScores } from '/utils/firestore-rest.js';
+
+    const debugBtn = document.getElementById('debugBtn');
+    const debugInfo = document.getElementById('debugInfo');
+
+    debugBtn.addEventListener('click', async () => {
+      debugInfo.style.display = 'block';
+      debugInfo.innerHTML = '⏳ Checking Firestore via REST API...';
+
+      try {
+        const user = getCurrentUser();
+        debugInfo.innerHTML = `✅ User ID: ${user.uid.substring(0, 8)}...<br>`;
+        
+        debugInfo.innerHTML += '⏳ Querying YOUR scores via REST API...<br>';
+        const scores = await getUserScores(user.uid);
+        debugInfo.innerHTML += `✅ Your scores: ${scores.length}<br><br>`;
+        
+        if (scores.length > 0) {
+          debugInfo.innerHTML += '<strong>🎮 SCORE DETAILS:</strong><br>';
+          scores.forEach((score, i) => {
+            debugInfo.innerHTML += `<br><strong>Game ${i+1}:</strong><br>`;
+            debugInfo.innerHTML += `  Mode: ${score.mode}<br>`;
+            debugInfo.innerHTML += `  Score: ${score.score}/${score.total} (${score.percentage}%)<br>`;
+            debugInfo.innerHTML += `  Proficiency: ${score.proficiencyScore}<br>`;
+            debugInfo.innerHTML += `  Instrument: ${score.instrument || 'N/A'}<br>`;
+            debugInfo.innerHTML += `  Key: ${score.key || 'N/A'}<br>`;
+            debugInfo.innerHTML += `  Stars: ${score.stars || 'N/A'}<br>`;
+          });
+          
+          // Calculate stats
+          const totalScore = scores.reduce((sum, s) => sum + (s.score || 0), 0);
+          const totalNotes = scores.reduce((sum, s) => sum + (s.total || 0), 0);
+          const accuracy = totalNotes > 0 ? Math.round((totalScore / totalNotes) * 100) : 0;
+          
+          debugInfo.innerHTML += `<br><strong>📊 CALCULATED STATS:</strong><br>`;
+          debugInfo.innerHTML += `  Total Correct: ${totalScore}<br>`;
+          debugInfo.innerHTML += `  Total Notes: ${totalNotes}<br>`;
+          debugInfo.innerHTML += `  Accuracy: ${accuracy}%<br>`;
+        } else {
+          debugInfo.innerHTML += '<br><strong>❌ NO GAMES FOUND</strong>';
+        }
+      } catch (error) {
+        debugInfo.innerHTML += `<br>❌ ERROR: ${error.message}`;
+        console.error('Debug error:', error);
+      }
+    });
+  </script>
 </Layout>
