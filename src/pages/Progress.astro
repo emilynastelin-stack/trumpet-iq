@@ -254,10 +254,92 @@ import Layout from "../layouts/Layout.astro";
   </div>
 
   <script type="module">
-  import { renderView } from "/scripts/progress.js";
   import { getOrCreateUser } from '/utils/simple-auth.js';
   import { getUserScores } from '/utils/firestore-rest.js';
   import { TranspositionProficiency } from '/scripts/TranspositionProficiency.js';
+  
+  // Inline render function for bar graph
+  function renderView(viewName) {
+    console.log('🎨 renderView called:', viewName);
+    
+    const barGraph = document.getElementById("barGraph");
+    const graphLabels = document.getElementById("graphLabels");
+    
+    if (!barGraph || !graphLabels || !window.views) {
+      console.error('❌ Missing elements:', { barGraph: !!barGraph, graphLabels: !!graphLabels, views: !!window.views });
+      return;
+    }
+
+    const view = window.views[viewName];
+    if (!view) {
+      console.error('❌ View not found:', viewName);
+      return;
+    }
+
+    const { labels, values } = view;
+    console.log('📈 Rendering data:', { labels, values });
+    
+    // Always use 100 as max value for proficiency scaling
+    const maxValue = 100;
+
+    barGraph.innerHTML = "";
+    graphLabels.innerHTML = "";
+
+    values.forEach((value, index) => {
+      const barWrapper = document.createElement("div");
+      barWrapper.className = "bar-wrapper";
+      // Let CSS handle flex layout - don't override
+
+      const tooltip = document.createElement("div");
+      tooltip.className = "bar-tooltip";
+      tooltip.textContent = value > 0 ? `${value}` : '0';
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      
+      // Calculate height in pixels (140px is the container height, 100 is max proficiency)
+      const maxHeightPx = 140;
+      const heightPx = (value / maxValue) * maxHeightPx;
+      // Ensure minimum visible height for non-zero values
+      const finalHeight = value > 0 ? Math.max(heightPx, 10) : heightPx;
+      bar.style.height = `${finalHeight}px`;
+      console.log(`Bar ${index} (${labels[index]}): value=${value}, maxValue=${maxValue}, heightPx=${heightPx}px, finalHeight=${finalHeight}px`);
+      
+      if (value === 0) {
+        bar.style.background = "linear-gradient(180deg, #475569 0%, #334155 100%)";
+        bar.style.boxShadow = "0 2px 8px rgba(51, 65, 85, 0.3)";
+      } else if (value >= maxValue * 0.7) {
+        bar.style.background = "linear-gradient(180deg, #34d399 0%, #10b981 100%)";
+        bar.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.3)";
+      } else if (value >= maxValue * 0.4) {
+        bar.style.background = "linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%)";
+        bar.style.boxShadow = "0 4px 12px rgba(245, 158, 11, 0.3)";
+      } else {
+        bar.style.background = "linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%)";
+        bar.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
+      }
+
+      barWrapper.appendChild(tooltip);
+      barWrapper.appendChild(bar);
+      barGraph.appendChild(barWrapper);
+
+      barWrapper.addEventListener("mouseenter", () => {
+        tooltip.style.opacity = "1";
+      });
+      barWrapper.addEventListener("mouseleave", () => {
+        tooltip.style.opacity = "0";
+      });
+    });
+
+    labels.forEach((label) => {
+      const labelEl = document.createElement("div");
+      labelEl.className = "graph-label";
+      labelEl.textContent = label;
+      graphLabels.appendChild(labelEl);
+    });
+    
+    console.log('✅ Graph rendered successfully');
+  }
 
     // Use simple local auth instead of Firebase Auth (which hangs in iOS WebView)
     const currentUser = getOrCreateUser();
@@ -402,15 +484,23 @@ import Layout from "../layouts/Layout.astro";
       
       console.log('updateActivity called with scores:', scores);
       
-      scores.forEach(score => {
+      // Filter for Bb trumpet to Bb key (default) scores only
+      const defaultScores = scores.filter(score => {
+        const instrument = score.instrument || 'Bb';
+        const key = score.key || 'Bb';
+        return instrument === 'Bb' && key === 'Bb';
+      });
+      
+      console.log('Filtered Bb→Bb scores:', defaultScores.length);
+      
+      defaultScores.forEach(score => {
         const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
         const dateKey = scoreDate.toISOString().split('T')[0];
         
-        console.log('Processing score:', { date: dateKey });
-        
         if (!activityByDate[dateKey]) {
-          activityByDate[dateKey] = { count: 0 };
+          activityByDate[dateKey] = { proficiency: 0, count: 0 };
         }
+        activityByDate[dateKey].proficiency += (score.proficiencyScore || 0);
         activityByDate[dateKey].count++;
       });
       
@@ -428,22 +518,72 @@ import Layout from "../layouts/Layout.astro";
         
         dailyLabels.push(dayName);
         const dayData = activityByDate[dateKey];
-        // Count number of games played that day
-        const gamesPlayed = dayData ? dayData.count : 0;
-        dailyValues.push(gamesPlayed);
-        console.log(`Day ${dayName} (${dateKey}): ${gamesPlayed} games played`);
+        // Use average proficiency for the day
+        const avgProficiency = dayData && dayData.count > 0 ? Math.round(dayData.proficiency / dayData.count) : 0;
+        dailyValues.push(avgProficiency);
+        console.log(`Day ${dayName} (${dateKey}): ${avgProficiency} avg proficiency (${dayData?.count || 0} games)`);
       }
       
       console.log('Daily values for chart:', dailyValues);
       
+      // Calculate weekly view (last 4 weeks)
+      const weeklyLabels = [];
+      const weeklyValues = [];
+      for (let i = 3; i >= 0; i--) {
+        const weekEnd = new Date(today);
+        weekEnd.setDate(weekEnd.getDate() - (i * 7));
+        const weekStart = new Date(weekEnd);
+        weekStart.setDate(weekStart.getDate() - 6);
+        
+        weeklyLabels.push(`W${4 - i}`);
+        
+        let weekProficiency = 0;
+        let weekCount = 0;
+        for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+          const dateKey = d.toISOString().split('T')[0];
+          if (activityByDate[dateKey]) {
+            weekProficiency += activityByDate[dateKey].proficiency;
+            weekCount += activityByDate[dateKey].count;
+          }
+        }
+        const avgWeekProficiency = weekCount > 0 ? Math.round(weekProficiency / weekCount) : 0;
+        weeklyValues.push(avgWeekProficiency);
+      }
+      
+      // Calculate yearly view (last 12 months)
+      const yearlyLabels = [];
+      const yearlyValues = [];
+      for (let i = 11; i >= 0; i--) {
+        const month = new Date(today);
+        month.setMonth(month.getMonth() - i);
+        month.setDate(1);
+        const monthName = month.toLocaleDateString('en-US', { month: 'short' });
+        yearlyLabels.push(monthName);
+        
+        const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+        const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+        
+        let monthProficiency = 0;
+        let monthCount = 0;
+        for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+          const dateKey = d.toISOString().split('T')[0];
+          if (activityByDate[dateKey]) {
+            monthProficiency += activityByDate[dateKey].proficiency;
+            monthCount += activityByDate[dateKey].count;
+          }
+        }
+        const avgMonthProficiency = monthCount > 0 ? Math.round(monthProficiency / monthCount) : 0;
+        yearlyValues.push(avgMonthProficiency);
+      }
+      
       window.views = {
         daily: { labels: dailyLabels, values: dailyValues },
-        weekly: { labels: ["W1", "W2", "W3", "W4"], values: [5, 8, 12, 10] },
-        progress: { labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], values: [10, 15, 18, 22, 25, 30, 35, 38, 42, 45, 50, 55] }
+        weekly: { labels: weeklyLabels, values: weeklyValues },
+        progress: { labels: yearlyLabels, values: yearlyValues }
       };
       
-      console.log('Rendering daily view with data:', window.views.daily);
-      renderView.call(window, "daily");
+      console.log('📊 Calling renderView with updated data:', window.views.daily);
+      renderView("daily");
     }
 
     function updateMastery(scores) {
@@ -552,6 +692,7 @@ import Layout from "../layouts/Layout.astro";
 
     // Initialize default views only if not already set
     if (!window.views) {
+      console.log('Initializing default views');
       const views = {
         daily: { labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], values: [0, 0, 0, 0, 0, 0, 0] },
         weekly: { labels: ["W1", "W2", "W3", "W4"], values: [0, 0, 0, 0] },
@@ -559,17 +700,16 @@ import Layout from "../layouts/Layout.astro";
       };
       window.views = views;
       
-      const barGraph = document.getElementById("barGraph");
-      const graphLabels = document.getElementById("graphLabels");
-
-      renderView.call(window, "daily");
+      renderView("daily");
+    } else {
+      console.log('Views already initialized:', window.views);
     }
 
     document.querySelectorAll(".pill-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".pill-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
-        renderView.call(window, btn.dataset.view);
+        renderView(btn.dataset.view);
       });
     });
 
@@ -818,19 +958,21 @@ import Layout from "../layouts/Layout.astro";
     .bar-graph {
       display: flex;
       align-items: flex-end;
-      gap: 0.4rem;
+      justify-content: space-evenly;
       height: 140px;
       overflow-x: auto;
-      padding: 0 0.25rem;
+      padding: 0 0.5rem;
     }
 
     .bar-wrapper {
-      flex: 0 0 24px;
+      flex: 1;
+      max-width: 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
       overflow: visible;
+      height: 100%;
     }
 
     .bar {
@@ -854,12 +996,17 @@ import Layout from "../layouts/Layout.astro";
 
     .graph-labels {
       display: flex;
-      justify-content: flex-start;
-      gap: 0.4rem;
+      justify-content: space-evenly;
       font-size: 0.7rem;
       color: rgba(255, 255, 255, 0.5);
-      padding: 0 0.25rem;
+      padding: 0 0.5rem;
       font-weight: 600;
+    }
+
+    .graph-label {
+      flex: 1;
+      max-width: 40px;
+      text-align: center;
     }
 
     .summary-grid {

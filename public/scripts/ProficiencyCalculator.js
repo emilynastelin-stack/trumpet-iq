@@ -13,6 +13,13 @@
 
 export class ProficiencyCalculator {
   /**
+   * Check if beginner mode is enabled
+   */
+  static isBeginnerMode() {
+    return localStorage.getItem('transposition-enabled') !== 'true';
+  }
+
+  /**
    * Calculate performance score from current session metrics
    * @param {Object} metrics
    * @param {number} metrics.accuracy - 0-1, percentage correct
@@ -22,19 +29,39 @@ export class ProficiencyCalculator {
    * @returns {number} Performance score 0-1
    */
   static calculatePerformance({ accuracy, avgSpeed, coverage = 0.5, consistency = 0.5 }) {
-    // Normalize speed: faster = higher score
-    // Baseline: 3 seconds per note (very slow)
-    // Best: <1 second per note
-    const baselineSpeed = 3.0; // seconds
+    const isBeginnerMode = this.isBeginnerMode();
+    
+    // Beginner mode: more lenient speed baseline for kids
+    // Advanced mode: standard expectations
+    const baselineSpeed = isBeginnerMode ? 5.0 : 3.0; // seconds per note
     const normSpeed = 1 - Math.min(avgSpeed / baselineSpeed, 1);
     
-    // Weighted composite (can adjust these weights)
-    const performance = (
-      0.50 * accuracy +      // Accuracy is most important
-      0.20 * normSpeed +     // Speed/fluency matters
-      0.20 * coverage +      // Variety of practice
-      0.10 * consistency     // Reliability over time
-    );
+    // Beginner mode: boost accuracy weight, reduce speed pressure
+    // Advanced mode: direct reflection of skill
+    let performance;
+    if (isBeginnerMode) {
+      // Kids mode: emphasize accuracy, be lenient on speed
+      performance = (
+        0.70 * accuracy +      // Accuracy is most important for kids
+        0.10 * normSpeed +     // Speed matters much less
+        0.15 * coverage +      // Some variety
+        0.05 * consistency     // Less pressure on consistency
+      );
+      // Apply boost to make progress feel more rewarding for kids
+      performance = Math.min(performance * 1.3, 1.0);
+    } else {
+      // Adult/advanced mode: if you perform like a master, you get master score
+      performance = (
+        0.80 * accuracy +      // Accuracy is king
+        0.20 * normSpeed       // Speed shows true fluency
+        // Coverage removed - marathon/speed modes test true mastery
+        // Consistency removed - each performance speaks for itself
+      );
+      // If performance is excellent (>0.85), boost it to reward mastery
+      if (performance >= 0.85) {
+        performance = Math.min(performance * 1.15, 1.0);
+      }
+    }
     
     return Math.min(Math.max(performance, 0), 1); // Clamp to 0-1
   }
@@ -49,8 +76,14 @@ export class ProficiencyCalculator {
    * @returns {number} Updated proficiency score
    */
   static updateProficiency(prevScore, performance, alpha = 0.15) {
+    const isBeginnerMode = this.isBeginnerMode();
+    
+    // Beginner mode: moderate learning rate for kids
+    // Advanced mode: very high learning rate - if you're performing at mastery level, score should reflect it
+    const learningRate = isBeginnerMode ? 0.40 : 0.70;
+    
     // EMA formula: new = old * (1 - alpha) + current * alpha
-    return prevScore * (1 - alpha) + performance * alpha;
+    return prevScore * (1 - learningRate) + performance * learningRate;
   }
 
   /**
@@ -65,8 +98,14 @@ export class ProficiencyCalculator {
   static applyDecay(score, daysSincePractice, decayRate = 0.02) {
     if (daysSincePractice <= 0) return score;
     
+    const isBeginnerMode = this.isBeginnerMode();
+    
+    // Beginner mode: slower decay for kids (they might practice less frequently)
+    // Advanced mode: standard decay
+    const actualDecayRate = isBeginnerMode ? 0.01 : decayRate; // 1% vs 2% per day
+    
     // Exponential decay: score * e^(-rate * days)
-    return score * Math.exp(-decayRate * daysSincePractice);
+    return score * Math.exp(-actualDecayRate * daysSincePractice);
   }
 
   /**
@@ -82,13 +121,13 @@ export class ProficiencyCalculator {
     // 1. Calculate current performance
     const performance = this.calculatePerformance(metrics);
     
-    // 2. Smooth with exponential moving average
-    const smoothed = this.updateProficiency(prevScore, performance, alpha);
+    // 2. Apply decay first if there's been a gap
+    const decayed = this.applyDecay(prevScore, daysSincePractice);
     
-    // 3. Apply decay if there's been a gap
-    const decayed = this.applyDecay(smoothed, daysSincePractice);
+    // 3. Smooth with exponential moving average
+    const smoothed = this.updateProficiency(decayed, performance, alpha);
     
-    return Math.min(Math.max(decayed, 0), 1); // Clamp to 0-1
+    return Math.min(Math.max(smoothed, 0), 1); // Clamp to 0-1
   }
 
   /**

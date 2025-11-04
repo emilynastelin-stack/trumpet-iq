@@ -2,16 +2,29 @@
 // Handles client-side logic for the Progress page
 
 export function renderView(viewName) {
+  console.log('🎨 renderView called with:', viewName);
+  
   const barGraph = document.getElementById("barGraph");
   const graphLabels = document.getElementById("graphLabels");
   
-  if (!barGraph || !graphLabels || !window.views) return;
+  console.log('📊 Elements found:', { barGraph: !!barGraph, graphLabels: !!graphLabels, views: !!window.views });
+  
+  if (!barGraph || !graphLabels || !window.views) {
+    console.error('❌ Missing required elements or data');
+    return;
+  }
 
   const view = window.views[viewName];
-  if (!view) return;
+  if (!view) {
+    console.error('❌ View not found:', viewName);
+    return;
+  }
 
   const { labels, values } = view;
+  console.log('📈 Rendering data:', { labels, values });
+  
   const maxValue = Math.max(...values, 1); // Ensure at least 1 to avoid division by 0
+  console.log('📏 Max value:', maxValue);
 
   // Clear existing content
   barGraph.innerHTML = "";
@@ -25,25 +38,28 @@ export function renderView(viewName) {
 
     const tooltip = document.createElement("div");
     tooltip.className = "bar-tooltip";
-    tooltip.textContent = `${value}%`;
+    tooltip.textContent = value > 0 ? `${value}` : '0';
 
     const bar = document.createElement("div");
     bar.className = "bar";
     
     // Calculate height percentage
-    const heightPercent = (value / maxValue) * 100;
-    bar.style.height = `${heightPercent}%`;
+    const heightPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
+    bar.style.height = `${Math.max(heightPercent, value > 0 ? 8 : 0)}%`;
     
-    // Set color based on value
-    if (value >= 75) {
+    // Set color based on relative value (gradient from low to high activity)
+    if (value === 0) {
+      bar.style.background = "linear-gradient(180deg, #475569 0%, #334155 100%)";
+      bar.style.boxShadow = "0 2px 8px rgba(51, 65, 85, 0.3)";
+    } else if (value >= maxValue * 0.7) {
       bar.style.background = "linear-gradient(180deg, #34d399 0%, #10b981 100%)";
       bar.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.3)";
-    } else if (value >= 50) {
+    } else if (value >= maxValue * 0.4) {
       bar.style.background = "linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%)";
       bar.style.boxShadow = "0 4px 12px rgba(245, 158, 11, 0.3)";
     } else {
-      bar.style.background = "linear-gradient(180deg, #f87171 0%, #ef4444 100%)";
-      bar.style.boxShadow = "0 4px 12px rgba(239, 68, 68, 0.3)";
+      bar.style.background = "linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%)";
+      bar.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
     }
 
     barWrapper.appendChild(tooltip);
