@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout>
+<Layout isHomepage={true}>
   <main class="mode-select-page">
     <!-- DEBUG BUTTON for Absolute Beginner Mode - HIDDEN -->
     <a href="/absolutebeginnermode" style="position: fixed; top: max(10px, env(safe-area-inset-top)); right: 10px; z-index: 9999; padding: 8px 12px; background: #8b5cf6; color: white; border: 2px solid white; border-radius: 10px; font-weight: bold; font-size: 12px; box-shadow: 0 4px 12px rgba(139,92,246,0.5); text-decoration: none; display: none; align-items: center; gap: 6px;">

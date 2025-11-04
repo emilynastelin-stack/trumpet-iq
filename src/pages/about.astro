@@ -1,0 +1,715 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="About">
+  <div class="about-page">
+
+    <!-- HERO SECTION -->
+    <div class="hero-section">
+      <img src="/assets/images/AppIcon.png" alt="TrumpetIQ" class="about-icon" />
+      <h1 class="hero-title">About TrumpetLab</h1>
+      <p class="hero-subtitle">Note reading and transposition for trumpet</p>
+    </div>
+
+    <!-- MISSION SECTION -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Our Mission</h2>
+      <p class="panel-text">
+        TrumpetLab was created to help trumpet players develop essential sight-reading 
+        and transposition skills through interactive, gamified practice. Whether you're 
+        a beginner learning your first notes or an advanced player mastering complex 
+        transpositions, our app adapts to your skill level.
+      </p>
+    </section>
+
+    <!-- FEATURES GRID -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Key Features</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3 class="feature-title">Reading Practice</h3>
+          <p class="feature-text">
+            Improve your note recognition with randomized exercises tailored to your skill level.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3 class="feature-title">Transposition Training</h3>
+          <p class="feature-text">
+            Master transposition across C, Bb, D, and Eb trumpet with dedicated practice modes.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3 class="feature-title">Progress Tracking</h3>
+          <p class="feature-text">
+            Monitor your improvement with detailed statistics and proficiency scores.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⭐</div>
+          <h3 class="feature-title">Achievement System</h3>
+          <p class="feature-text">
+            Earn stars and track your proficiency over time.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3 class="feature-title">Mobile Friendly</h3>
+          <p class="feature-text">
+            Practice anywhere with our responsive design that works on all devices.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="glass-panel">
+      <h2 class="panel-title">The Games</h2>
+      
+      <div class="steps-container">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3 class="step-title">Learning Mode</h3>
+            <p class="step-text">
+              Basic note reading with a hint feedback to help you learn at your own pace. Each game lasts 20 notes and you are free to learn at your own pace.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3 class="step-title">Marathon Mode</h3>
+            <p class="step-text">
+              You have 3 lives to get as many notes right as possible. A wrong answer costs a life, and the game ends when all lives are lost.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3 class="step-title">Speed Mode</h3>
+            <p class="step-text">
+              Complete timed exercises identifying notes on the staff as quickly and accurately as possible.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFICIENCY EXPLANATION -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Understanding Proficiency</h2>
+      <p class="panel-text">
+        True fluency is more complicated than merely how many right notes you can read. To be truly proficient, you have to be able to read music accurately, consistently and in time. Inspired by language learning benchmarks illustrated by the Common European Framework of Reference for Languages (CEFR), TrumpetLab uses a weighted composite of 4 factors to calculate a "proficiency score":
+      </p>
+
+      <div class="proficiency-factors">
+        <div class="factor-card">
+          <div class="factor-header">
+            <span class="factor-name">Accuracy</span>
+            <span class="factor-weight">50% weight</span>
+          </div>
+          <p class="factor-description">Most important factor</p>
+          <ul class="factor-list">
+            <li>Get more notes correct</li>
+            <li>Aim for 100% correct in sessions</li>
+          </ul>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-header">
+            <span class="factor-name">Speed</span>
+            <span class="factor-weight">20% weight</span>
+          </div>
+          <p class="factor-description">Reaction time</p>
+          <ul class="factor-list">
+            <li>Play notes faster (baseline is 3 seconds per note)</li>
+            <li>Under 1 second per note is considered fluent</li>
+          </ul>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-header">
+            <span class="factor-name">Coverage</span>
+            <span class="factor-weight">20% weight</span>
+          </div>
+          <p class="factor-description">Note variety</p>
+          <ul class="factor-list">
+            <li>Practice all 36 possible notes</li>
+            <li>System tracks which notes you've played</li>
+          </ul>
+        </div>
+
+        <div class="factor-card">
+          <div class="factor-header">
+            <span class="factor-name">Consistency</span>
+            <span class="factor-weight">10% weight</span>
+          </div>
+          <p class="factor-description">Reliability</p>
+          <ul class="factor-list">
+            <li>Maintain steady accuracy across sessions</li>
+            <li>Less variation between sessions = higher score</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="panel-text" style="margin-top: 1rem;">
+        Track your progress over time and watch yourself improve!
+      </p>
+    </section>
+
+    <!-- TRANSPOSITION TRACKING -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Transposition Tracking</h2>
+      <p class="panel-text">
+        For advanced users looking to improve their sight transposition, the app scores your proficiency levels across <strong>9 different keys on 4 different trumpets</strong>: A, Bb, H (B), C, D, Eb, E, F and G on Bb, C, D and Eb trumpet. 
+      </p>
+      <p class="panel-text" style="margin-top: 0.75rem;">
+        Practice your standard transpositions for orchestra and be empowered to play any trumpet you want on any piece of music. Gone are the days that you have to remember which transpositions you really need to work on—TrumpetLab has all of your information saved!
+      </p>
+    </section>
+
+    <!-- PROFICIENCY BANDS -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Proficiency System</h2>
+      <p class="panel-subtitle">Track your mastery level across different keys and instruments</p>
+      
+      <div class="bands-container">
+        <div class="band-card novice">
+          <div class="band-header">
+            <span class="band-name">Novice</span>
+            <span class="band-range">0-24</span>
+          </div>
+          <p class="band-description">Just starting out. Focus on basic note recognition.</p>
+        </div>
+
+        <div class="band-card learner">
+          <div class="band-header">
+            <span class="band-name">Learner</span>
+            <span class="band-range">25-49</span>
+          </div>
+          <p class="band-description">Building confidence with regular practice.</p>
+        </div>
+
+        <div class="band-card intermediate">
+          <div class="band-header">
+            <span class="band-name">Intermediate</span>
+            <span class="band-range">50-74</span>
+          </div>
+          <p class="band-description">Comfortable with most notes and patterns.</p>
+        </div>
+
+        <div class="band-card proficient">
+          <div class="band-header">
+            <span class="band-name">Proficient</span>
+            <span class="band-range">75-89</span>
+          </div>
+          <p class="band-description">Strong skills with consistent accuracy.</p>
+        </div>
+
+        <div class="band-card advanced">
+          <div class="band-header">
+            <span class="band-name">Advanced</span>
+            <span class="band-range">90-99</span>
+          </div>
+          <p class="band-description">Near-perfect recognition and speed.</p>
+        </div>
+
+        <div class="band-card master">
+          <div class="band-header">
+            <span class="band-name">Master</span>
+            <span class="band-range">100</span>
+          </div>
+          <p class="band-description">Complete mastery achieved!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMING SOON -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Coming Soon</h2>
+      <div class="coming-soon-list">
+        <div class="coming-soon-item">
+          <span class="coming-icon">🚀</span>
+          <p>Adventure mode with guided lessons for beginners learning their very first notes</p>
+        </div>
+        <div class="coming-soon-item">
+          <span class="coming-icon">🎺</span>
+          <p>Support for piccolo trumpet in Bb and A with an expanded gamepad to account for the 4th valve</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT/FEEDBACK -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Get In Touch</h2>
+      <p class="panel-text">
+        We're always looking to improve! If you have feedback, feature requests, or 
+        just want to share your progress, we'd love to hear from you.
+      </p>
+      
+      <div class="contact-buttons">
+        <a href="mailto:feedback@noteperfect.app" class="contact-btn primary">
+          <span class="btn-icon">✉️</span>
+          Send Feedback
+        </a>
+        <a href="/support" class="contact-btn secondary">
+          <span class="btn-icon">❓</span>
+          Get Help
+        </a>
+      </div>
+    </section>
+
+    <!-- VERSION INFO -->
+    <div class="version-info">
+      <p>Version 1.0.0 • TrumpetLab © 2025 Emily Nastelin</p>
+    </div>
+
+  </div>
+</Layout>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .about-page {
+    min-height: 100vh;
+    width: 100%;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 5rem;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+    font-family: "Inter", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-x: hidden;
+  }
+
+  /* HERO SECTION */
+  .hero-section {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .about-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 28px;
+    margin: 0 auto 1rem;
+    display: block;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 40px rgba(16, 185, 129, 0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .hero-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+  }
+
+  /* GLASS PANEL */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .panel-title {
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin: 0 0 1rem 0;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  .panel-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+    margin: -0.5rem 0 1.25rem 0;
+    line-height: 1.5;
+  }
+
+  .panel-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* FEATURES GRID */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .feature-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .feature-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(16, 185, 129, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .feature-text {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* STEPS */
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .step-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-weight: 800;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .step-text {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* PROFICIENCY FACTORS */
+  .proficiency-factors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .factor-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 1rem;
+  }
+
+  .factor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .factor-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #10b981;
+  }
+
+  .factor-weight {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+
+  .factor-description {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 0.5rem 0;
+    font-style: italic;
+  }
+
+  .factor-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: none;
+  }
+
+  .factor-list li {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin-bottom: 0.25rem;
+    position: relative;
+  }
+
+  .factor-list li:before {
+    content: "•";
+    color: #10b981;
+    font-weight: bold;
+    position: absolute;
+    left: -1rem;
+  }
+
+  /* PROFICIENCY BANDS */
+  .bands-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .band-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 1rem;
+  }
+
+  .band-card.novice { border-color: rgba(156, 163, 175, 0.3); }
+  .band-card.learner { border-color: rgba(59, 130, 246, 0.3); }
+  .band-card.intermediate { border-color: rgba(34, 197, 94, 0.3); }
+  .band-card.proficient { border-color: rgba(234, 179, 8, 0.3); }
+  .band-card.advanced { border-color: rgba(249, 115, 22, 0.3); }
+  .band-card.master { border-color: rgba(168, 85, 247, 0.3); }
+
+  .band-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .band-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+  }
+
+  .band-range {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .band-description {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* COMING SOON */
+  .coming-soon-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .coming-soon-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .coming-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .coming-soon-item p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+  }
+
+  /* CONTACT BUTTONS */
+  .contact-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .contact-btn.primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .contact-btn.primary:hover {
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .contact-btn.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  .contact-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-icon {
+    font-size: 1.125rem;
+  }
+
+  /* VERSION INFO */
+  .version-info {
+    text-align: center;
+    padding: 1.5rem 0;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.875rem;
+  }
+
+  /* RESPONSIVE */
+  @supports (padding: max(0px)) {
+    .about-page {
+      padding-bottom: max(5rem, env(safe-area-inset-bottom));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero-title {
+      font-size: 1.75rem;
+    }
+
+    .about-icon {
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .proficiency-factors {
+      grid-template-columns: 1fr;
+    }
+
+    .bands-container {
+      grid-template-columns: 1fr;
+    }
+
+    .contact-buttons {
+      flex-direction: column;
+    }
+
+    .contact-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 375px) {
+    .about-page {
+      padding: 0.875rem 0.875rem 4.5rem;
+    }
+
+    .glass-panel {
+      padding: 1rem;
+    }
+
+    .about-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+    }
+  }
+</style>

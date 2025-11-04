@@ -1,5 +1,5 @@
 ---
-const { showTransposition = false } = Astro.props || {};
+const { showTransposition = false, isHomepage = false } = Astro.props || {};
 ---
 <footer class="footer">
   <div class="footer-bg"></div>
@@ -21,14 +21,26 @@ const { showTransposition = false } = Astro.props || {};
       </div>
     </button>
   )}
-  <a href="/" class="footer-btn btn-center" aria-label="Home">
-    <div class="btn-glass">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-    </div>
-  </a>
+  {isHomepage ? (
+    <a href="/about" class="footer-btn btn-center" aria-label="About">
+      <div class="btn-glass">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4"/>
+          <path d="M12 8h.01"/>
+        </svg>
+      </div>
+    </a>
+  ) : (
+    <a href="/" class="footer-btn btn-center" aria-label="Home">
+      <div class="btn-glass">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+    </a>
+  )}
   <a href="/Progress" class="footer-btn btn-rightmid" aria-label="View Progress">
     <div class="btn-glass">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

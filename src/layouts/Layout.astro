@@ -4,7 +4,7 @@ import TranspositionPanel from "../components/TranspositionPanel.astro";
 import UserSettings from "../components/UserSettings.astro";
 import "../styles/tailwind.css";
 
-const { showTransposition = false } = Astro.props;
+const { showTransposition = false, isHomepage = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -43,7 +43,7 @@ const { showTransposition = false } = Astro.props;
     <slot />
     {showTransposition && (<TranspositionPanel />)}
     <UserSettings />
-    <Footer showTransposition={showTransposition} />
+    <Footer showTransposition={showTransposition} isHomepage={isHomepage} />
   {showTransposition && (<script type="module" src="/scripts/transposition-panel.js"></script>)}
   {showTransposition && (<script is:inline>
     // Initialize transposition UI state on page load

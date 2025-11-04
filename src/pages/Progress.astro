@@ -5,14 +5,6 @@ import Layout from "../layouts/Layout.astro";
 <Layout title="Your Progress">
   <div class="progress-page">
 
-    <!-- DEBUG BUTTON -->
-    <button id="debugBtn" style="position: fixed; top: max(60px, calc(env(safe-area-inset-top) + 10px)); right: 10px; z-index: 9999; padding: 10px 15px; background: #10b981; color: white; border: 2px solid white; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-      🐛 DEBUG
-    </button>
-    <div id="debugInfo" style="position: fixed; top: max(120px, calc(env(safe-area-inset-top) + 70px)); right: 10px; left: 10px; z-index: 9999; padding: 15px; background: rgba(0,0,0,0.95); color: #0f0; border: 2px solid #10b981; border-radius: 12px; font-family: monospace; font-size: 11px; max-height: 50vh; overflow-y: auto; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.7);">
-      Checking...
-    </div>
-
     <!-- HERO STATS -->
     <div class="hero-section">
       <div class="greeting">
@@ -1239,54 +1231,4 @@ import Layout from "../layouts/Layout.astro";
       }
     }
   </style>
-
-  <script type="module">
-    import { getCurrentUser } from '/utils/simple-auth.js';
-    import { getUserScores } from '/utils/firestore-rest.js';
-
-    const debugBtn = document.getElementById('debugBtn');
-    const debugInfo = document.getElementById('debugInfo');
-
-    debugBtn.addEventListener('click', async () => {
-      debugInfo.style.display = 'block';
-      debugInfo.innerHTML = '⏳ Checking Firestore via REST API...';
-
-      try {
-        const user = getCurrentUser();
-        debugInfo.innerHTML = `✅ User ID: ${user.uid.substring(0, 8)}...<br>`;
-        
-        debugInfo.innerHTML += '⏳ Querying YOUR scores via REST API...<br>';
-        const scores = await getUserScores(user.uid);
-        debugInfo.innerHTML += `✅ Your scores: ${scores.length}<br><br>`;
-        
-        if (scores.length > 0) {
-          debugInfo.innerHTML += '<strong>🎮 SCORE DETAILS:</strong><br>';
-          scores.forEach((score, i) => {
-            debugInfo.innerHTML += `<br><strong>Game ${i+1}:</strong><br>`;
-            debugInfo.innerHTML += `  Mode: ${score.mode}<br>`;
-            debugInfo.innerHTML += `  Score: ${score.score}/${score.total} (${score.percentage}%)<br>`;
-            debugInfo.innerHTML += `  Proficiency: ${score.proficiencyScore}<br>`;
-            debugInfo.innerHTML += `  Instrument: ${score.instrument || 'N/A'}<br>`;
-            debugInfo.innerHTML += `  Key: ${score.key || 'N/A'}<br>`;
-            debugInfo.innerHTML += `  Stars: ${score.stars || 'N/A'}<br>`;
-          });
-          
-          // Calculate stats
-          const totalScore = scores.reduce((sum, s) => sum + (s.score || 0), 0);
-          const totalNotes = scores.reduce((sum, s) => sum + (s.total || 0), 0);
-          const accuracy = totalNotes > 0 ? Math.round((totalScore / totalNotes) * 100) : 0;
-          
-          debugInfo.innerHTML += `<br><strong>📊 CALCULATED STATS:</strong><br>`;
-          debugInfo.innerHTML += `  Total Correct: ${totalScore}<br>`;
-          debugInfo.innerHTML += `  Total Notes: ${totalNotes}<br>`;
-          debugInfo.innerHTML += `  Accuracy: ${accuracy}%<br>`;
-        } else {
-          debugInfo.innerHTML += '<br><strong>❌ NO GAMES FOUND</strong>';
-        }
-      } catch (error) {
-        debugInfo.innerHTML += `<br>❌ ERROR: ${error.message}`;
-        console.error('Debug error:', error);
-      }
-    });
-  </script>
 </Layout>
