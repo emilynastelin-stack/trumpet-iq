@@ -1,4 +1,5 @@
 ---
+import { ViewTransitions } from 'astro:transitions';
 import Footer from "../components/Footer.astro";
 import TranspositionPanel from "../components/TranspositionPanel.astro";
 import UserSettings from "../components/UserSettings.astro";
@@ -15,6 +16,9 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     
+    <!-- Prevent white flash with theme color -->
+    <meta name="theme-color" content="#182134" />
+    
     <!-- iOS PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,9 +28,123 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
     <meta name="view-transition" content="same-origin" />
     
     <title>Astro Music Game</title>
+    
+    <!-- Inline critical CSS to prevent white flash -->
+    <style>
+      html, body {
+        background-color: #182134;
+        background: linear-gradient(135deg, 
+          #c4421a 0%, 
+          #ff8c00 12%, 
+          #ffa500 20%, 
+          #182134 35%, 
+          #374661 50%, 
+          #12908e 75%, 
+          #16594a 100%);
+      }
+    </style>
 
     <!-- Tailwind CSS -->
   <link rel="stylesheet" href="/global.css" />
+  
+  <!-- Astro View Transitions for smooth page navigation -->
+  <ViewTransitions />
+  
+  <!-- View Transitions lifecycle handlers -->
+  <script is:inline>
+    // Reinitialize everything after View Transitions navigation
+    let vtNavigationCount = 0;
+    let lastGamePath = null;
+    
+    // Clear any stuck button states before navigation starts
+    document.addEventListener('astro:before-swap', () => {
+      console.log('[VT] Before swap - clearing button states');
+      
+      // Check if we're leaving a game page
+      const currentPath = window.location.pathname;
+      const isLeavingGame = currentPath.includes('/game/');
+      
+      if (isLeavingGame) {
+        console.log('[VT] Leaving game page - triggering cleanup');
+        // Dispatch game cleanup event
+        const cleanupEvent = new Event('game:cleanup');
+        window.dispatchEvent(cleanupEvent);
+        document.dispatchEvent(cleanupEvent);
+      }
+      
+      // Clear all active buttons
+      document.querySelectorAll('.gp-btn.active, .footer-btn.touching').forEach(btn => {
+        btn.classList.remove('active', 'touching');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+      
+      // Clear any active touch mappings
+      if (window.touchMap) {
+        window.touchMap.clear();
+      }
+      
+      // Clear any active keyboard states
+      if (window.activeKeys) {
+        window.activeKeys.clear();
+      }
+    });
+    
+    document.addEventListener('astro:page-load', () => {
+      vtNavigationCount++;
+      const currentPath = window.location.pathname;
+      const wasGamePage = lastGamePath && lastGamePath.includes('/game/');
+      const isGamePage = currentPath.includes('/game/');
+      
+      console.log('[VT] Page loaded/swapped #' + vtNavigationCount + ' path: ' + currentPath + ' (from game: ' + wasGamePage + ')');
+      
+      // If navigating to a game page (from anywhere), do a full reload
+      // Game pages have complex module scripts that need to run fresh
+      if (isGamePage && vtNavigationCount > 1) {
+        console.log('[VT] Game page detected, doing full reload');
+        window.location.href = currentPath + window.location.search;
+        return;
+      }
+      
+      // If coming FROM a game page, we need to reset initialization flags
+      // because the game page did a full reload which reset global state
+      if (wasGamePage && !isGamePage) {
+        console.log('[VT] Coming from game page, resetting initialization flags');
+        window.footerInitialized = false;
+        
+        // Clear all button states after coming from game
+        setTimeout(function() {
+          document.querySelectorAll('.gp-btn.active, .footer-btn.touching').forEach(btn => {
+            btn.classList.remove('active', 'touching');
+            btn.setAttribute('aria-pressed', 'false');
+          });
+        }, 10);
+        
+        // Give the DOM a moment to settle, then dispatch DOMContentLoaded to reinitialize
+        setTimeout(function() {
+          console.log('[VT] Dispatching DOMContentLoaded to reinitialize footer');
+          const domEvent = new Event('DOMContentLoaded', { bubbles: true });
+          document.dispatchEvent(domEvent);
+        }, 50);
+      }
+      
+      lastGamePath = currentPath;
+      
+      // For normal non-game navigation, components reinitialize automatically
+      if (vtNavigationCount > 1 && !isGamePage && !wasGamePage) {
+        console.log('[VT] Normal navigation between non-game pages');
+        
+        // Still clear button states on normal navigation
+        setTimeout(function() {
+          document.querySelectorAll('.gp-btn.active, .footer-btn.touching').forEach(btn => {
+            btn.classList.remove('active', 'touching');
+            btn.setAttribute('aria-pressed', 'false');
+          });
+        }, 10);
+      } else if (vtNavigationCount === 1) {
+        console.log('[VT] First load, using natural initialization');
+      }
+    });
+  </script>
   
   <!-- Haptic Feedback Manager -->
   <script is:inline src="/scripts/HapticManager.js"></script>
@@ -37,8 +155,8 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
       <div class="loader-spinner"></div>
     </div>
     
-    <div class="background-gradient"></div>
-    <div class="floating-orbs">
+    <div class="background-gradient" transition:persist></div>
+    <div class="floating-orbs" transition:persist>
       <div class="orb orb-1"></div>
       <div class="orb orb-2"></div>
       <div class="orb orb-3"></div>
@@ -89,6 +207,8 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
     })();
   </script>)}
   <script is:inline>
+    // Custom navigation disabled - View Transitions handles this
+    /*
     // Fix absolute /-prefixed navigation for Capacitor/WKWebView by rewriting to root-based URLs.
     (function () {
       function isExternal(h) {
@@ -287,6 +407,7 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
         }
       }, false);
     })();
+    */
   </script>
   <script is:inline>
     // Remove navigating class on page load to show content
@@ -331,19 +452,33 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
       window.addEventListener('load', function() {
         setTimeout(hideLoader, 100);
       });
+      
+      // Hide after View Transitions navigation
+      document.addEventListener('astro:page-load', function() {
+        console.log('[loader] astro:page-load - hiding loader');
+        setTimeout(hideLoader, 100);
+      });
     })();
   </script>
   <script is:inline>
     // Footer touch feedback only - let global nav handler do the navigation
     (function initFooter() {
-      console.log('[footer] Initializing footer touch feedback');
-      
       // Mark if already initialized to prevent duplicate listeners
       if (window.footerInitialized) {
-        console.log('[footer] Already initialized');
+        console.log('[footer] Already initialized, skipping');
         return;
       }
+      
+      console.log('[footer] Initializing footer touch feedback');
       window.footerInitialized = true;
+      
+      // Clear any stuck button states immediately when initializing
+      setTimeout(function() {
+        document.querySelectorAll('.gp-btn.active, .footer-btn.touching').forEach(btn => {
+          btn.classList.remove('active', 'touching');
+          btn.setAttribute('aria-pressed', 'false');
+        });
+      }, 10);
       
       // Wait for footer to be in DOM
       function attachFooterListeners() {

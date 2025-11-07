@@ -300,8 +300,8 @@ import GamePad from "../../components/GamePad.astro";
     // BUILD LESSON FUNCTION
     // ============================================
     
-    function buildLesson(newNotes, reviewNotes = [], practiceCount = 10, newWeight = 1.0) {
-      const lessons = [];
+    function buildLesson(newNotes: string[], reviewNotes: string[] = [], practiceCount: number = 10, newWeight: number = 1.0) {
+      const lessons: any[] = [];
       const noteData = {
         'G': { note: 'G1', fingering: [0] },
         'F': { note: 'F1', fingering: [1] },
@@ -313,8 +313,8 @@ import GamePad from "../../components/GamePad.astro";
       };
       
       // Part 1: Introduce new notes with hints
-      newNotes.forEach(noteName => {
-        const data = noteData[noteName];
+      newNotes.forEach((noteName: string) => {
+        const data = noteData[noteName as keyof typeof noteData];
         if (data) {
           lessons.push({
             note: data.note,
@@ -336,7 +336,7 @@ import GamePad from "../../components/GamePad.astro";
       // Add weighted new notes
       for (let i = 0; i < newNotesCount; i++) {
         const noteName = newNotes[Math.floor(Math.random() * newNotes.length)];
-        const data = noteData[noteName];
+        const data = noteData[noteName as keyof typeof noteData];
         if (data) {
           practiceNotes.push({
             note: data.note,
@@ -351,7 +351,7 @@ import GamePad from "../../components/GamePad.astro";
       // Add review notes
       for (let i = 0; i < reviewNotesCount; i++) {
         const noteName = reviewNotes[Math.floor(Math.random() * reviewNotes.length)];
-        const data = noteData[noteName];
+        const data = noteData[noteName as keyof typeof noteData];
         if (data) {
           practiceNotes.push({
             note: data.note,
@@ -385,8 +385,8 @@ import GamePad from "../../components/GamePad.astro";
 
     let currentLessonIndex = 0;
     let mistakeCount = 0;
-    let currentLesson = null;
-    let pressedButtons = new Set();
+    let currentLesson: any = null;
+    let pressedButtons = new Set<number>();
     let correctCount = 0;
     let totalAttempts = 0;
 
@@ -398,7 +398,7 @@ import GamePad from "../../components/GamePad.astro";
       }
     }
 
-    function renderNoteLesson(lesson) {
+    function renderNoteLesson(lesson: any) {
       const container = document.getElementById('lessonContainer');
       if (!container) return;
 
@@ -430,21 +430,21 @@ import GamePad from "../../components/GamePad.astro";
       });
     }
 
-    function highlightButtons(fingering) {
+    function highlightButtons(fingering: number[]) {
       const buttons = document.querySelectorAll('.gamepad-btn');
       buttons.forEach(btn => {
-        const valve = parseInt(btn.dataset.valve);
+        const valve = parseInt((btn as HTMLElement).dataset.valve || '0');
         if (fingering.includes(valve)) {
           btn.classList.add('hint');
         }
       });
     }
 
-    function checkAnswer(lesson) {
-      const expected = new Set(lesson.fingering);
-      const pressed = new Set(pressedButtons);
+    function checkAnswer(lesson: any) {
+      const expected = new Set<number>(lesson.fingering);
+      const pressed = new Set<number>(pressedButtons);
       
-      if (expected.size === pressed.size && [...expected].every(v => pressed.has(v))) {
+      if (expected.size === pressed.size && [...expected].every((v: number) => pressed.has(v))) {
         return true;
       }
       return false;
@@ -461,7 +461,7 @@ import GamePad from "../../components/GamePad.astro";
       }, 800);
     }
 
-    function checkAndAdvance(lesson) {
+    function checkAndAdvance(lesson: any) {
       if (checkAnswer(lesson)) {
         celebrateCorrect();
         correctCount++;
@@ -495,7 +495,7 @@ import GamePad from "../../components/GamePad.astro";
       const buttons = document.querySelectorAll('.gamepad-btn');
       
       buttons.forEach(btn => {
-        const valve = parseInt(btn.dataset.valve);
+        const valve = parseInt((btn as HTMLElement).dataset.valve || '0');
         
         // Mouse events
         btn.addEventListener('mousedown', () => {
@@ -526,7 +526,7 @@ import GamePad from "../../components/GamePad.astro";
       
       // Keyboard events
       document.addEventListener('keydown', (e) => {
-        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const keyMap: { [key: string]: number } = { '0': 0, '1': 1, '2': 2, '3': 3 };
         const valve = keyMap[e.key];
         
         if (valve !== undefined && !pressedButtons.has(valve)) {
@@ -537,7 +537,7 @@ import GamePad from "../../components/GamePad.astro";
       });
       
       document.addEventListener('keyup', (e) => {
-        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const keyMap: { [key: string]: number } = { '0': 0, '1': 1, '2': 2, '3': 3 };
         const valve = keyMap[e.key];
         
         if (valve !== undefined && pressedButtons.has(valve)) {
@@ -593,7 +593,7 @@ import GamePad from "../../components/GamePad.astro";
       localStorage.setItem('lesson2-complete', 'true');
       
       // Hide gamepad
-      const gamepad = document.querySelector('.gamepad-container');
+      const gamepad = document.querySelector('.gamepad-container') as HTMLElement;
       if (gamepad) gamepad.style.display = 'none';
     }
 

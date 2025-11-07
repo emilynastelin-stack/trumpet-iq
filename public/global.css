@@ -1,0 +1,22 @@
+/* Prevent white flash during page transitions */
+html {
+  background-color: #182134 !important;
+  background: linear-gradient(135deg, 
+    #c4421a 0%, 
+    #ff8c00 12%, 
+    #ffa500 20%, 
+    #182134 35%, 
+    #374661 50%, 
+    #12908e 75%, 
+    #16594a 100%) !important;
+  background-attachment: fixed !important;
+}
+
+body {
+  background: transparent !important;
+}
+
+/* Ensure content doesn't flash white */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

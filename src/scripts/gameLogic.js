@@ -3,6 +3,70 @@ import { levels } from '../data/levels.js';
 import { getFingering } from '../utils/getFingerings.js';
 
 /**
+ * Save note performance data to localStorage for tracking difficult notes
+ */
+function saveNotePerformance(notePerformance) {
+  if (!notePerformance || typeof notePerformance !== 'object') return;
+  
+  try {
+    // Log notes you got wrong in this game
+    console.log('🎯 === GAME OVER: Note Performance ===');
+    const wrongNotes = [];
+    const perfectNotes = [];
+    
+    Object.keys(notePerformance).forEach(noteName => {
+      const { correct, total } = notePerformance[noteName];
+      const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+      
+      if (correct < total) {
+        wrongNotes.push({ note: noteName, correct, total, accuracy });
+      } else {
+        perfectNotes.push({ note: noteName, correct, total, accuracy });
+      }
+    });
+    
+    if (wrongNotes.length > 0) {
+      console.log('❌ Notes you got wrong:');
+      wrongNotes.forEach(({ note, correct, total, accuracy }) => {
+        console.log(`  ${note}: ${correct}/${total} correct (${accuracy}%)`);
+      });
+    }
+    
+    if (perfectNotes.length > 0) {
+      console.log('✅ Notes you got perfect:');
+      perfectNotes.forEach(({ note, correct, total }) => {
+        console.log(`  ${note}: ${correct}/${total} correct (100%)`);
+      });
+    }
+    
+    // Get existing tracker from localStorage
+    let notePerformanceTracker = {};
+    try {
+      const stored = localStorage.getItem('notePerformanceTracker');
+      if (stored) notePerformanceTracker = JSON.parse(stored);
+    } catch (e) {
+      console.error('Failed to parse notePerformanceTracker:', e);
+    }
+    
+    // Aggregate note performance data
+    Object.keys(notePerformance).forEach(noteName => {
+      if (!notePerformanceTracker[noteName]) {
+        notePerformanceTracker[noteName] = { correct: 0, total: 0 };
+      }
+      notePerformanceTracker[noteName].correct += notePerformance[noteName].correct;
+      notePerformanceTracker[noteName].total += notePerformance[noteName].total;
+    });
+    
+    // Save to localStorage
+    localStorage.setItem('notePerformanceTracker', JSON.stringify(notePerformanceTracker));
+    console.log('📊 Note performance saved to localStorage');
+    console.log('🎯 ===================================');
+  } catch (err) {
+    console.error('❌ Failed to save note performance:', err);
+  }
+}
+
+/**
  * Initialize the game with dynamic fingerings.
  * @param {{
  *   instrument: string,
@@ -61,6 +125,8 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
   let correctCount = 0; // number of correct answers
   let pointsEarned = 0; // points earned (100 per correct in speed/marathon, accuracy % in learning)
   let ended = false;
+  // Track individual note performance: { "C1": { correct: 2, total: 3 }, "D1": { correct: 1, total: 2 }, ... }
+  const notePerformance = {};
   // short tolerance window so slightly staggered multi-touch presses still count
   let pendingWrongTimer = null;
   // ms to wait before deciding an attempt is wrong — small tolerance helps
@@ -100,6 +166,13 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
     if (!noteData) return;
     // increment number of notes presented; if in learning mode, end after 20
     noteCount++;
+    // Initialize note performance tracking for this note
+    const noteName = noteData.note;
+    if (!notePerformance[noteName]) {
+      notePerformance[noteName] = { correct: 0, total: 0 };
+    }
+    notePerformance[noteName].total++;
+    console.log('📝 Tracking note:', noteName, 'Total attempts:', notePerformance[noteName].total);
     // Reset per-note wrong marker when we move to the next note
     noteWasMarkedWrong = false;
     // Dispatch a progress event for debugging: how many notes have been shown.
@@ -208,6 +281,12 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
       // Only award a point if the current note hasn't already been marked wrong
       if (!noteWasMarkedWrong) {
         correctCount++;
+        // Track note performance
+        const noteName = noteData.note;
+        if (notePerformance[noteName]) {
+          notePerformance[noteName].correct++;
+          console.log('✅ Correct answer for:', noteName, 'Correct count:', notePerformance[noteName].correct);
+        }
         // Award 100 points per correct answer in speed/marathon mode
         if (mode === 'speed' || mode === 'marathon') {
           pointsEarned += 100;
@@ -228,9 +307,12 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             lastPlayed: Date.now()
           });
         }).catch(e => console.error('Failed to save progress:', e));
-        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent }, bubbles: true, composed: true });
+        console.log('📊 Final notePerformance object:', notePerformance);
+        const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent, notePerformance }, bubbles: true, composed: true });
         try { container.dispatchEvent(endEv); } catch (err) {}
         try { window.dispatchEvent(endEv); } catch (err) {}
+        // Save note performance to localStorage
+        saveNotePerformance(notePerformance);
       } else {
         currentIndex = pickRandomIndex();
         // In speed mode, wait for success animation (520ms). In other modes use shorter delay.
@@ -267,6 +349,12 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           // Only award a point if the current note hasn't already been marked wrong
           if (!noteWasMarkedWrong) {
             correctCount++;
+            // Track note performance
+            const noteName = noteData.note;
+            if (notePerformance[noteName]) {
+              notePerformance[noteName].correct++;
+              console.log('✅ Correct answer (delayed) for:', noteName, 'Correct count:', notePerformance[noteName].correct);
+            }
             // Award 100 points per correct answer in speed/marathon mode
             if (mode === 'speed' || mode === 'marathon') {
               pointsEarned += 100;
@@ -292,9 +380,12 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
               };
               localStorage.setItem(progressKey, JSON.stringify(progress));
             } catch (e) { console.error('Failed to save progress:', e); }
-            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent }, bubbles: true, composed: true });
+            console.log('📊 Final notePerformance object (delayed end):', notePerformance);
+            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent, notePerformance }, bubbles: true, composed: true });
             try { container.dispatchEvent(endEv); } catch (err) {}
             try { window.dispatchEvent(endEv); } catch (err) {}
+            // Save note performance to localStorage
+            saveNotePerformance(notePerformance);
           } else {
             currentIndex = pickRandomIndex();
             // In speed mode, wait for success animation (520ms). In other modes use shorter delay.
@@ -325,19 +416,23 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
             if (lives <= 0) {
               ended = true;
               const accuracyPercent = noteCount > 0 ? Math.round((correctCount / noteCount) * 100) : 0;
+              console.log('📊 Final notePerformance object (marathon game over):', notePerformance);
               const endEv = new CustomEvent('game:end', { 
                 detail: { 
                   score: pointsEarned, 
                   total: noteCount, 
                   correctCount, 
                   accuracy: accuracyPercent,
-                  reason: 'lives' 
+                  reason: 'lives',
+                  notePerformance 
                 }, 
                 bubbles: true, 
                 composed: true 
               });
               try { container.dispatchEvent(endEv); } catch (err) {}
               try { window.dispatchEvent(endEv); } catch (err) {}
+              // Save note performance to localStorage
+              saveNotePerformance(notePerformance);
               return;
             }
             
@@ -355,9 +450,12 @@ export function initGame({ instrument = 'Bb', key = 'Bb', difficulty = 'basic', 
           if (mode === 'learning' && !ended && noteCount >= 20) {
             ended = true;
             const accuracyPercent = Math.round((correctCount / noteCount) * 100);
-            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent }, bubbles: true, composed: true });
+            console.log('📊 Final notePerformance object (wrong answer end):', notePerformance);
+            const endEv = new CustomEvent('game:end', { detail: { score: correctCount, total: noteCount, accuracy: accuracyPercent, notePerformance }, bubbles: true, composed: true });
             try { container.dispatchEvent(endEv); } catch (err) {}
             try { window.dispatchEvent(endEv); } catch (err) {}
+            // Save note performance to localStorage
+            saveNotePerformance(notePerformance);
             return; // stop further processing for this timer
           }
 

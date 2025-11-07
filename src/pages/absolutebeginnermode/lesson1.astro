@@ -409,11 +409,11 @@ import GamePad from "../../components/GamePad.astro";
      * @param {number} practiceCount - Number of practice exercises
      * @param {number} newWeight - Percentage of practice that should be new notes (0-1)
      */
-    function buildLesson(newNotes, reviewNotes = [], practiceCount = 10, newWeight = 1.0) {
-      const lessons = [];
+    function buildLesson(newNotes: string[], reviewNotes: string[] = [], practiceCount: number = 10, newWeight: number = 1.0) {
+      const lessons: any[] = [];
       
       // Phase 1: Introduction - show each new note with hints
-      newNotes.forEach((note, index) => {
+      newNotes.forEach((note: string, index: number) => {
         lessons.push({
           type: 'note',
           title: index === 0 ? 'Meet Your First Note!' : 
@@ -422,7 +422,7 @@ import GamePad from "../../components/GamePad.astro";
                  `Note ${index + 1}!`,
           note: note,
           image: `/notes/${note}.png`,
-          fingering: NOTE_FINGERINGS[note],
+          fingering: NOTE_FINGERINGS[note as keyof typeof NOTE_FINGERINGS],
           showHint: true
         });
       });
@@ -440,7 +440,7 @@ import GamePad from "../../components/GamePad.astro";
           type: 'practice',
           note: randomNote,
           image: `/notes/${randomNote}.png`,
-          fingering: NOTE_FINGERINGS[randomNote],
+          fingering: NOTE_FINGERINGS[randomNote as keyof typeof NOTE_FINGERINGS],
           showHint: false
         });
       }
@@ -487,14 +487,14 @@ import GamePad from "../../components/GamePad.astro";
     // HINT SYSTEM
     // ============================================
     
-    function highlightButtons(fingering) {
+    function highlightButtons(fingering: number[]) {
       // Clear all highlights
       document.querySelectorAll('.gp-btn').forEach(btn => {
         btn.classList.remove('hint');
       });
       
       // Add hints to correct buttons
-      fingering.forEach(valve => {
+      fingering.forEach((valve: number) => {
         const btn = document.querySelector(`[data-button="${valve}"]`);
         if (btn) {
           btn.classList.add('hint');
@@ -512,7 +512,7 @@ import GamePad from "../../components/GamePad.astro";
     // ANSWER CHECKING
     // ============================================
     
-    function checkAnswer(lesson) {
+    function checkAnswer(lesson: any) {
       const expected = new Set(lesson.fingering);
       
       // Check if pressed buttons match expected
@@ -525,7 +525,7 @@ import GamePad from "../../components/GamePad.astro";
       return true;
     }
 
-    function checkAndAdvance(lesson) {
+    function checkAndAdvance(lesson: any) {
       if (checkAnswer(lesson)) {
         // Correct! Show celebration and advance
         celebrateCorrect();
@@ -573,7 +573,7 @@ import GamePad from "../../components/GamePad.astro";
     // RENDERING
     // ============================================
     
-    function renderNoteLesson(lesson) {
+    function renderNoteLesson(lesson: any) {
       const container = document.getElementById('lessonContainer');
       if (!container) return;
 
@@ -607,7 +607,7 @@ import GamePad from "../../components/GamePad.astro";
       if (!container) return;
 
       // Hide gamepad
-      const gamepad = document.getElementById('gamepad');
+      const gamepad = document.getElementById('gamepad') as HTMLElement;
       if (gamepad) gamepad.style.display = 'none';
 
       container.innerHTML = `
@@ -647,15 +647,15 @@ import GamePad from "../../components/GamePad.astro";
     // INPUT HANDLING
     // ============================================
     
-    function setupButtonListeners(lesson) {
+    function setupButtonListeners(lesson: any) {
       const buttons = document.querySelectorAll('.gp-btn');
       
-      function handlePress(valve) {
+      function handlePress(valve: number) {
         pressedButtons.add(valve);
         checkAndAdvance(lesson);
       }
       
-      function handleRelease(valve) {
+      function handleRelease(valve: number) {
         pressedButtons.delete(valve);
       }
 
@@ -674,7 +674,7 @@ import GamePad from "../../components/GamePad.astro";
 
       // Keyboard events
       document.addEventListener('keydown', (e) => {
-        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const keyMap: { [key: string]: number } = { '0': 0, '1': 1, '2': 2, '3': 3 };
         const valve = keyMap[e.key];
         if (valve !== undefined && !e.repeat) {
           handlePress(valve);
@@ -684,7 +684,7 @@ import GamePad from "../../components/GamePad.astro";
       });
 
       document.addEventListener('keyup', (e) => {
-        const keyMap = { '0': 0, '1': 1, '2': 2, '3': 3 };
+        const keyMap: { [key: string]: number } = { '0': 0, '1': 1, '2': 2, '3': 3 };
         const valve = keyMap[e.key];
         if (valve !== undefined) {
           handleRelease(valve);

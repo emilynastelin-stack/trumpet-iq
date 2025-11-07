@@ -447,6 +447,39 @@ const initialImage = Array.isArray(selectedLevel) && selectedLevel.length > 0 ? 
     } catch (err) {}
   }
   
+  // Track note performance across games
+  window.addEventListener('game:end', (ev) => {
+    try {
+      if (!(ev instanceof CustomEvent)) return;
+      const notePerformance = ev.detail?.notePerformance;
+      if (!notePerformance) return;
+      
+      // Get existing tracker from localStorage
+      let notePerformanceTracker = {};
+      try {
+        const stored = localStorage.getItem('notePerformanceTracker');
+        if (stored) notePerformanceTracker = JSON.parse(stored);
+      } catch (e) {
+        console.error('Failed to parse notePerformanceTracker from localStorage:', e);
+      }
+      
+      // Aggregate note performance data
+      Object.keys(notePerformance).forEach(noteName => {
+        if (!notePerformanceTracker[noteName]) {
+          notePerformanceTracker[noteName] = { correct: 0, total: 0 };
+        }
+        notePerformanceTracker[noteName].correct += notePerformance[noteName].correct;
+        notePerformanceTracker[noteName].total += notePerformance[noteName].total;
+      });
+      
+      // Save to localStorage
+      localStorage.setItem('notePerformanceTracker', JSON.stringify(notePerformanceTracker));
+      console.log('📊 Note performance saved:', notePerformanceTracker);
+    } catch (err) {
+      console.error('Failed to save note performance:', err);
+    }
+  });
+  
   window.addEventListener('game:end', showEndOverlayFromEvent);
   document.addEventListener('game:end', showEndOverlayFromEvent);
 

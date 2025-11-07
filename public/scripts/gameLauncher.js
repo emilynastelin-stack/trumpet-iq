@@ -13,5 +13,25 @@ export function launchGame(modeKey, container, opts = {}) {
   const speedTimeout = opts.speedTimeout;
 
   // Pass mode and speedTimeout along so game logic can adapt (e.g., Learning mode end condition)
-  initGame({ instrument, key, difficulty, container, mode: modeKey, speedTimeout });
+  const gameInstance = initGame({ instrument, key, difficulty, container, mode: modeKey, speedTimeout });
+  
+  // Store game instance globally so it can be cleaned up on navigation
+  window.currentGameInstance = gameInstance;
+  
+  // Listen for cleanup event from navigation
+  const cleanupHandler = () => {
+    console.log('🧹 Game cleanup event received');
+    if (window.currentGameInstance && typeof window.currentGameInstance.destroy === 'function') {
+      window.currentGameInstance.destroy();
+      window.currentGameInstance = null;
+    }
+    // Remove this listener after cleanup
+    window.removeEventListener('game:cleanup', cleanupHandler);
+    document.removeEventListener('game:cleanup', cleanupHandler);
+  };
+  
+  window.addEventListener('game:cleanup', cleanupHandler);
+  document.addEventListener('game:cleanup', cleanupHandler);
+  
+  return gameInstance;
 }

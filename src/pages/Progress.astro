@@ -2,8 +2,11 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Your Progress">
+<Layout title="Your Progress - Beginner Mode">
   <div class="progress-page">
+
+    <!-- TAB CONTENT: LEARNING PROGRESS -->
+    <div class="tab-content active" data-content="learning">
 
     <!-- HERO STATS -->
     <div class="hero-section">
@@ -11,6 +14,12 @@ import Layout from "../layouts/Layout.astro";
         <h1>My Progress</h1>
         <p>You're on a <strong>0-day streak</strong></p>
       </div>
+
+    <!-- MAIN TABS -->
+    <div class="main-tabs">
+      <button class="main-tab active" data-tab="learning">Learning Progress</button>
+      <button class="main-tab" data-tab="transposition">Transposition</button>
+    </div>
       
       <div class="hero-stats">
         <div class="hero-stat">
@@ -93,155 +102,375 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </section>
 
-    <!-- TRANSPOSITION MASTERY -->
-    <section class="glass-panel mastery-panel">
-      <h2 class="panel-title">Transposition Mastery</h2>
-      <p class="panel-subtitle">Track your proficiency across instruments and keys</p>
-
-      <!-- Locked Message (shown in Beginner Mode) -->
-      <div class="mastery-locked-message">
-        <div class="lock-icon-large">🔒</div>
-        <h4 class="lock-title">Transposition Locked</h4>
-        <p class="lock-description">
-          Transposition tracking is only available in <strong>Advanced Mode</strong>.
-        </p>
-        <p class="lock-instruction">
-          Open <strong>Settings</strong> and turn off <strong>Beginner Mode</strong> to unlock.
-        </p>
-      </div>
-
-      <!-- Transposition Content (shown in Advanced Mode) -->
-      <div class="mastery-content">
-      <div class="mastery-tabs">
-        <button class="mastery-tab active" data-instrument="c">C Trumpet</button>
-        <button class="mastery-tab" data-instrument="bb">Bb Trumpet</button>
-        <button class="mastery-tab" data-instrument="d">D Trumpet</button>
-        <button class="mastery-tab" data-instrument="eb">Eb Trumpet</button>
-      </div>
-
-      <div class="keys-container" id="keysContainer">
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">A Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
-        </div>
-
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">Bb Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
-        </div>
-
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">H Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
-        </div>
-
-        <div class="key-card disabled">
-          <div class="key-header">
-            <span class="key-name">C Major</span>
-            <span class="key-percentage">N/A</span>
-          </div>
-          <div class="key-note">Native key - no transposition needed</div>
-        </div>
-
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">D Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
-        </div>
-
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">Eb Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
-        </div>
-
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">E Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
-        </div>
-
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">F Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
-        </div>
-
-        <div class="key-card">
-          <div class="key-header">
-            <span class="key-name">G Major</span>
-            <span class="key-percentage">0%</span>
-          </div>
-          <div class="key-progress-bar">
-            <div class="key-progress-fill" style="width: 0%"></div>
-          </div>
-          <div class="key-stats">
-            <span>0 attempts</span>
-            <span>0 correct</span>
-          </div>
+    <!-- MOST DIFFICULT NOTES -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Most Difficult Notes</h2>
+      <p class="panel-subtitle">Notes you're still working on</p>
+      
+      <div class="difficult-notes-scroll" id="difficultNotesList">
+        <!-- Will be populated by JavaScript based on actual game performance -->
+        <div class="empty-state">
+          <p>Play some games to see your most difficult notes!</p>
         </div>
       </div>
+      
+      <button id="practiceHardNotesBtn" class="practice-hard-notes-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        <span>Practice These Notes</span>
+      </button>
+    </section>
+
+    <!-- LEARNING MODE PROGRESS -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Learning Mode Progress</h2>
+      <p class="panel-subtitle">Your progress through each difficulty level</p>
+      
+      <div class="learning-mode-list" id="learningModeList">
+        <!-- Will be populated by JavaScript -->
       </div>
     </section>
+
+    <!-- MARATHON MODE PROGRESS -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Marathon Mode Progress</h2>
+      <p class="panel-subtitle">Endless practice performance</p>
+      
+      <div class="learning-mode-list" id="marathonModeList">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- SPEED MODE PROGRESS -->
+    <section class="glass-panel">
+      <h2 class="panel-title">Speed Mode Progress</h2>
+      <p class="panel-subtitle">Race against the clock performance</p>
+      
+      <div class="learning-mode-list" id="speedModeList">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </section>
+
+    </div>
+    <!-- END TAB CONTENT: LEARNING PROGRESS -->
+
+    <!-- TAB CONTENT: TRANSPOSITION -->
+    <div class="tab-content" data-content="transposition">
+      
+      <!-- HERO STATS -->
+      <div class="hero-section">
+        <div class="greeting">
+          <h1>My Progress</h1>
+          <p>You're on a <strong>0-day streak</strong></p>
+        </div>
+
+      <!-- MAIN TABS -->
+      <div class="main-tabs">
+        <button class="main-tab" data-tab="learning">Learning Progress</button>
+        <button class="main-tab active" data-tab="transposition">Transposition</button>
+      </div>
+      </div>
+
+      <!-- TRANSPOSITION PROGRESS GRAPH -->
+      <section class="glass-panel chart-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Progress</h2>
+          <div class="tab-pills">
+            <button class="pill-btn active" data-transpose-view="daily">Week</button>
+            <button class="pill-btn" data-transpose-view="weekly">Month</button>
+            <button class="pill-btn" data-transpose-view="progress">Year</button>
+          </div>
+        </div>
+
+        <div class="transpose-filters">
+          <div class="filter-group">
+            <label class="filter-label">Instrument</label>
+            <select class="filter-select" id="transposeInstrument">
+              <option value="c" selected>C Trumpet</option>
+              <option value="bb">Bb Trumpet</option>
+              <option value="d">D Trumpet</option>
+              <option value="eb">Eb Trumpet</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Key</label>
+            <select class="filter-select" id="transposeKey">
+              <option value="a">A</option>
+              <option value="bb" selected>Bb</option>
+              <option value="h">H</option>
+              <option value="c">C</option>
+              <option value="d">D</option>
+              <option value="eb">Eb</option>
+              <option value="e">E</option>
+              <option value="f">F</option>
+              <option value="g">G</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="bar-graph" id="transpositionBarGraph"></div>
+        </div>
+        <div class="graph-labels" id="transpositionGraphLabels"></div>
+      </section>
+
+      <!-- GOALS -->
+      <section class="glass-panel">
+        <h2 class="panel-title">Goals</h2>
+        <p class="panel-subtitle">Target specific transpositions</p>
+        
+        <div class="goals-container" id="goalsContainer">
+          <!-- Default Goals -->
+          <div class="goal-card" data-instrument="c" data-key="bb">
+            <div class="goal-card-header">
+              <h3 class="goal-card-title">C Trumpet → Bb</h3>
+              <button class="goal-remove-btn" title="Remove goal">×</button>
+            </div>
+            <div class="goal-stats-grid">
+              <div class="goal-stat">
+                <div class="goal-stat-icon">🎯</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0%</div>
+                  <div class="goal-stat-label">Accuracy</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">⏱️</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0 times</div>
+                  <div class="goal-stat-label">Practiced this week</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">📈</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0</div>
+                  <div class="goal-stat-label">Proficiency</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="goal-card" data-instrument="c" data-key="f">
+            <div class="goal-card-header">
+              <h3 class="goal-card-title">C Trumpet → F</h3>
+              <button class="goal-remove-btn" title="Remove goal">×</button>
+            </div>
+            <div class="goal-stats-grid">
+              <div class="goal-stat">
+                <div class="goal-stat-icon">🎯</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0%</div>
+                  <div class="goal-stat-label">Accuracy</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">⏱️</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0 times</div>
+                  <div class="goal-stat-label">Practiced this week</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">📈</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0</div>
+                  <div class="goal-stat-label">Proficiency</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Goal Button -->
+          <button class="add-goal-btn" id="addGoalBtn">
+            <span class="add-icon">+</span>
+            <span>Add Transposition Goal</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Add Goal Modal -->
+      <div class="goal-modal" id="goalModal">
+        <div class="goal-modal-backdrop"></div>
+        <div class="goal-modal-content">
+          <div class="goal-modal-header">
+            <h3>Add Transposition Goal</h3>
+            <button class="goal-modal-close" id="closeGoalModal">×</button>
+          </div>
+          <div class="goal-modal-body">
+            <div class="goal-form-group">
+              <label class="goal-form-label">Instrument</label>
+              <select class="goal-form-select" id="goalInstrument">
+                <option value="c">C Trumpet</option>
+                <option value="bb">Bb Trumpet</option>
+                <option value="d">D Trumpet</option>
+                <option value="eb">Eb Trumpet</option>
+              </select>
+            </div>
+            <div class="goal-form-group">
+              <label class="goal-form-label">Key</label>
+              <select class="goal-form-select" id="goalKey">
+                <option value="a">A</option>
+                <option value="bb">Bb</option>
+                <option value="h">H</option>
+                <option value="c">C</option>
+                <option value="d">D</option>
+                <option value="eb">Eb</option>
+                <option value="e">E</option>
+                <option value="f">F</option>
+                <option value="g">G</option>
+              </select>
+            </div>
+          </div>
+          <div class="goal-modal-footer">
+            <button class="goal-modal-cancel" id="cancelGoalModal">Cancel</button>
+            <button class="goal-modal-add" id="confirmAddGoal">Add Goal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSPOSITION MASTERY -->
+      <section class="glass-panel mastery-panel">
+        <h2 class="panel-title">Transposition Mastery</h2>
+        <p class="panel-subtitle">Track your proficiency across instruments and keys</p>
+
+        <!-- Transposition Content -->
+        <div class="mastery-content">
+        <div class="mastery-tabs">
+          <button class="mastery-tab active" data-instrument="c">C Trumpet</button>
+          <button class="mastery-tab" data-instrument="bb">Bb Trumpet</button>
+          <button class="mastery-tab" data-instrument="d">D Trumpet</button>
+          <button class="mastery-tab" data-instrument="eb">Eb Trumpet</button>
+        </div>
+
+        <div class="keys-container" id="keysContainer">
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">A Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">Bb Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">H Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+
+          <div class="key-card disabled">
+            <div class="key-header">
+              <span class="key-name">C Major</span>
+              <span class="key-percentage">N/A</span>
+            </div>
+            <div class="key-note">Native key - no transposition needed</div>
+          </div>
+
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">D Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">Eb Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">E Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">F Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+
+          <div class="key-card">
+            <div class="key-header">
+              <span class="key-name">G Major</span>
+              <span class="key-percentage">0%</span>
+            </div>
+            <div class="key-progress-bar">
+              <div class="key-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="key-stats">
+              <span>0 attempts</span>
+              <span>0 correct</span>
+            </div>
+          </div>
+        </div>
+        </div>
+      </section>
+
+    </div>
+    <!-- END TAB CONTENT: TRANSPOSITION -->
 
   </div>
 
@@ -249,6 +478,35 @@ import Layout from "../layouts/Layout.astro";
   import { getOrCreateUser } from '/utils/simple-auth.js';
   import { getUserScores } from '/utils/firestore-rest.js';
   import { TranspositionProficiency } from '/scripts/TranspositionProficiency.js';
+  import { levels } from '/data/levels.js';
+  
+  // Global note performance tracker - aggregates across all games
+  if (!window.notePerformanceTracker) {
+    const stored = localStorage.getItem('notePerformanceTracker');
+    window.notePerformanceTracker = stored ? JSON.parse(stored) : {};
+  }
+  
+  // Listen for game:end events to track note performance
+  window.addEventListener('game:end', (ev) => {
+    if (!(ev instanceof CustomEvent)) return;
+    const notePerformance = ev.detail?.notePerformance;
+    if (!notePerformance) return;
+    
+    // Aggregate note performance data
+    Object.keys(notePerformance).forEach(noteName => {
+      if (!window.notePerformanceTracker[noteName]) {
+        window.notePerformanceTracker[noteName] = { correct: 0, total: 0 };
+      }
+      window.notePerformanceTracker[noteName].correct += notePerformance[noteName].correct;
+      window.notePerformanceTracker[noteName].total += notePerformance[noteName].total;
+    });
+    
+    // Save to localStorage
+    localStorage.setItem('notePerformanceTracker', JSON.stringify(window.notePerformanceTracker));
+    
+    // Update difficult notes display
+    updateDifficultNotes();
+  });
   
   // Inline render function for bar graph
   function renderView(viewName) {
@@ -280,7 +538,6 @@ import Layout from "../layouts/Layout.astro";
     values.forEach((value, index) => {
       const barWrapper = document.createElement("div");
       barWrapper.className = "bar-wrapper";
-      // Let CSS handle flex layout - don't override
 
       const tooltip = document.createElement("div");
       tooltip.className = "bar-tooltip";
@@ -292,8 +549,8 @@ import Layout from "../layouts/Layout.astro";
       // Calculate height in pixels (140px is the container height, 100 is max proficiency)
       const maxHeightPx = 140;
       const heightPx = (value / maxValue) * maxHeightPx;
-      // Ensure minimum visible height for non-zero values
-      const finalHeight = value > 0 ? Math.max(heightPx, 10) : heightPx;
+      // Always show a minimum height for visibility, even when value is 0
+      const finalHeight = Math.max(heightPx, 8);
       bar.style.height = `${finalHeight}px`;
       console.log(`Bar ${index} (${labels[index]}): value=${value}, maxValue=${maxValue}, heightPx=${heightPx}px, finalHeight=${finalHeight}px`);
       
@@ -333,41 +590,14 @@ import Layout from "../layouts/Layout.astro";
     console.log('✅ Graph rendered successfully');
   }
 
-    // Use simple local auth instead of Firebase Auth (which hangs in iOS WebView)
+    // Use simple local auth
     const currentUser = getOrCreateUser();
-    console.log('✅ Progress page: User authenticated:', currentUser.uid);
-
-    // Check transposition mode on page load
-    function updateMasteryVisibility() {
-      const isEnabled = localStorage.getItem('transposition-enabled') === 'true';
-      const lockedMessage = document.querySelector('.mastery-locked-message');
-      const masteryContent = document.querySelector('.mastery-content');
-      
-      if (lockedMessage && masteryContent) {
-        if (isEnabled) {
-          // Advanced Mode - show mastery content
-          lockedMessage.style.display = 'none';
-          masteryContent.style.display = 'block';
-        } else {
-          // Beginner Mode - show locked message
-          lockedMessage.style.display = 'flex';
-          masteryContent.style.display = 'none';
-        }
-      }
-    }
-
-    // Listen for mode changes
-    window.addEventListener('transposition:enabled', () => {
-      updateMasteryVisibility();
-    });
-
-    // Check on page load
-    updateMasteryVisibility();
+    console.log('✅ Progressbegin page: User authenticated:', currentUser.uid);
 
     // Load progress immediately with local user
     loadUserProgress(currentUser.uid);
 
-    // Reload progress data when page becomes visible (e.g., after navigating back)
+    // Reload progress data when page becomes visible
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
         console.log('Page visible again, reloading progress...');
@@ -375,219 +605,474 @@ import Layout from "../layouts/Layout.astro";
       }
     });
 
-    // Also listen for DOMContentLoaded to reload after client-side navigation
+    // Also listen for DOMContentLoaded
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOMContentLoaded - reloading progress...');
       loadUserProgress(currentUser.uid);
+      
+      // Add click handlers for flip cards
+      setupFlipCards();
+      
+      // Setup practice button
+      setupPracticeButton();
+      
+      // Setup main tabs
+      setupMainTabs();
     });
 
-    async function loadUserProgress(uid) {
-      try {
-        console.log('📊 Loading progress for user via REST API:', uid);
+    function setupFlipCards() {
+      const cards = document.querySelectorAll('.note-card-container');
+      
+      // Hardcoded Bb trumpet fingerings (native/learning mode)
+      const fingerings = {
+        "Fsharp0": "1 + 2 + 3",
+        "Gflat0": "1 + 2 + 3",
+        "G0": "1 + 3",
+        "Gsharp0": "2 + 3",
+        "Aflat0": "2 + 3",
+        "A0": "1 + 2",
+        "Asharp0": "1",
+        "Bflat0": "1",
+        "B0": "2",
+        "Cflat1": "2",
+        "C1": "Open",
+        "Csharp1": "1 + 2 + 3",
+        "Dflat1": "1 + 2 + 3",
+        "D1": "1 + 3",
+        "Dsharp1": "2 + 3",
+        "Eflat1": "2 + 3",
+        "E1": "1 + 2",
+        "F1": "1",
+        "Fsharp1": "2",
+        "Gflat1": "2",
+        "G1": "Open",
+        "Gsharp1": "2 + 3",
+        "Aflat1": "2 + 3",
+        "A1": "1 + 2",
+        "Asharp1": "1",
+        "Bflat1": "1",
+        "B1": "2",
+        "C2": "Open",
+        "Csharp2": "1 + 2",
+        "Dflat2": "1 + 2",
+        "D2": "1",
+        "Dsharp2": "2 + 3 or 2",
+        "Eflat2": "2 + 3 or 2",
+        "E2": "1 + 2 or Open",
+        "Fflat2": "1 + 2 or Open",
+        "F2": "1",
+        "Fsharp2": "2",
+        "Gflat2": "2",
+        "G2": "Open",
+        "Gsharp2": "2 + 3",
+        "Aflat2": "2 + 3",
+        "A2": "1 + 2",
+        "Asharp2": "1",
+        "Bflat2": "1",
+        "B2": "2",
+        "Cflat3": "2",
+        "C3": "Open"
+      };
+      
+      // Update each card with its fingering
+      cards.forEach(card => {
+        const noteName = card.getAttribute('data-note');
+        const fingeringDisplay = card.querySelector('.fingering-display');
         
-        // Load default proficiency (Bb trumpet in Bb key - native/default)
-        const proficiencyInfo = TranspositionProficiency.getDefaultProficiency(uid);
-        console.log('🎯 Default proficiency (Bb→Bb):', proficiencyInfo);
+        if (fingeringDisplay && noteName && fingerings[noteName]) {
+          fingeringDisplay.textContent = fingerings[noteName];
+        } else if (fingeringDisplay) {
+          fingeringDisplay.textContent = 'No data';
+        }
         
-        const scores = await getUserScores(uid);
-        console.log('✅ Loaded', scores.length, 'user scores via REST API:', scores);
+        // Add flip functionality
+        card.addEventListener('click', () => {
+          card.classList.toggle('flipped');
+        });
+      });
+    }
+
+    function setupPracticeButton() {
+      const practiceBtn = document.getElementById('practiceHardNotesBtn');
+      if (!practiceBtn) return;
+      
+      practiceBtn.addEventListener('click', () => {
+        // Get all the difficult notes from the cards
+        const noteCards = document.querySelectorAll('.note-card-container');
+        const difficultNotes = Array.from(noteCards).map(card => {
+          const noteName = card.getAttribute('data-note');
+          return noteName;
+        }).filter(Boolean);
         
-        if (scores.length > 0) {
-          console.log('📊 First score:', scores[0]);
+        if (difficultNotes.length === 0) {
+          console.warn('No difficult notes to practice');
+          return;
+        }
+        
+        // Define the levels structure (matching levels.js)
+        const levelStructure = {
+          basic: ["C1.png", "D1.png", "E1.png", "F1.png", "G1.png", "A1.png", "B1.png", "C2.png"],
+          beginner: ["A0.png", "B0.png", "C1.png", "D1.png", "E1.png", "F1.png", "G1.png", "A1.png", "B1.png", "C2.png", "Fsharp1.png", "Csharp1.png", "Gsharp1.png", "Bflat1.png", "Eflat1.png", "Aflat1.png", "Csharp2.png", "Dflat2.png", "D2.png"],
+          intermediate: ["Fsharp0.png", "G0.png", "Gsharp0.png", "Aflat0.png", "A0.png", "Asharp0.png", "Bflat0.png", "B0.png", "C1.png", "Csharp1.png", "Dflat1.png", "D1.png", "Dsharp1.png", "Eflat1.png", "E1.png", "F1.png", "Fsharp1.png", "G1.png", "Gsharp1.png", "Aflat1.png", "A1.png", "Asharp1.png", "Bflat1.png", "B1.png", "C2.png", "Csharp2.png", "Dflat2.png", "D2.png", "Dsharp2.png", "Eflat2.png", "E2.png", "F2.png", "Fsharp2.png"],
+          advanced: ["Fsharp0.png", "G0.png", "Gsharp0.png", "Aflat0.png", "A0.png", "Asharp0.png", "Bflat0.png", "B0.png", "C1.png", "Csharp1.png", "Dflat1.png", "D1.png", "Dsharp1.png", "Eflat1.png", "E1.png", "Esharp1.png", "Fflat1.png", "F1.png", "Fsharp1.png", "G1.png", "Gsharp1.png", "Aflat1.png", "A1.png", "Asharp1.png", "Bflat1.png", "B1.png", "C2.png", "Csharp2.png", "Dflat2.png", "D2.png", "Dsharp2.png", "Eflat2.png", "E2.png", "F2.png", "Fsharp2.png", "G2.png", "Gsharp2.png", "Aflat2.png", "A2.png", "Asharp2.png", "Bflat2.png", "B2.png", "C3.png"]
+        };
+        
+        // Find the lowest difficulty level that contains all the difficult notes
+        let selectedLevel = 'beginner'; // default
+        
+        for (const [levelName, notes] of Object.entries(levelStructure)) {
+          const allNotesInLevel = difficultNotes.every(note => notes.includes(note));
+          if (allNotesInLevel) {
+            selectedLevel = levelName;
+            break; // Use the first (lowest difficulty) level that contains all notes
+          }
+        }
+        
+        // Navigate directly to the game in learning mode at the appropriate level
+        const url = `/game/learning?level=${selectedLevel}`;
+        
+        console.log('🎯 Navigating to practice difficult notes:', {
+          notes: difficultNotes,
+          level: selectedLevel,
+          url: url
+        });
+        
+        window.location.href = url;
+      });
+    }
+
+    function setupMainTabs() {
+      const tabButtons = document.querySelectorAll('.main-tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      // Check if advanced mode (transposition) is enabled
+      const isAdvancedMode = localStorage.getItem('transposition-enabled') === 'true';
+      
+      // If advanced mode, default to transposition tab
+      if (isAdvancedMode) {
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        const transpositionTab = document.querySelector('.main-tab[data-tab="transposition"]');
+        const transpositionContent = document.querySelector('[data-content="transposition"]');
+        
+        if (transpositionTab && transpositionContent) {
+          transpositionTab.classList.add('active');
+          transpositionContent.classList.add('active');
+          loadTranspositionData();
+        }
+      }
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const tabName = button.getAttribute('data-tab');
           
-          const stats = calculateStats(scores);
-          console.log('📊 Calculated stats:', stats);
-          stats.proficiency = proficiencyInfo.proficiencyDisplay;
-          stats.proficiencyBand = proficiencyInfo.band.name;
-          updateStats(stats);
-          updateActivity(scores);
-          updateMastery(scores);
-        } else {
-          console.warn('⚠️ No scores found for userId:', uid, '- keeping default 0 values');
-          // Still show proficiency for new users
-          const stats = { 
-            accuracy: 0, 
-            avgSession: 0, 
-            correctNotes: 0, 
-            mistakes: 0, 
-            sessions: 0, 
-            avgSpeed: 0,
-            proficiency: proficiencyInfo.proficiencyDisplay,
-            proficiencyBand: proficiencyInfo.band.name
-          };
-          updateStats(stats);
-        }
-      } catch (err) {
-        console.error('❌ Error loading user progress:', err);
-        console.error('❌ Error details:', err.message);
-      }
+          // Remove active class from all tabs and contents
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Add active class to clicked tab and corresponding content
+          button.classList.add('active');
+          const targetContent = document.querySelector(`[data-content="${tabName}"]`);
+          if (targetContent) {
+            targetContent.classList.add('active');
+          }
+          
+          // If switching to transposition tab, load transposition data
+          if (tabName === 'transposition') {
+            loadTranspositionData();
+          }
+        });
+      });
     }
 
-    function calculateStats(scores) {
-      if (!scores || scores.length === 0) {
-        return { accuracy: 0, avgSession: 0, correctNotes: 0, mistakes: 0, sessions: 0, avgSpeed: 0 };
-      }
-
-      const totalScore = scores.reduce((sum, s) => sum + (s.score || 0), 0);
-      const totalNotes = scores.reduce((sum, s) => sum + (s.total || 0), 0);
+    async function loadTranspositionData() {
+      console.log('Loading transposition data...');
       
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayScores = scores.filter(s => {
-        // Handle both Firestore Timestamp and ISO string formats
-        const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
-        return scoreDate >= today;
-      });
+      const transpositionBarGraph = document.getElementById('transpositionBarGraph');
+      const transpositionGraphLabels = document.getElementById('transpositionGraphLabels');
       
-      const todayCorrect = todayScores.reduce((sum, s) => sum + (s.score || 0), 0);
-      const todayMistakes = todayScores.reduce((sum, s) => sum + ((s.total || 0) - (s.score || 0)), 0);
-      
-      return {
-        accuracy: totalNotes > 0 ? Math.round((totalScore / totalNotes) * 100) : 0,
-        avgSession: scores.length > 0 ? Math.round((totalNotes / scores.length) * 0.5) : 0,
-        correctNotes: todayCorrect,
-        mistakes: todayMistakes,
-        sessions: todayScores.length,
-        avgSpeed: 1.8
-      };
-    }
-
-    function updateStats(data) {
-      const heroStats = document.querySelectorAll('.hero-stat');
-      if (heroStats[0]) heroStats[0].querySelector('.stat-value').textContent = `${data.accuracy}%`;
-      if (heroStats[1]) heroStats[1].querySelector('.stat-value').textContent = `${data.avgSession}min`;
-      if (heroStats[2]) {
-        heroStats[2].querySelector('.stat-value').textContent = data.proficiency || 0;
-        // Update label to show proficiency band
-        if (data.proficiencyBand) {
-          heroStats[2].querySelector('.stat-label').textContent = data.proficiencyBand;
-        }
-      }
-
-      const summaryCards = document.querySelectorAll('.summary-card');
-      if (summaryCards[0]) summaryCards[0].querySelector('.summary-value').textContent = data.correctNotes;
-      if (summaryCards[1]) summaryCards[1].querySelector('.summary-value').textContent = data.mistakes;
-      if (summaryCards[2]) summaryCards[2].querySelector('.summary-value').textContent = data.sessions;
-      if (summaryCards[3]) summaryCards[3].querySelector('.summary-value').textContent = `${data.avgSpeed}s`;
-    }
-
-    function updateActivity(scores) {
-      const activityByDate = {};
-      
-      console.log('updateActivity called with scores:', scores);
-      
-      // Filter for Bb trumpet to Bb key (default) scores only
-      const defaultScores = scores.filter(score => {
-        const instrument = score.instrument || 'Bb';
-        const key = score.key || 'Bb';
-        return instrument === 'Bb' && key === 'Bb';
-      });
-      
-      console.log('Filtered Bb→Bb scores:', defaultScores.length);
-      
-      defaultScores.forEach(score => {
-        const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
-        const dateKey = scoreDate.toISOString().split('T')[0];
-        
-        if (!activityByDate[dateKey]) {
-          activityByDate[dateKey] = { proficiency: 0, count: 0 };
-        }
-        activityByDate[dateKey].proficiency += (score.proficiencyScore || 0);
-        activityByDate[dateKey].count++;
-      });
-      
-      console.log('Activity by date:', activityByDate);
-      
-      const today = new Date();
-      const dailyLabels = [];
-      const dailyValues = [];
-      
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateKey = date.toISOString().split('T')[0];
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-        
-        dailyLabels.push(dayName);
-        const dayData = activityByDate[dateKey];
-        // Use average proficiency for the day
-        const avgProficiency = dayData && dayData.count > 0 ? Math.round(dayData.proficiency / dayData.count) : 0;
-        dailyValues.push(avgProficiency);
-        console.log(`Day ${dayName} (${dateKey}): ${avgProficiency} avg proficiency (${dayData?.count || 0} games)`);
+      if (!transpositionBarGraph || !transpositionGraphLabels) {
+        console.error('❌ Transposition graph elements not found');
+        return;
       }
       
-      console.log('Daily values for chart:', dailyValues);
+      const instrumentSelect = document.getElementById('transposeInstrument');
+      const keySelect = document.getElementById('transposeKey');
       
-      // Calculate weekly view (last 4 weeks)
-      const weeklyLabels = [];
-      const weeklyValues = [];
-      for (let i = 3; i >= 0; i--) {
-        const weekEnd = new Date(today);
-        weekEnd.setDate(weekEnd.getDate() - (i * 7));
-        const weekStart = new Date(weekEnd);
-        weekStart.setDate(weekStart.getDate() - 6);
+      // Native key mapping (instrument native key = no transposition)
+      const nativeKeyMap = { 'c': 'c', 'bb': 'bb', 'd': 'd', 'eb': 'eb' };
+      
+      // Update key dropdown to disable native key option
+      const updateKeyOptions = () => {
+        const instrument = instrumentSelect?.value || 'c';
+        const nativeKey = nativeKeyMap[instrument];
         
-        weeklyLabels.push(`W${4 - i}`);
-        
-        let weekProficiency = 0;
-        let weekCount = 0;
-        for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
-          const dateKey = d.toISOString().split('T')[0];
-          if (activityByDate[dateKey]) {
-            weekProficiency += activityByDate[dateKey].proficiency;
-            weekCount += activityByDate[dateKey].count;
+        // If currently selected key will become native, switch to different key first
+        if (keySelect.value === nativeKey) {
+          // Find first non-native key to switch to
+          const firstAvailable = Array.from(keySelect.options).find(opt => opt.value !== nativeKey);
+          if (firstAvailable) {
+            keySelect.value = firstAvailable.value;
           }
         }
-        const avgWeekProficiency = weekCount > 0 ? Math.round(weekProficiency / weekCount) : 0;
-        weeklyValues.push(avgWeekProficiency);
-      }
-      
-      // Calculate yearly view (last 12 months)
-      const yearlyLabels = [];
-      const yearlyValues = [];
-      for (let i = 11; i >= 0; i--) {
-        const month = new Date(today);
-        month.setMonth(month.getMonth() - i);
-        month.setDate(1);
-        const monthName = month.toLocaleDateString('en-US', { month: 'short' });
-        yearlyLabels.push(monthName);
         
-        const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
-        const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+        // Enable all options first
+        Array.from(keySelect.options).forEach(option => {
+          option.disabled = false;
+        });
         
-        let monthProficiency = 0;
-        let monthCount = 0;
-        for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
-          const dateKey = d.toISOString().split('T')[0];
-          if (activityByDate[dateKey]) {
-            monthProficiency += activityByDate[dateKey].proficiency;
-            monthCount += activityByDate[dateKey].count;
+        // Disable the native key option
+        Array.from(keySelect.options).forEach(option => {
+          if (option.value === nativeKey) {
+            option.disabled = true;
           }
-        }
-        const avgMonthProficiency = monthCount > 0 ? Math.round(monthProficiency / monthCount) : 0;
-        yearlyValues.push(avgMonthProficiency);
-      }
-      
-      window.views = {
-        daily: { labels: dailyLabels, values: dailyValues },
-        weekly: { labels: weeklyLabels, values: weeklyValues },
-        progress: { labels: yearlyLabels, values: yearlyValues }
+        });
       };
       
-      console.log('📊 Calling renderView with updated data:', window.views.daily);
-      renderView("daily");
-    }
-
-    function updateMastery(scores) {
-      // Load all transposition proficiency data (each instrument/key combo tracked separately)
-      const userId = currentUser.uid;
-      const allCombinations = TranspositionProficiency.getAllCombinations(userId);
+      const renderTranspositionGraph = async (view = 'daily') => {
+        const instrument = instrumentSelect?.value || 'c';
+        const key = keySelect?.value || 'bb';
+        
+        console.log('🎺 Rendering transposition graph:', { instrument, key, view });
+        
+        // Get proficiency data from TranspositionProficiency
+        const currentUser = await getOrCreateUser();
+        // Map dropdown values to display format (c→C, bb→Bb, etc.)
+        const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
+        const keyMap = { 'a': 'A', 'bb': 'Bb', 'h': 'H', 'c': 'C', 'd': 'D', 'eb': 'Eb', 'e': 'E', 'f': 'F', 'g': 'G' };
+        const proficiencyData = TranspositionProficiency.getCurrentProficiency(
+          currentUser.uid, 
+          instrumentMap[instrument], 
+          keyMap[key]
+        );
+        console.log('📊 Proficiency data:', proficiencyData);
+        
+        // Fetch scores for this instrument/key combination
+        const allScores = await getUserScores(currentUser.uid);
+        const filteredScores = allScores.filter(score => {
+          const scoreInstrument = score.instrument || 'Bb';
+          const scoreKey = score.key || 'Bb';
+          return scoreInstrument === instrumentMap[instrument] && scoreKey === keyMap[key];
+        });
+        
+        console.log(`📊 Found ${filteredScores.length} scores for ${instrument}→${key}`);
+        
+        const today = new Date();
+        let labels = [];
+        let proficiencyValues = [];
+        
+        if (view === 'daily') {
+          // Week view - show last 7 days
+          const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          
+          // Get start of week (Monday)
+          const currentDay = today.getDay();
+          const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+          const monday = new Date(today);
+          monday.setDate(today.getDate() + mondayOffset);
+          monday.setHours(0, 0, 0, 0);
+          
+          // Calculate proficiency for each day of the week
+          for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(monday);
+            dayDate.setDate(monday.getDate() + i);
+            dayDate.setHours(0, 0, 0, 0);
+            
+            const nextDay = new Date(dayDate);
+            nextDay.setDate(dayDate.getDate() + 1);
+            
+            const dayScores = filteredScores.filter(s => {
+              const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
+              return scoreDate >= dayDate && scoreDate < nextDay;
+            });
+            
+            if (dayScores.length > 0) {
+              const avgProficiency = dayScores.reduce((sum, s) => sum + (s.proficiencyScore || 0), 0) / dayScores.length;
+              proficiencyValues.push(Math.round(avgProficiency));
+            } else {
+              proficiencyValues.push(0);
+            }
+          }
+          
+          labels = daysOfWeek;
+          
+        } else if (view === 'weekly') {
+          // Month view - show last 30 days (grouped by week)
+          for (let i = 3; i >= 0; i--) {
+            const weekEnd = new Date(today);
+            weekEnd.setDate(today.getDate() - (i * 7));
+            weekEnd.setHours(23, 59, 59, 999);
+            
+            const weekStart = new Date(weekEnd);
+            weekStart.setDate(weekEnd.getDate() - 6);
+            weekStart.setHours(0, 0, 0, 0);
+            
+            const weekScores = filteredScores.filter(s => {
+              const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
+              return scoreDate >= weekStart && scoreDate <= weekEnd;
+            });
+            
+            if (weekScores.length > 0) {
+              const avgProficiency = weekScores.reduce((sum, s) => sum + (s.proficiencyScore || 0), 0) / weekScores.length;
+              proficiencyValues.push(Math.round(avgProficiency));
+            } else {
+              proficiencyValues.push(0);
+            }
+            
+            // Format label as "Week 1", "Week 2", etc.
+            labels.push(`W${4 - i}`);
+          }
+          
+        } else if (view === 'progress') {
+          // Year view - show last 12 months
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          
+          for (let i = 11; i >= 0; i--) {
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() - i + 1, 0);
+            monthEnd.setHours(23, 59, 59, 999);
+            
+            const monthStart = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            monthStart.setHours(0, 0, 0, 0);
+            
+            const monthScores = filteredScores.filter(s => {
+              const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
+              return scoreDate >= monthStart && scoreDate <= monthEnd;
+            });
+            
+            if (monthScores.length > 0) {
+              const avgProficiency = monthScores.reduce((sum, s) => sum + (s.proficiencyScore || 0), 0) / monthScores.length;
+              proficiencyValues.push(Math.round(avgProficiency));
+            } else {
+              proficiencyValues.push(0);
+            }
+            
+            labels.push(monthNames[monthStart.getMonth()]);
+          }
+        }
+        
+        console.log(`📊 ${view} proficiency values:`, proficiencyValues);
+        
+        // Render line graph
+        const maxValue = Math.max(...proficiencyValues, 100);
+        const width = transpositionBarGraph.offsetWidth || 800;
+        const height = 140;
+        const padding = 10;
+        const graphWidth = width - (padding * 2);
+        const graphHeight = height - (padding * 2);
+        const pointSpacing = graphWidth / (labels.length - 1 || 1);
+        
+        // Create SVG points
+        const points = proficiencyValues.map((value, i) => {
+          const x = padding + (i * pointSpacing);
+          const y = padding + graphHeight - ((value / maxValue) * graphHeight);
+          return { x, y, value };
+        });
+        
+        // Create path string
+        const pathD = points.map((p, i) => 
+          `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
+        ).join(' ');
+        
+        // Create area fill path (for gradient under line)
+        const areaD = `M ${padding} ${height - padding} L ${points.map(p => `${p.x} ${p.y}`).join(' L ')} L ${padding + graphWidth} ${height - padding} Z`;
+        
+        transpositionBarGraph.innerHTML = `
+          <svg width="${width}" height="${height}" style="overflow: visible;">
+            <defs>
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color: rgba(59, 130, 246, 0.3); stop-opacity: 1" />
+                <stop offset="100%" style="stop-color: rgba(59, 130, 246, 0.05); stop-opacity: 1" />
+              </linearGradient>
+            </defs>
+            
+            <!-- Area fill -->
+            <path d="${areaD}" fill="url(#lineGradient)" />
+            
+            <!-- Line -->
+            <path d="${pathD}" 
+                  fill="none" 
+                  stroke="rgba(59, 130, 246, 0.8)" 
+                  stroke-width="3" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round" />
+            
+            <!-- Points -->
+            ${points.map(p => `
+              <circle cx="${p.x}" cy="${p.y}" r="5" 
+                      fill="rgb(59, 130, 246)" 
+                      stroke="rgba(15, 23, 42, 0.8)" 
+                      stroke-width="2">
+                <title>${p.value}</title>
+              </circle>
+            `).join('')}
+          </svg>
+        `;
+        
+        // Render labels
+        transpositionGraphLabels.innerHTML = labels.map(label => 
+          `<span class="graph-label">${label}</span>`
+        ).join('');
+      };
       
+      // Initial setup - disable native key
+      updateKeyOptions();
+      
+      // Track current view
+      let currentView = 'daily';
+      
+      // Initial render
+      await renderTranspositionGraph('daily');
+      
+      // Setup dropdown change handlers
+      const updateTransposeGraph = () => {
+        updateKeyOptions();
+        renderTranspositionGraph(currentView);
+      };
+      
+      if (instrumentSelect) instrumentSelect.addEventListener('change', updateTransposeGraph);
+      if (keySelect) keySelect.addEventListener('change', () => renderTranspositionGraph(currentView));
+      
+      // Setup tab switching
+      const transposeTabBtns = document.querySelectorAll('[data-transpose-view]');
+      transposeTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          transposeTabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentView = btn.getAttribute('data-transpose-view');
+          console.log('🎨 Transposition view changed to:', currentView);
+          renderTranspositionGraph(currentView);
+        });
+      });
+      
+      // Load and populate transposition mastery panel
+      const currentUser = await getOrCreateUser();
+      const allCombinations = TranspositionProficiency.getAllCombinations(currentUser.uid);
       console.log('📊 All transposition combinations:', allCombinations);
       window.masteryData = allCombinations;
       
-      // Populate current instrument view (C trumpet by default)
+      // Populate mastery cards for C trumpet by default
       populateMasteryCards('C');
+      
+      // Setup instrument tab switching for mastery panel
+      const masteryTabs = document.querySelectorAll('.mastery-tab');
+      masteryTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          masteryTabs.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const instrumentCode = btn.getAttribute('data-instrument');
+          // Map instrument code to display name
+          const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
+          const instrumentName = instrumentMap[instrumentCode];
+          populateMasteryCards(instrumentName);
+        });
+      });
+      
+      // Setup goal modal functionality (loads saved goals)
+      setupGoalModal();
+      
+      // Update goals panel with real data
+      await updateGoals();
     }
     
     function populateMasteryCards(instrumentName) {
@@ -681,8 +1166,648 @@ import Layout from "../layouts/Layout.astro";
         }
       });
     }
+    
+    async function updateGoals() {
+      const currentUser = await getOrCreateUser();
+      const allScores = await getUserScores(currentUser.uid);
+      
+      // Get all goal cards
+      const goalCards = document.querySelectorAll('.goal-card');
+      
+      goalCards.forEach(card => {
+        const instrument = card.getAttribute('data-instrument');
+        const key = card.getAttribute('data-key');
+        
+        if (!instrument || !key) return;
+        
+        // Map lowercase values to display format
+        const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
+        const keyMap = { 'a': 'A', 'bb': 'Bb', 'h': 'H', 'c': 'C', 'd': 'D', 'eb': 'Eb', 'e': 'E', 'f': 'F', 'g': 'G' };
+        
+        const instrumentDisplay = instrumentMap[instrument];
+        const keyDisplay = keyMap[key];
+        
+        // Get proficiency for this combination
+        const proficiencyData = TranspositionProficiency.getCurrentProficiency(
+          currentUser.uid, 
+          instrumentDisplay, 
+          keyDisplay
+        );
+        
+        // Filter scores for this instrument/key combination
+        const filteredScores = allScores.filter(score => {
+          const scoreInstrument = score.instrument || 'Bb';
+          const scoreKey = score.key || 'Bb';
+          return scoreInstrument === instrumentDisplay && scoreKey === keyDisplay;
+        });
+        
+        // Calculate accuracy
+        let totalCorrect = 0;
+        let totalNotes = 0;
+        filteredScores.forEach(score => {
+          totalCorrect += score.score || 0;
+          totalNotes += score.total || 0;
+        });
+        const accuracy = totalNotes > 0 ? Math.round((totalCorrect / totalNotes) * 100) : 0;
+        
+        // Calculate sessions this week
+        const today = new Date();
+        const currentDay = today.getDay();
+        const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset);
+        monday.setHours(0, 0, 0, 0);
+        
+        const weekScores = filteredScores.filter(score => {
+          const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
+          return scoreDate >= monday;
+        });
+        
+        // Update the card's stat values
+        const statValues = card.querySelectorAll('.goal-stat-value');
+        if (statValues[0]) statValues[0].textContent = `${accuracy}%`;
+        if (statValues[1]) statValues[1].textContent = `${weekScores.length} times`;
+        if (statValues[2]) statValues[2].textContent = `${proficiencyData.proficiencyDisplay}`;
+      });
+    }
+    
+    function saveGoals() {
+      const goalCards = document.querySelectorAll('.goal-card');
+      const goals = [];
+      
+      goalCards.forEach(card => {
+        const instrument = card.getAttribute('data-instrument');
+        const key = card.getAttribute('data-key');
+        if (instrument && key) {
+          goals.push({ instrument, key });
+        }
+      });
+      
+      localStorage.setItem('transposition-goals', JSON.stringify(goals));
+      console.log('💾 Saved goals:', goals);
+    }
+    
+    function loadSavedGoals() {
+      const saved = localStorage.getItem('transposition-goals');
+      if (!saved) return;
+      
+      try {
+        const goals = JSON.parse(saved);
+        const goalsContainer = document.getElementById('goalsContainer');
+        const addGoalBtn = document.getElementById('addGoalBtn');
+        
+        if (!goalsContainer || !addGoalBtn) return;
+        
+        // Remove existing goal cards (except default ones)
+        const existingGoals = document.querySelectorAll('.goal-card');
+        existingGoals.forEach(card => card.remove());
+        
+        // Map to display names
+        const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
+        const keyMap = { 'a': 'A', 'bb': 'Bb', 'h': 'H', 'c': 'C', 'd': 'D', 'eb': 'Eb', 'e': 'E', 'f': 'F', 'g': 'G' };
+        
+        // Recreate goal cards from saved data
+        goals.forEach(goal => {
+          const newGoalCard = document.createElement('div');
+          newGoalCard.className = 'goal-card';
+          newGoalCard.setAttribute('data-instrument', goal.instrument);
+          newGoalCard.setAttribute('data-key', goal.key);
+          
+          newGoalCard.innerHTML = `
+            <div class="goal-card-header">
+              <h3 class="goal-card-title">${instrumentMap[goal.instrument]} Trumpet → ${keyMap[goal.key]}</h3>
+              <button class="goal-remove-btn" title="Remove goal">×</button>
+            </div>
+            <div class="goal-stats-grid">
+              <div class="goal-stat">
+                <div class="goal-stat-icon">🎯</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0%</div>
+                  <div class="goal-stat-label">Accuracy</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">⏱️</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0 times</div>
+                  <div class="goal-stat-label">Practiced this week</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">📈</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0</div>
+                  <div class="goal-stat-label">Proficiency</div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          goalsContainer.insertBefore(newGoalCard, addGoalBtn);
+        });
+        
+        console.log('✅ Loaded goals:', goals);
+      } catch (e) {
+        console.error('❌ Failed to load goals:', e);
+      }
+    }
+    
+    function setupGoalModal() {
+      const addGoalBtn = document.getElementById('addGoalBtn');
+      const goalModal = document.getElementById('goalModal');
+      const closeModalBtn = document.getElementById('closeGoalModal');
+      const cancelModalBtn = document.getElementById('cancelGoalModal');
+      const confirmAddBtn = document.getElementById('confirmAddGoal');
+      const goalInstrument = document.getElementById('goalInstrument');
+      const goalKey = document.getElementById('goalKey');
+      const goalsContainer = document.getElementById('goalsContainer');
+      
+      // Load saved goals first
+      loadSavedGoals();
+      
+      // Open modal
+      if (addGoalBtn) {
+        addGoalBtn.addEventListener('click', () => {
+          goalModal?.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        });
+      }
+      
+      // Close modal
+      const closeModal = () => {
+        goalModal?.classList.remove('active');
+        document.body.style.overflow = '';
+      };
+      
+      if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+      if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
+      
+      // Click backdrop to close
+      goalModal?.querySelector('.goal-modal-backdrop')?.addEventListener('click', closeModal);
+      
+      // Add goal
+      if (confirmAddBtn) {
+        confirmAddBtn.addEventListener('click', async () => {
+          const instrument = goalInstrument.value;
+          const key = goalKey.value;
+          
+          // Check if native key
+          if (instrument === key) {
+            alert('Cannot create a goal for native key (no transposition needed)');
+            return;
+          }
+          
+          // Check if goal already exists
+          const existingGoal = document.querySelector(`.goal-card[data-instrument="${instrument}"][data-key="${key}"]`);
+          if (existingGoal) {
+            alert('This goal already exists');
+            return;
+          }
+          
+          // Map to display names
+          const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
+          const keyMap = { 'a': 'A', 'bb': 'Bb', 'h': 'H', 'c': 'C', 'd': 'D', 'eb': 'Eb', 'e': 'E', 'f': 'F', 'g': 'G' };
+          
+          // Create new goal card
+          const newGoalCard = document.createElement('div');
+          newGoalCard.className = 'goal-card';
+          newGoalCard.setAttribute('data-instrument', instrument);
+          newGoalCard.setAttribute('data-key', key);
+          
+          newGoalCard.innerHTML = `
+            <div class="goal-card-header">
+              <h3 class="goal-card-title">${instrumentMap[instrument]} Trumpet → ${keyMap[key]}</h3>
+              <button class="goal-remove-btn" title="Remove goal">×</button>
+            </div>
+            <div class="goal-stats-grid">
+              <div class="goal-stat">
+                <div class="goal-stat-icon">🎯</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0%</div>
+                  <div class="goal-stat-label">Accuracy</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">⏱️</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0 times</div>
+                  <div class="goal-stat-label">Practiced this week</div>
+                </div>
+              </div>
+              <div class="goal-stat">
+                <div class="goal-stat-icon">📈</div>
+                <div class="goal-stat-content">
+                  <div class="goal-stat-value">0</div>
+                  <div class="goal-stat-label">Proficiency</div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Insert before the add button
+          goalsContainer?.insertBefore(newGoalCard, addGoalBtn);
+          
+          // Add remove functionality
+          const removeBtn = newGoalCard.querySelector('.goal-remove-btn');
+          removeBtn?.addEventListener('click', () => {
+            newGoalCard.remove();
+            saveGoals();
+          });
+          
+          // Save goals to localStorage
+          saveGoals();
+          
+          // Update the new goal card with data
+          await updateGoals();
+          
+          // Close modal
+          closeModal();
+        });
+      }
+      
+      // Add remove functionality to all goal cards (including loaded ones)
+      document.querySelectorAll('.goal-remove-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const goalCard = e.target.closest('.goal-card');
+          if (goalCard && confirm('Remove this goal?')) {
+            goalCard.remove();
+            saveGoals();
+          }
+        });
+      });
+    }
 
-    // Initialize default views only if not already set
+    async function loadUserProgress(uid) {
+      try {
+        console.log('📊 Loading progress for user via REST API:', uid);
+        
+        // Load default proficiency (Bb trumpet in Bb key - native/default)
+        const proficiencyInfo = TranspositionProficiency.getDefaultProficiency(uid);
+        console.log('🎯 Default proficiency (Bb→Bb):', proficiencyInfo);
+        
+        const scores = await getUserScores(uid);
+        console.log('✅ Loaded', scores.length, 'user scores via REST API:', scores);
+        
+        if (scores.length > 0) {
+          console.log('📊 First score:', scores[0]);
+          
+          // Filter for Bb trumpet to Bb key (default) scores only - beginner mode
+          const defaultScores = scores.filter(score => {
+            const instrument = score.instrument || 'Bb';
+            const key = score.key || 'Bb';
+            return instrument === 'Bb' && key === 'Bb';
+          });
+          
+          const stats = calculateStats(scores);
+          console.log('📊 Calculated stats:', stats);
+          stats.proficiency = proficiencyInfo.proficiencyDisplay;
+          stats.proficiencyBand = proficiencyInfo.band.name;
+          updateStats(stats);
+          updateActivity(scores);
+          updateModeProgress(defaultScores);
+          updateDifficultNotes();
+        } else {
+          console.warn('⚠️ No scores found for userId:', uid, '- keeping default 0 values');
+          // Still show proficiency for new users
+          const stats = { 
+            accuracy: 0, 
+            avgSession: 0, 
+            correctNotes: 0, 
+            mistakes: 0, 
+            sessions: 0, 
+            avgSpeed: 0,
+            proficiency: proficiencyInfo.proficiencyDisplay,
+            proficiencyBand: proficiencyInfo.band.name
+          };
+          updateStats(stats);
+          // Initialize empty states for new sections
+          updateModeProgress([]);
+        }
+      } catch (err) {
+        console.error('❌ Error loading user progress:', err);
+        console.error('❌ Error details:', err.message);
+      }
+    }
+
+    function calculateStats(scores) {
+      if (!scores || scores.length === 0) {
+        return { accuracy: 0, avgSession: 0, correctNotes: 0, mistakes: 0, sessions: 0, avgSpeed: 0 };
+      }
+
+      const totalScore = scores.reduce((sum, s) => sum + (s.score || 0), 0);
+      const totalNotes = scores.reduce((sum, s) => sum + (s.total || 0), 0);
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayScores = scores.filter(s => {
+        const scoreDate = s.timestamp?.toDate ? s.timestamp.toDate() : new Date(s.timestamp);
+        return scoreDate >= today;
+      });
+      
+      const todayCorrect = todayScores.reduce((sum, s) => sum + (s.score || 0), 0);
+      const todayMistakes = todayScores.reduce((sum, s) => sum + ((s.total || 0) - (s.score || 0)), 0);
+      
+      return {
+        accuracy: totalNotes > 0 ? Math.round((totalScore / totalNotes) * 100) : 0,
+        avgSession: scores.length > 0 ? Math.round((totalNotes / scores.length) * 0.5) : 0,
+        correctNotes: todayCorrect,
+        mistakes: todayMistakes,
+        sessions: todayScores.length,
+        avgSpeed: 1.8
+      };
+    }
+
+    function updateStats(data) {
+      const heroStats = document.querySelectorAll('.hero-stat');
+      if (heroStats[0]) heroStats[0].querySelector('.stat-value').textContent = `${data.accuracy}%`;
+      if (heroStats[1]) heroStats[1].querySelector('.stat-value').textContent = `${data.avgSession}min`;
+      if (heroStats[2]) {
+        heroStats[2].querySelector('.stat-value').textContent = data.proficiency || 0;
+        if (data.proficiencyBand) {
+          heroStats[2].querySelector('.stat-label').textContent = data.proficiencyBand;
+        }
+      }
+
+      const summaryCards = document.querySelectorAll('.summary-card');
+      if (summaryCards[0]) summaryCards[0].querySelector('.summary-value').textContent = data.correctNotes;
+      if (summaryCards[1]) summaryCards[1].querySelector('.summary-value').textContent = data.mistakes;
+      if (summaryCards[2]) summaryCards[2].querySelector('.summary-value').textContent = data.sessions;
+      if (summaryCards[3]) summaryCards[3].querySelector('.summary-value').textContent = `${data.avgSpeed}s`;
+    }
+
+    function updateActivity(scores) {
+      const activityByDate = {};
+      
+      console.log('updateActivity called with scores:', scores);
+      
+      // Filter for Bb trumpet to Bb key (default) scores only - beginner mode
+      const defaultScores = scores.filter(score => {
+        const instrument = score.instrument || 'Bb';
+        const key = score.key || 'Bb';
+        return instrument === 'Bb' && key === 'Bb';
+      });
+      
+      console.log('Filtered Bb→Bb scores:', defaultScores.length);
+      
+      defaultScores.forEach(score => {
+        const scoreDate = score.timestamp?.toDate ? score.timestamp.toDate() : new Date(score.timestamp);
+        const dateKey = scoreDate.toISOString().split('T')[0];
+        
+        if (!activityByDate[dateKey]) {
+          activityByDate[dateKey] = { proficiency: 0, count: 0 };
+        }
+        activityByDate[dateKey].proficiency += (score.proficiencyScore || 0);
+        activityByDate[dateKey].count++;
+      });
+      
+      console.log('Activity by date:', activityByDate);
+      
+      const today = new Date();
+      const dailyLabels = [];
+      const dailyValues = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split('T')[0];
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        
+        dailyLabels.push(dayName);
+        const dayData = activityByDate[dateKey];
+        const avgProficiency = dayData && dayData.count > 0 ? Math.round(dayData.proficiency / dayData.count) : 0;
+        dailyValues.push(avgProficiency);
+        console.log(`Day ${dayName} (${dateKey}): ${avgProficiency} avg proficiency (${dayData?.count || 0} games)`);
+      }
+      
+      console.log('Daily values for chart:', dailyValues);
+      
+      // Calculate weekly view (last 4 weeks)
+      const weeklyLabels = [];
+      const weeklyValues = [];
+      for (let i = 3; i >= 0; i--) {
+        const weekEnd = new Date(today);
+        weekEnd.setDate(weekEnd.getDate() - (i * 7));
+        const weekStart = new Date(weekEnd);
+        weekStart.setDate(weekStart.getDate() - 6);
+        
+        weeklyLabels.push(`W${4 - i}`);
+        
+        let weekProficiency = 0;
+        let weekCount = 0;
+        for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+          const dateKey = d.toISOString().split('T')[0];
+          if (activityByDate[dateKey]) {
+            weekProficiency += activityByDate[dateKey].proficiency;
+            weekCount += activityByDate[dateKey].count;
+          }
+        }
+        const avgWeekProficiency = weekCount > 0 ? Math.round(weekProficiency / weekCount) : 0;
+        weeklyValues.push(avgWeekProficiency);
+      }
+      
+      // Calculate yearly view (last 12 months)
+      const yearlyLabels = [];
+      const yearlyValues = [];
+      for (let i = 11; i >= 0; i--) {
+        const month = new Date(today);
+        month.setMonth(month.getMonth() - i);
+        month.setDate(1);
+        const monthName = month.toLocaleDateString('en-US', { month: 'short' });
+        yearlyLabels.push(monthName);
+        
+        const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+        const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+        
+        let monthProficiency = 0;
+        let monthCount = 0;
+        for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+          const dateKey = d.toISOString().split('T')[0];
+          if (activityByDate[dateKey]) {
+            monthProficiency += activityByDate[dateKey].proficiency;
+            monthCount += activityByDate[dateKey].count;
+          }
+        }
+        const avgMonthProficiency = monthCount > 0 ? Math.round(monthProficiency / monthCount) : 0;
+        yearlyValues.push(avgMonthProficiency);
+      }
+      
+      window.views = {
+        daily: { labels: dailyLabels, values: dailyValues },
+        weekly: { labels: weeklyLabels, values: weeklyValues },
+        progress: { labels: yearlyLabels, values: yearlyValues }
+      };
+      
+      console.log('📊 Calling renderView with updated data:', window.views.daily);
+      renderView("daily");
+    }
+
+    // ============================================
+    // MODE PROGRESS (Learning, Marathon, Speed)
+    // ============================================
+    
+    function updateModeProgress(scores) {
+      console.log('📊 updateModeProgress called with', scores.length, 'scores');
+      
+      // Calculate progress for each mode and difficulty level
+      const modeProgress = {
+        learning: { basic: 0, beginner: 0, intermediate: 0, advanced: 0 },
+        marathon: { basic: 0, beginner: 0, intermediate: 0, advanced: 0 },
+        speed: { basic: 0, beginner: 0, intermediate: 0, advanced: 0 }
+      };
+      
+      // Count scores by mode and level, calculate average accuracy
+      const modeStats = {
+        learning: { basic: [], beginner: [], intermediate: [], advanced: [] },
+        marathon: { basic: [], beginner: [], intermediate: [], advanced: [] },
+        speed: { basic: [], beginner: [], intermediate: [], advanced: [] }
+      };
+      
+      scores.forEach(score => {
+        // Try multiple field names for mode
+        const mode = score.mode || score.gameMode || 'learning';
+        // Try multiple field names for level/difficulty
+        const level = (score.level || score.difficulty || 'beginner').toLowerCase();
+        // Calculate accuracy from score
+        const accuracy = score.percentage || (score.total > 0 ? Math.round((score.score / score.total) * 100) : 0);
+        
+        console.log('Processing score:', { mode, level, accuracy, rawScore: score });
+        
+        if (modeStats[mode] && modeStats[mode][level]) {
+          modeStats[mode][level].push(accuracy);
+        } else {
+          console.warn('Unknown mode/level combination:', mode, level);
+        }
+      });
+      
+      console.log('Mode stats collected:', modeStats);
+      
+      // Calculate average accuracy for each mode/level combination
+      Object.keys(modeStats).forEach(mode => {
+        Object.keys(modeStats[mode]).forEach(level => {
+          const accuracies = modeStats[mode][level];
+          if (accuracies.length > 0) {
+            const avg = accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length;
+            modeProgress[mode][level] = Math.round(avg);
+            console.log(`${mode} - ${level}: ${Math.round(avg)}% (from ${accuracies.length} sessions)`);
+          }
+        });
+      });
+      
+      console.log('Final mode progress:', modeProgress);
+      
+      // Update Learning Mode
+      updateModeList('learningModeList', modeProgress.learning);
+      
+      // Update Marathon Mode
+      updateModeList('marathonModeList', modeProgress.marathon);
+      
+      // Update Speed Mode
+      updateModeList('speedModeList', modeProgress.speed);
+    }
+    
+    function updateDifficultNotes() {
+      const tracker = window.notePerformanceTracker || {};
+      
+      // Calculate accuracy percentage for each note
+      const noteAccuracies = Object.keys(tracker).map(noteName => {
+        const { correct, total } = tracker[noteName];
+        const accuracy = total > 0 ? (correct / total) * 100 : 100;
+        return { noteName, accuracy, total, correct };
+      }).filter(note => note.total >= 1); // Only include notes attempted at least once
+      
+      // Sort by accuracy (lowest first) - most difficult notes
+      noteAccuracies.sort((a, b) => a.accuracy - b.accuracy);
+      
+      // Get top 5 most difficult notes
+      const difficultNotes = noteAccuracies.slice(0, 5);
+      
+      // Update the note cards
+      const cardsContainer = document.getElementById('difficultNotesList');
+      if (!cardsContainer) return;
+      
+      // If we don't have enough data, show empty state
+      if (difficultNotes.length === 0) {
+        cardsContainer.innerHTML = `
+          <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            <p>Play some games to see your most difficult notes!</p>
+          </div>
+        `;
+        return;
+      }
+      
+      cardsContainer.innerHTML = difficultNotes.map((note, index) => {
+        // Clean note name (remove .png extension if present, then remove octave number)
+        const noteFileName = note.noteName.replace(/\.png$/i, '');
+        const cleanNoteName = noteFileName.replace(/\d+$/, '');
+        
+        // Normalize note name for display (convert "Fsharp" to "F#", "Bflat" to "Bb", etc.)
+        const displayNoteName = cleanNoteName
+          .replace(/sharp/i, '#')
+          .replace(/flat/i, 'b');
+        
+        const accuracyPercent = Math.round(note.accuracy);
+        
+        return `
+          <div class="note-card-container" data-note="${noteFileName}">
+            <div class="note-card-inner">
+              <div class="note-card-front">
+                <img src="/notes/${noteFileName}.png" alt="${displayNoteName}" class="note-image" />
+                <div class="note-accuracy">${accuracyPercent}% accuracy</div>
+              </div>
+              <div class="note-card-back">
+                <div class="note-name">${displayNoteName}</div>
+                <div class="fingering-display">Loading...</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Re-initialize flip cards
+      setupFlipCards();
+    }
+    
+    // Make updateDifficultNotes globally accessible for testing
+    window.updateDifficultNotes = updateDifficultNotes;
+    
+    function updateModeList(containerId, progress) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      const difficulties = [
+        { key: 'basic', label: 'Basic', color: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)' },
+        { key: 'beginner', label: 'Beginner', color: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)' },
+        { key: 'intermediate', label: 'Intermediate', color: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)' },
+        { key: 'advanced', label: 'Advanced', color: 'linear-gradient(90deg, #ef4444 0%, #f87171 100%)' }
+      ];
+      
+      container.innerHTML = difficulties.map(({ key, label, color }) => {
+        const percentage = progress[key] || 0;
+        const widthStyle = percentage > 0 ? `width: ${percentage}%; background: ${color};` : `width: 0%; background: transparent;`;
+        
+        return `
+          <div class="learning-mode-item">
+            <div class="mode-info">
+              <span class="mode-label">${label}</span>
+              <span class="mode-difficulty-badge ${key}">${label}</span>
+            </div>
+            <div class="mode-progress-bar">
+              <div class="mode-progress-fill" style="${widthStyle}"></div>
+            </div>
+            <div class="mode-percentage">${percentage}%</div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Make updateModeList globally accessible for testing
+    window.testProgressBars = updateModeList;
+
+    // Initialize default views
     if (!window.views) {
       console.log('Initializing default views');
       const views = {
@@ -704,22 +1829,9 @@ import Layout from "../layouts/Layout.astro";
         renderView(btn.dataset.view);
       });
     });
-
-    document.querySelectorAll(".mastery-tab").forEach((tab) => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".mastery-tab").forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-        
-        const instrumentMap = { 'c': 'C', 'bb': 'Bb', 'd': 'D', 'eb': 'Eb' };
-        const instrument = instrumentMap[tab.dataset.instrument];
-        if (instrument) {
-          populateMasteryCards(instrument);
-        }
-      });
-    });
   </script>
 
-  <style>
+  <style is:global>
     * {
       box-sizing: border-box;
     }
@@ -810,6 +1922,54 @@ import Layout from "../layouts/Layout.astro";
       font-weight: 600;
     }
 
+    /* Main Tabs */
+    .main-tabs {
+      display: flex;
+      gap: 0.375rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.375rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      margin-bottom: 1rem;
+    }
+
+    .main-tab {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .main-tab:hover {
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .main-tab.active {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
     .glass-panel {
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(20px);
@@ -832,88 +1992,6 @@ import Layout from "../layouts/Layout.astro";
       margin: 0;
       color: #fff;
       letter-spacing: -0.01em;
-    }
-
-    .panel-subtitle {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.8rem;
-      margin: 0.5rem 0 1.25rem;
-    }
-
-    /* Mastery Locked Message */
-    .mastery-locked-message {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 2rem 1.5rem;
-    }
-
-    .lock-icon-large {
-      font-size: 3rem;
-      margin-bottom: 0.75rem;
-      opacity: 0.8;
-    }
-
-    .lock-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #fff;
-      margin: 0 0 0.5rem 0;
-      letter-spacing: -0.02em;
-    }
-
-    .lock-description {
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.7);
-      margin: 0 0 0.375rem 0;
-      line-height: 1.5;
-    }
-
-    .lock-description strong {
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .lock-instruction {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.5);
-      margin: 0 0 1.125rem 0;
-      line-height: 1.5;
-    }
-
-    .lock-instruction strong {
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 600;
-    }
-
-    .lock-home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-      padding: 0.625rem 1.25rem;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      border-radius: 12px;
-      border: 1.5px solid rgba(16, 185, 129, 0.3);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-      transition: all 0.2s ease;
-    }
-
-    .lock-home-btn:hover {
-      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-      transform: translateY(-1px);
-    }
-
-    .lock-home-btn:active {
-      transform: scale(0.98);
-    }
-
-    .mastery-content {
-      display: block;
     }
 
     .tab-pills {
@@ -1065,6 +2143,750 @@ import Layout from "../layouts/Layout.astro";
       font-weight: 600;
     }
 
+    .panel-subtitle {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+      margin: 0.5rem 0 1.25rem;
+    }
+
+    /* Difficult Notes Styles */
+    .difficult-notes-scroll {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 1rem 0;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .difficult-notes-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .difficult-notes-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    .difficult-notes-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    .difficult-notes-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .empty-state {
+      width: 100%;
+      padding: 3rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-align: center;
+    }
+
+    .empty-state svg {
+      opacity: 0.3;
+    }
+
+    .empty-state p {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .note-accuracy {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      padding: 0.375rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .note-card-container {
+      flex-shrink: 0;
+      width: 200px;
+      height: 240px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .note-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .note-card-container.flipped .note-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .note-card-front,
+    .note-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .note-card-container:hover .note-card-front,
+    .note-card-container:hover .note-card-back {
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .note-card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .note-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .fingering-display {
+      font-size: 2rem;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      letter-spacing: 0.1em;
+    }
+
+    .note-image {
+      width: calc(100% - 1rem);
+      height: calc(100% - 1rem);
+      object-fit: contain;
+      background: white;
+      border-radius: 12px;
+      padding: 0.75rem;
+    }
+
+    .practice-hard-notes-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .practice-hard-notes-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .practice-hard-notes-btn:active {
+      transform: translateY(0);
+    }
+
+    .practice-hard-notes-btn svg {
+      flex-shrink: 0;
+    }
+
+    /* Learning Mode Progress Styles */
+    .learning-mode-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .learning-mode-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .learning-mode-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .mode-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 120px;
+    }
+
+    .mode-label {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .mode-difficulty-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width: fit-content;
+    }
+
+    .mode-difficulty-badge.basic {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .mode-difficulty-badge.beginner {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+
+    .mode-difficulty-badge.intermediate {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+
+    .mode-difficulty-badge.advanced {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .mode-progress-bar {
+      flex: 1;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-progress-fill {
+      height: 100%;
+      border-radius: 8px;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      display: block;
+    }
+
+    .mode-percentage {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #fff;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    @supports (padding: max(0px)) {
+      .progress-page {
+        padding-bottom: max(5rem, env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (max-width: 375px) {
+      .progress-page {
+        padding: 0.875rem 0.875rem 4.5rem;
+      }
+
+      .greeting h1 {
+        font-size: 1.375rem;
+      }
+
+      .hero-stat {
+        padding: 0.875rem;
+      }
+
+      .glass-panel {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .progress-page {
+        padding: 0.75rem 0.75rem 4.5rem;
+      }
+
+      .hero-stat .stat-value {
+        font-size: 1.25rem;
+      }
+
+      .summary-value {
+        font-size: 1.125rem;
+      }
+    }
+
+    /* Goals Styles */
+    .goals-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .goal-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .goal-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .goal-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .goal-card-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+
+    .goal-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .goal-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 0.75rem;
+    }
+
+    .goal-stat-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .goal-stat-content {
+      flex: 1;
+    }
+
+    .goal-stat-value {
+      font-size: 1.125rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .goal-stat-label {
+      font-size: 0.625rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 480px) {
+      .goal-stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Old goal styles for backwards compatibility */
+    .goal-header {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      margin-bottom: 0.875rem;
+      position: relative;
+    }
+
+    .goal-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .goal-info {
+      flex: 1;
+    }
+
+    .goal-remove-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      line-height: 1;
+      padding: 0;
+      font-weight: 300;
+    }
+
+    .goal-remove-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      transform: scale(1.1);
+    }
+
+    .goal-remove-btn:active {
+      transform: scale(0.95);
+    }
+
+    .goal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .goal-description {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+    }
+
+    .goal-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .goal-progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .goal-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      border-radius: 4px;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .goal-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .goal-current {
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: #10b981;
+    }
+
+    .goal-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 600;
+    }
+
+    .add-goal-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+    }
+
+    .add-goal-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .add-goal-btn:active {
+      transform: scale(0.98);
+    }
+
+    .add-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    /* Goal Modal */
+    .goal-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .goal-modal.active {
+      display: flex;
+    }
+
+    .goal-modal-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    .goal-modal-content {
+      position: relative;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .goal-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .goal-modal-header h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+
+    .goal-modal-close {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 2rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .goal-modal-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .goal-modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .goal-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .goal-form-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .goal-form-select {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 0.875rem 1rem;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .goal-form-select:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .goal-form-select:focus {
+      outline: none;
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .goal-form-select option {
+      background: #0f172a;
+      color: #fff;
+    }
+
+    .goal-modal-footer {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    .goal-modal-cancel,
+    .goal-modal-add {
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .goal-modal-cancel {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .goal-modal-cancel:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .goal-modal-add {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #fff;
+    }
+
+    .goal-modal-add:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Transposition Filters */
+    .transpose-filters {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .filter-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+    }
+
+    .filter-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filter-select {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 0.625rem 0.875rem;
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .filter-select:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Transposition Mastery Styles */
     .mastery-tabs {
       display: flex;
       gap: 0.5rem;
@@ -1193,42 +3015,85 @@ import Layout from "../layouts/Layout.astro";
       font-style: italic;
     }
 
-    @supports (padding: max(0px)) {
-      .progress-page {
-        padding-bottom: max(5rem, env(safe-area-inset-bottom));
-      }
+    /* Transposition Styles */
+    .transposition-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
     }
 
-    @media (max-width: 375px) {
-      .progress-page {
-        padding: 0.875rem 0.875rem 4.5rem;
-      }
-
-      .greeting h1 {
-        font-size: 1.375rem;
-      }
-
-      .hero-stat {
-        padding: 0.875rem;
-      }
-
-      .glass-panel {
-        padding: 1rem;
-      }
+    .transposition-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      transition: all 0.3s ease;
     }
 
-    @media (max-width: 320px) {
-      .progress-page {
-        padding: 0.75rem 0.75rem 4.5rem;
-      }
+    .transposition-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
 
-      .hero-stat .stat-value {
-        font-size: 1.25rem;
-      }
+    .transposition-key {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
 
-      .summary-value {
-        font-size: 1.125rem;
-      }
+    .transposition-proficiency {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #a5b4fc;
+      margin-bottom: 0.25rem;
+    }
+
+    .transposition-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .transposition-history {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .history-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-info {
+      flex: 1;
+    }
+
+    .history-key {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .history-date {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .history-score {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #10b981;
     }
   </style>
 </Layout>
