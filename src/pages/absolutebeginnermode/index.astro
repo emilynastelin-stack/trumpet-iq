@@ -181,13 +181,13 @@ import Layout from "../../layouts/Layout.astro";
     beginnerBtn?.addEventListener('click', () => {
       // Save choice and go to introduction
       localStorage.setItem('learning-mode', 'absolute-beginner');
-      window.location.href = '/absolutebeginnermode/intro';
+      window.location.href = './intro/index.html';
     });
 
     experiencedBtn?.addEventListener('click', () => {
       // Save choice and return to main app
       localStorage.setItem('learning-mode', 'experienced');
-      window.location.href = '/';
+      window.location.href = '../index.html';
     });
   </script>
 </Layout>

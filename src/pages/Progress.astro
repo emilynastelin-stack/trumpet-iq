@@ -5,22 +5,20 @@ import Layout from "../layouts/Layout.astro";
 <Layout title="Your Progress - Beginner Mode">
   <div class="progress-page">
 
-    <!-- TAB CONTENT: LEARNING PROGRESS -->
-    <div class="tab-content active" data-content="learning">
-
-    <!-- HERO STATS -->
+    <!-- HERO SECTION -->
     <div class="hero-section">
       <div class="greeting">
         <h1>My Progress</h1>
         <p>You're on a <strong>0-day streak</strong></p>
       </div>
 
-    <!-- MAIN TABS -->
-    <div class="main-tabs">
-      <button class="main-tab active" data-tab="learning">Learning Progress</button>
-      <button class="main-tab" data-tab="transposition">Transposition</button>
-    </div>
-      
+      <!-- MAIN TABS - MOVED OUTSIDE OF TAB CONTENT -->
+      <div class="main-tabs">
+        <button class="main-tab active" data-tab="learning">Learning Progress</button>
+        <button class="main-tab" data-tab="transposition">Transposition</button>
+      </div>
+
+      <!-- HERO STATS - SHARED BETWEEN TABS -->
       <div class="hero-stats">
         <div class="hero-stat">
           <div class="stat-icon">🎯</div>
@@ -45,6 +43,9 @@ import Layout from "../layouts/Layout.astro";
         </div>
       </div>
     </div>
+
+    <!-- TAB CONTENT: LEARNING PROGRESS -->
+    <div class="tab-content active" data-content="learning">
 
     <!-- ACTIVITY CHART -->
     <section class="glass-panel chart-panel">
@@ -158,20 +159,6 @@ import Layout from "../layouts/Layout.astro";
 
     <!-- TAB CONTENT: TRANSPOSITION -->
     <div class="tab-content" data-content="transposition">
-      
-      <!-- HERO STATS -->
-      <div class="hero-section">
-        <div class="greeting">
-          <h1>My Progress</h1>
-          <p>You're on a <strong>0-day streak</strong></p>
-        </div>
-
-      <!-- MAIN TABS -->
-      <div class="main-tabs">
-        <button class="main-tab" data-tab="learning">Learning Progress</button>
-        <button class="main-tab active" data-tab="transposition">Transposition</button>
-      </div>
-      </div>
 
       <!-- TRANSPOSITION PROGRESS GRAPH -->
       <section class="glass-panel chart-panel">
@@ -480,6 +467,67 @@ import Layout from "../layouts/Layout.astro";
   import { TranspositionProficiency } from '/scripts/TranspositionProficiency.js';
   import { levels } from '/data/levels.js';
   
+  // Touch event debouncing utility
+  let lastTouchTime = 0;
+  const TOUCH_DEBOUNCE_MS = 300; // Reduced from 500ms for better responsiveness
+  
+  function addSmartClickListener(element, handler) {
+    if (!element) {
+      console.warn('addSmartClickListener: element is null/undefined');
+      return;
+    }
+    
+    let touchHandled = false;
+    const elementInfo = element.className || element.id || 'unknown';
+    
+    // Touch events for mobile - use touchstart for better responsiveness
+    element.addEventListener('touchstart', (e) => {
+      element.classList.add('touching');
+      console.log(`[Touch] touchstart on ${elementInfo}`);
+    }, { passive: true });
+    
+    element.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      element.classList.remove('touching');
+      
+      console.log(`[Touch] touchend on ${elementInfo}, time since last: ${now - lastTouchTime}ms`);
+      
+      if (now - lastTouchTime < TOUCH_DEBOUNCE_MS) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`[Touch] Debounced ${elementInfo}`);
+        return;
+      }
+      lastTouchTime = now;
+      touchHandled = true;
+      
+      console.log(`[Touch] Executing handler for ${elementInfo}`);
+      handler(e);
+      
+      // Reset after a delay
+      setTimeout(() => { 
+        touchHandled = false; 
+        console.log(`[Touch] Reset touchHandled for ${elementInfo}`);
+      }, TOUCH_DEBOUNCE_MS);
+    }, { passive: false });
+    
+    // Click events for desktop/fallback
+    element.addEventListener('click', (e) => {
+      const now = Date.now();
+      console.log(`[Click] on ${elementInfo}, touchHandled: ${touchHandled}, time since touch: ${now - lastTouchTime}ms`);
+      
+      // Prevent double-firing if touch already handled
+      if (touchHandled && now - lastTouchTime < TOUCH_DEBOUNCE_MS) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`[Click] Prevented (touch already handled) ${elementInfo}`);
+        return;
+      }
+      console.log(`[Click] Executing handler for ${elementInfo}`);
+      handler(e);
+    });
+  }
+  
   // Global note performance tracker - aggregates across all games
   if (!window.notePerformanceTracker) {
     const stored = localStorage.getItem('notePerformanceTracker');
@@ -611,17 +659,22 @@ import Layout from "../layouts/Layout.astro";
       loadUserProgress(currentUser.uid);
       
       // Add click handlers for flip cards
+      console.log('Setting up flip cards...');
       setupFlipCards();
       
       // Setup practice button
+      console.log('Setting up practice button...');
       setupPracticeButton();
       
       // Setup main tabs
+      console.log('Setting up main tabs...');
       setupMainTabs();
     });
 
     function setupFlipCards() {
+      console.log('setupFlipCards called');
       const cards = document.querySelectorAll('.note-card-container');
+      console.log('Found note cards:', cards.length);
       
       // Hardcoded Bb trumpet fingerings (native/learning mode)
       const fingerings = {
@@ -685,8 +738,8 @@ import Layout from "../layouts/Layout.astro";
           fingeringDisplay.textContent = 'No data';
         }
         
-        // Add flip functionality
-        card.addEventListener('click', () => {
+        // Add flip functionality with smart touch handling
+        addSmartClickListener(card, () => {
           card.classList.toggle('flipped');
         });
       });
@@ -696,7 +749,7 @@ import Layout from "../layouts/Layout.astro";
       const practiceBtn = document.getElementById('practiceHardNotesBtn');
       if (!practiceBtn) return;
       
-      practiceBtn.addEventListener('click', () => {
+      addSmartClickListener(practiceBtn, () => {
         // Get all the difficult notes from the cards
         const noteCards = document.querySelectorAll('.note-card-container');
         const difficultNotes = Array.from(noteCards).map(card => {
@@ -742,11 +795,19 @@ import Layout from "../layouts/Layout.astro";
     }
 
     function setupMainTabs() {
+      console.log('setupMainTabs called');
       const tabButtons = document.querySelectorAll('.main-tab');
       const tabContents = document.querySelectorAll('.tab-content');
+      console.log('Found tab buttons:', tabButtons.length, 'tab contents:', tabContents.length);
+      
+      // Log each button
+      tabButtons.forEach((btn, index) => {
+        console.log(`Tab button ${index}:`, btn.getAttribute('data-tab'), 'visible:', window.getComputedStyle(btn).display !== 'none');
+      });
       
       // Check if advanced mode (transposition) is enabled
       const isAdvancedMode = localStorage.getItem('transposition-enabled') === 'true';
+      console.log('Advanced mode enabled:', isAdvancedMode);
       
       // If advanced mode, default to transposition tab
       if (isAdvancedMode) {
@@ -763,9 +824,11 @@ import Layout from "../layouts/Layout.astro";
         }
       }
       
-      tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
+      tabButtons.forEach((button, index) => {
+        console.log(`Attaching listener to tab button ${index}:`, button.getAttribute('data-tab'));
+        addSmartClickListener(button, () => {
           const tabName = button.getAttribute('data-tab');
+          console.log('Main tab clicked:', tabName);
           
           // Remove active class from all tabs and contents
           tabButtons.forEach(btn => btn.classList.remove('active'));
@@ -776,10 +839,14 @@ import Layout from "../layouts/Layout.astro";
           const targetContent = document.querySelector(`[data-content="${tabName}"]`);
           if (targetContent) {
             targetContent.classList.add('active');
+            console.log('Activated content:', tabName);
+          } else {
+            console.error('Could not find content for tab:', tabName);
           }
           
           // If switching to transposition tab, load transposition data
           if (tabName === 'transposition') {
+            console.log('Loading transposition data...');
             loadTranspositionData();
           }
         });
@@ -1036,7 +1103,7 @@ import Layout from "../layouts/Layout.astro";
       // Setup tab switching
       const transposeTabBtns = document.querySelectorAll('[data-transpose-view]');
       transposeTabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        addSmartClickListener(btn, () => {
           transposeTabBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentView = btn.getAttribute('data-transpose-view');
@@ -1057,7 +1124,7 @@ import Layout from "../layouts/Layout.astro";
       // Setup instrument tab switching for mastery panel
       const masteryTabs = document.querySelectorAll('.mastery-tab');
       masteryTabs.forEach(btn => {
-        btn.addEventListener('click', () => {
+        addSmartClickListener(btn, () => {
           masteryTabs.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           const instrumentCode = btn.getAttribute('data-instrument');
@@ -1327,7 +1394,7 @@ import Layout from "../layouts/Layout.astro";
       
       // Open modal
       if (addGoalBtn) {
-        addGoalBtn.addEventListener('click', () => {
+        addSmartClickListener(addGoalBtn, () => {
           goalModal?.classList.add('active');
           document.body.style.overflow = 'hidden';
         });
@@ -1339,15 +1406,16 @@ import Layout from "../layouts/Layout.astro";
         document.body.style.overflow = '';
       };
       
-      if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-      if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
+      if (closeModalBtn) addSmartClickListener(closeModalBtn, closeModal);
+      if (cancelModalBtn) addSmartClickListener(cancelModalBtn, closeModal);
       
       // Click backdrop to close
-      goalModal?.querySelector('.goal-modal-backdrop')?.addEventListener('click', closeModal);
+      const backdrop = goalModal?.querySelector('.goal-modal-backdrop');
+      if (backdrop) addSmartClickListener(backdrop, closeModal);
       
       // Add goal
       if (confirmAddBtn) {
-        confirmAddBtn.addEventListener('click', async () => {
+        addSmartClickListener(confirmAddBtn, async () => {
           const instrument = goalInstrument.value;
           const key = goalKey.value;
           
@@ -1409,10 +1477,12 @@ import Layout from "../layouts/Layout.astro";
           
           // Add remove functionality
           const removeBtn = newGoalCard.querySelector('.goal-remove-btn');
-          removeBtn?.addEventListener('click', () => {
-            newGoalCard.remove();
-            saveGoals();
-          });
+          if (removeBtn) {
+            addSmartClickListener(removeBtn, () => {
+              newGoalCard.remove();
+              saveGoals();
+            });
+          }
           
           // Save goals to localStorage
           saveGoals();
@@ -1427,7 +1497,7 @@ import Layout from "../layouts/Layout.astro";
       
       // Add remove functionality to all goal cards (including loaded ones)
       document.querySelectorAll('.goal-remove-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        addSmartClickListener(btn, (e) => {
           const goalCard = e.target.closest('.goal-card');
           if (goalCard && confirm('Remove this goal?')) {
             goalCard.remove();
@@ -1822,13 +1892,28 @@ import Layout from "../layouts/Layout.astro";
       console.log('Views already initialized:', window.views);
     }
 
-    document.querySelectorAll(".pill-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".pill-btn").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        renderView(btn.dataset.view);
+    // Initialize pill buttons after DOM is ready
+    function initializePillButtons() {
+      console.log('Initializing pill buttons...');
+      const pillButtons = document.querySelectorAll(".pill-btn");
+      console.log('Found pill buttons:', pillButtons.length);
+      
+      pillButtons.forEach((btn) => {
+        addSmartClickListener(btn, () => {
+          console.log('Pill button clicked:', btn.dataset.view);
+          document.querySelectorAll(".pill-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderView(btn.dataset.view);
+        });
       });
-    });
+    }
+    
+    // Call immediately if DOM is already loaded, otherwise wait
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializePillButtons);
+    } else {
+      initializePillButtons();
+    }
   </script>
 
   <style is:global>
@@ -1945,8 +2030,14 @@ import Layout from "../layouts/Layout.astro";
       font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.15s ease;
       font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      position: relative;
+      z-index: 10;
     }
 
     .main-tab:hover {
@@ -1958,6 +2049,16 @@ import Layout from "../layouts/Layout.astro";
       background: rgba(99, 102, 241, 0.2);
       color: #a5b4fc;
       box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+    
+    /* iOS touch feedback */
+    .main-tab:active {
+      transform: scale(0.96);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .main-tab.active:active {
+      background: rgba(99, 102, 241, 0.3);
     }
 
     .tab-content {
@@ -2011,13 +2112,41 @@ import Layout from "../layouts/Layout.astro";
       font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.15s ease;
       white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
     }
 
     .pill-btn.active {
       background: rgba(255, 255, 255, 0.15);
       color: #fff;
+    }
+    
+    /* Touch feedback for all interactive elements */
+    .pill-btn:active,
+    .pill-btn.touching,
+    .main-tab:active,
+    .main-tab.touching,
+    .mastery-tab:active,
+    .mastery-tab.touching,
+    .note-card-container:active,
+    .note-card-container.touching,
+    .practice-hard-notes-btn:active,
+    .practice-hard-notes-btn.touching,
+    .goal-remove-btn:active,
+    .goal-remove-btn.touching,
+    .add-goal-btn:active,
+    .add-goal-btn.touching,
+    .goal-modal-cancel:active,
+    .goal-modal-cancel.touching,
+    .goal-modal-add:active,
+    .goal-modal-add.touching,
+    .goal-modal-close:active,
+    .goal-modal-close.touching {
+      transform: scale(0.95);
+      opacity: 0.85;
     }
 
     .chart-container {

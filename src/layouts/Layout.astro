@@ -31,8 +31,8 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
     
     <!-- Inline critical CSS to prevent white flash -->
     <style>
-      html, body {
-        background-color: #182134;
+      html {
+        background-color: #182134 !important;
         background: linear-gradient(135deg, 
           #c4421a 0%, 
           #ff8c00 12%, 
@@ -40,7 +40,26 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
           #182134 35%, 
           #374661 50%, 
           #12908e 75%, 
-          #16594a 100%);
+          #16594a 100%) !important;
+        background-attachment: fixed;
+      }
+      
+      body {
+        background-color: transparent !important;
+        background: transparent !important;
+      }
+      
+      /* Prevent white flash during view transitions */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: 150ms;
+        mix-blend-mode: normal;
+      }
+      
+      /* Keep background persistent during transitions */
+      ::view-transition-group(background-gradient),
+      ::view-transition-group(floating-orbs) {
+        animation-duration: 0ms;
       }
     </style>
 
@@ -48,7 +67,7 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
   <link rel="stylesheet" href="/global.css" />
   
   <!-- Astro View Transitions for smooth page navigation -->
-  <ViewTransitions />
+  <ViewTransitions fallback="none" />
   
   <!-- View Transitions lifecycle handlers -->
   <script is:inline>
@@ -155,8 +174,8 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
       <div class="loader-spinner"></div>
     </div>
     
-    <div class="background-gradient" transition:persist></div>
-    <div class="floating-orbs" transition:persist>
+    <div class="background-gradient" transition:persist="background-gradient"></div>
+    <div class="floating-orbs" transition:persist="floating-orbs">
       <div class="orb orb-1"></div>
       <div class="orb orb-2"></div>
       <div class="orb orb-3"></div>
@@ -565,8 +584,9 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
       #182134 35%, 
       #374661 50%, 
       #12908e 75%, 
-      #16594a 100%);
+      #16594a 100%) !important;
     background-attachment: fixed;
+    min-height: 100vh;
   }
 
   body {
@@ -583,8 +603,8 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
     /* Optimize touch interactions */
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    /* Prevent white flash - keep background always visible */
-    background: transparent;
+    /* Prevent white flash - keep background transparent */
+    background: transparent !important;
   }
 
   /* Loading overlay to prevent white flash during navigation */
@@ -625,30 +645,41 @@ const { showTransposition = false, isHomepage = false } = Astro.props;
     to { transform: rotate(360deg); }
   }
 
-  /* Page content animations - swoop in and out */
+  /* Page content animations - faster transitions */
   main {
-    animation: swoopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: none; /* Let View Transitions handle it */
+  }
+
+  /* Faster, smoother view transition animations */
+  @keyframes -ua-view-transition-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes -ua-view-transition-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 
   @keyframes swoopIn {
     from {
       opacity: 0;
-      transform: translateY(20px) scale(0.98);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
     }
   }
 
   @keyframes swoopOut {
     from {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
     }
     to {
       opacity: 0;
-      transform: translateY(-20px) scale(0.98);
+      transform: translateY(-10px);
     }
   }
 

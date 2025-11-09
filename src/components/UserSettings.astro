@@ -89,40 +89,137 @@
 </div>
 
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
+  // Initialize immediately and on page transitions
+  function initUserSettings() {
+    console.log('[UserSettings] initUserSettings called');
+    
     const overlay = document.getElementById('usersettings-overlay');
     const closeBtn = document.getElementById('usersettings-close');
     const backdrop = overlay?.querySelector('.overlay-backdrop');
 
+    if (!overlay) {
+      console.error('[UserSettings] Overlay element not found!');
+      return;
+    }
+
     function openPanel() {
-      if (overlay) {
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      }
+      console.log('[UserSettings] openPanel called');
+      overlay.classList.add('active');
+      overlay.style.visibility = 'visible';
+      overlay.style.opacity = '1';
+      overlay.style.pointerEvents = 'auto';
+      document.body.style.overflow = 'hidden';
     }
 
     function closePanel() {
-      if (overlay) {
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
-      }
+      console.log('[UserSettings] closePanel called');
+      overlay.classList.remove('active');
+      overlay.style.visibility = 'hidden';
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      document.body.style.overflow = '';
     }
 
     function togglePanel() {
-      if (overlay?.classList.contains('active')) {
+      console.log('[UserSettings] togglePanel called, active:', overlay.classList.contains('active'));
+      if (overlay.classList.contains('active')) {
         closePanel();
       } else {
         openPanel();
       }
     }
 
-    // Footer settings toggle button - use setTimeout to ensure button exists
-    setTimeout(() => {
-      const toggleBtn = document.getElementById('settings-toggle');
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', togglePanel);
+    // Settings toggle button handler with better iOS support
+    const toggleBtn = document.getElementById('settings-toggle');
+    
+    if (!toggleBtn) {
+      console.error('[UserSettings] settings-toggle button not found!');
+      return;
+    }
+    
+    console.log('[UserSettings] Found settings-toggle button, attaching handlers');
+    
+    // Remove any existing listeners by cloning
+    const newToggleBtn = toggleBtn.cloneNode(true);
+    toggleBtn.parentNode?.replaceChild(newToggleBtn, toggleBtn);
+    
+    let lastTouchTime = 0;
+    let touchStartY = 0;
+    let touchStartX = 0;
+    const DEBOUNCE_MS = 300;
+    
+    // Touch start - track position
+    newToggleBtn.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+      newToggleBtn.classList.add('touching');
+      console.log('[UserSettings] Touch start on settings button');
+    }, { passive: true });
+    
+    // Touch end - handle tap
+    newToggleBtn.addEventListener('touchend', (e) => {
+      newToggleBtn.classList.remove('touching');
+      
+      const now = Date.now();
+      if (now - lastTouchTime < DEBOUNCE_MS) {
+        console.log('[UserSettings] Touch debounced');
+        e.preventDefault();
+        return;
       }
-    }, 100);
+      
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const deltaY = Math.abs(touchEndY - touchStartY);
+      const deltaX = Math.abs(touchEndX - touchStartX);
+      
+      // Only trigger if it's a tap (not a swipe)
+      if (deltaY < 15 && deltaX < 15) {
+        console.log('[UserSettings] Settings button tapped');
+        lastTouchTime = now;
+        e.preventDefault();
+        e.stopPropagation();
+        togglePanel();
+      } else {
+        console.log('[UserSettings] Touch movement too large, not a tap');
+      }
+    }, { passive: false });
+    
+    // Click handler for desktop
+    newToggleBtn.addEventListener('click', (e) => {
+      const now = Date.now();
+      if (now - lastTouchTime < DEBOUNCE_MS) {
+        console.log('[UserSettings] Click prevented (recent touch)');
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      console.log('[UserSettings] Settings button clicked');
+      e.preventDefault();
+      e.stopPropagation();
+      togglePanel();
+    });
+
+    // Close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closePanel);
+    }
+
+    // Listen for custom events
+    window.addEventListener('usersettings:open', openPanel);
+    window.addEventListener('usersettings:close', closePanel);
+    window.addEventListener('usersettings:toggle', togglePanel);
+
+    // Click backdrop to close
+    if (backdrop) {
+      backdrop.addEventListener('click', closePanel);
+    }
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay?.classList.contains('active')) {
+        closePanel();
+      }
+    });
 
     // Close button
     if (closeBtn) {
@@ -305,7 +402,17 @@
         }
       });
     }
-  });
+  }
+  
+  // Initialize on DOM load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUserSettings);
+  } else {
+    initUserSettings();
+  }
+  
+  // Re-initialize on Astro page transitions
+  document.addEventListener('astro:page-load', initUserSettings);
 </script>
 
 <style>
@@ -313,18 +420,19 @@
     position: fixed;
     inset: 0;
     z-index: 999999;
-    display: none;
+    display: flex;
     align-items: flex-end;
     justify-content: center;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
 
   .usersettings-overlay.active {
-    display: flex;
-    pointer-events: auto;
-    opacity: 1;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   .overlay-backdrop {

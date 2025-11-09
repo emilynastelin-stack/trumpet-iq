@@ -30,7 +30,7 @@ const currentColor = modeColors[mode as keyof typeof modeColors] || modeColors.l
       <!-- Header with inline back button -->
       <div class="header-section">
         <div class="header-top">
-          <a href="/" class="back-button glass-btn">
+          <a href="../../index.html" class="back-button glass-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
@@ -48,7 +48,7 @@ const currentColor = modeColors[mode as keyof typeof modeColors] || modeColors.l
       <div class="levels-container">
         {availableLevels.map((lvl, index) => (
           <a
-            href={`/game/${mode}?level=${lvl}`}
+            href={`../../game/${mode}/index.html?level=${lvl}`}
             class={`level-card glass-card ${mode}`}
             style={`animation-delay: ${index * 0.1}s`}
           >
